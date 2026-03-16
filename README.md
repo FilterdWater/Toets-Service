@@ -1,5 +1,11 @@
-# tts
-Technova Toets Service
+# Toets Service
 
-Examenvoorbereiding in groepen.
-Maak een applicatie waarin toetsen kunnen worden opgesteld door docenten en ingevuld door studenten.
+Tech Stack
+
+- [Laravel React Starterkit](https://laravel.com/starter-kits)
+- [Laravel Sail](https://github.com/laravel/sail)
+
+Project Documentation
+
+- [Local development](./development.md)
+- [Coolify deployment](./deployment.md)
