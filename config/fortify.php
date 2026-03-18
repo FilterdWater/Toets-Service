@@ -71,6 +71,11 @@ return [
     | authentication or password reset when the operations are successful
     | and the user is authenticated. You are free to change this value.
     |
+    | FilterdWater: we're going to have at least 3 roles in this application.
+    | each role will have a different page they need to be redirected to after
+    | they login so I'm leaving a comment here just in case I need to remeber
+    | this file and want to find it in the Git commits.
+    |
     */
 
     'home' => '/dashboard',
