@@ -156,7 +156,7 @@ http {
            }
         )
 
-        location = /favicon.ico { access_log off; log_not_found off; }
+        location = /favicon.svg { access_log off; log_not_found off; }
         location = /robots.txt  { access_log off; log_not_found off; }
 
         $if(IS_LARAVEL) (
