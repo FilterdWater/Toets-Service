@@ -5,11 +5,11 @@
 #### Prerequisites
 
 - Docker Tooling _(recommended / required)_
-  - Check the [Docker docs](https://docs.docker.com/get-started/) for your [OS](https://en.wikipedia.org/wiki/Operating_system)'s best Docker setup
+    - Check the [Docker docs](https://docs.docker.com/get-started/) for your [OS](https://en.wikipedia.org/wiki/Operating_system)'s best Docker setup
 - [Unix-like OS](https://en.wikipedia.org/wiki/Unix-like) _(recommended / required)_
-  - if you're on Windows, consider using [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
+    - if you're on Windows, consider using [WSL](https://learn.microsoft.com/en-us/windows/wsl/install)
 - [Source Code Editor](https://en.wikipedia.org/wiki/Source-code_editor) or [IDE](https://en.wikipedia.org/wiki/Integrated_development_environment) _(recommended)_
-  - [VSCode (free)](https://code.visualstudio.com/) or [PHPStorm (paid)](https://www.jetbrains.com/phpstorm/) are both good choices
+    - [VSCode (free)](https://code.visualstudio.com/) or [PHPStorm (paid)](https://www.jetbrains.com/phpstorm/) are both good choices
 
 ---
 
@@ -63,16 +63,16 @@ curl http://localhost:3306
 - Stop Vite:
   Press `Ctrl + C` in the terminal running Vite
 - Stop Sail:
-  ```bash
-  # Stops all running containers, but keeps them (and your data) intact
-  ./vendor/bin/sail stop
-  ```
+    ```bash
+    # Stops all running containers, but keeps them (and your data) intact
+    ./vendor/bin/sail stop
+    ```
 - Remove containers & networks:
-  ```bash
-  # Removes containers and networks (your database volume is kept by default)
-  ./vendor/bin/sail down
-  ```
-  To also remove volumes use `down -v` (In layman's terms: it removes local database data) [Docker docs for volumes](https://docs.docker.com/engine/storage/volumes/)
+    ```bash
+    # Removes containers and networks (your database volume is kept by default)
+    ./vendor/bin/sail down
+    ```
+    To also remove volumes use `down -v` (In layman's terms: it removes local database data) [Docker docs for volumes](https://docs.docker.com/engine/storage/volumes/)
 
 ---
 
@@ -95,3 +95,7 @@ This project uses the Laravel React Starterkit, which follows consistent convent
 Take the [confirm-password.tsx](./resources/js/pages/auth/confirm-password.tsx) file as an example. The **file name uses kebab-case**, while the **function name uses PascalCase**. This convention is applied to all `.tsx` files in the project.
 
 Before creating a new file, check if a similar one exists and use it as a reference to follow established best practices.
+
+#### Pest tests
+
+If you create some new functionality creating a Pest test to make sure the functionality keeps working into future is desired.
