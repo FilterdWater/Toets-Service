@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->boolean('new_page')->default(false);
-            $table->integer('sequencenr')->unsigned();
+            $table->integer('sequence_nr')->unsigned();
             $table->foreignId('exam_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });

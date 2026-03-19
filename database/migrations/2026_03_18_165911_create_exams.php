@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('description');
             $table->dateTime('active_from');
             $table->dateTime('active_until');
-            $table->boolean('global_available')->default(false);
+            $table->boolean('globally_available')->default(false);
             $table->integer('max_mistakes')->unsigned();
             $table->timestamps();
         });

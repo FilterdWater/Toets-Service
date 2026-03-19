@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('text');
             $table->enum('type', ['single_choice', 'multiple_choice', 'text']);
-            $table->integer('sequencenr')->unsigned();
+            $table->integer('sequence_nr')->unsigned();
             $table->foreignId('section_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
         });
