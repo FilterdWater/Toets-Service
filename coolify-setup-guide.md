@@ -90,7 +90,7 @@ ssh root@<Your-VPS's-public-IP>
 
 You should be prompted to trust the connection & (if you entered one) for your private SSH Key passphrase.
 
-If you've connected succesfully, great! If not, you can try figuring out what went wrong by re-running the command using the -v, -vv or -vvv (the more Vs the more verbose the debug info) flag like so:
+If you've connected successfully, great! If not, you can try figuring out what went wrong by re-running the command using the -v, -vv or -vvv (the more Vs the more verbose the debug info) flag like so:
 
 ```bash
 ssh -v root@<Your-VPS's-public-IP>

@@ -1,6 +1,6 @@
 # Toets Service
 
-### Local development guide
+### Local Development Guide
 
 #### Prerequisites
 
@@ -78,9 +78,13 @@ curl http://localhost:3306
 
 ### Tips
 
+#### Laravel Sail
+
+Some services are accessible in your browser via `localhost:{port}`. To see which ports are being used, check the `compose.yaml` file in the codebase's root. Keep in mind that not all services (such as MySQL) are intended to be accessed through a browser.
+
 #### Merging code
 
-Before creating a pull request on the Git platform of choice, make sure your code is formatted, passes the linting checks and passes the tests. Run the following commands:
+Before creating a pull request on your Git platform of choice, make sure your code passes formatting and linting checks. Run the following commands:
 
 ```bash
 ./vendor/bin/sail npm run format && npm run lint
@@ -88,14 +92,51 @@ Before creating a pull request on the Git platform of choice, make sure your cod
 ./vendor/bin/sail artisan test
 ```
 
+Or run `npm run pre-commit`
+
 #### Best Practices
 
-This project uses the Laravel React Starterkit, which follows consistent conventions.
+This Starterkit uses the Laravel React Starterkit, which follows consistent conventions.
 
 Take the [confirm-password.tsx](./resources/js/pages/auth/confirm-password.tsx) file as an example. The **file name uses kebab-case**, while the **function name uses PascalCase**. This convention is applied to all `.tsx` files in the project.
 
 Before creating a new file, check if a similar one exists and use it as a reference to follow established best practices.
 
-#### Pest tests
+#### Creating tests for code
 
-If you create some new functionality creating a Pest test to make sure the functionality keeps working into future is desired.
+This Starterkit uses [Pest](https://pestphp.com/) for testing.
+
+**Test structure:**
+
+- Feature tests: `tests/Feature/`
+- Unit tests: `tests/Unit/`
+
+**Create a new test:**
+
+```bash
+# Create a feature test
+./vendor/bin/sail artisan make:test --pest Feature/MyTest
+
+# Create a unit test
+./vendor/bin/sail artisan make:test --pest Unit/MyTest
+```
+
+**Run tests:**
+
+```bash
+# Run all tests
+./vendor/bin/sail artisan test
+
+# Run a specific test file
+./vendor/bin/sail artisan test tests/Feature/DashboardTest.php
+
+# Run tests matching a name
+./vendor/bin/sail artisan test --filter=dashboard
+```
+
+**Test conventions:**
+
+- File names: `PascalCaseTest.php`
+- Test names: `snake_case` (e.g., `test('users_can_login')`)
+- Use `assertSuccessful()` instead of `assertStatus(200)`
+

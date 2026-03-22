@@ -1,6 +1,6 @@
 # Toets Service
 
-### Deployment Guide
+### Coolify Deployment Guide
 
 This guide explains how to deploy this application using a Coolify instance. It assumes you can run all the resources on the same VPS, hardware, etc.
 
@@ -10,19 +10,26 @@ This guide explains how to deploy this application using a Coolify instance. It 
 
 #### Git providers
 
-If you're using GitHub setup a GitHub App using Coolify ([link to the docs](https://coolify.io/docs/applications/ci-cd/github/setup-app))
+If you're using GitHub, setup a GitHub App using Coolify ([link to the docs](https://coolify.io/docs/applications/ci-cd/github/setup-app))
 
 If you're not using GitHub, take a look at [these docs](https://coolify.io/docs/applications/ci-cd/other-providers#private-repositories) instead
 
 #### Create a project & resources
 
-Go to the projects page, the link / button for which should be in the left sidebar. Create a new project => Create a new Git Based resource => Select your server (this step is available only if you have more than one server setup) => Configure the resource to use port 80. the rest of the options should be fine so click continue.
+1. Go to the projects page and create a new project
+2. Create a new Git Based resource
+3. Select your server (this step is available only if you have more than one server setup)
+4. Choose the Git repo containing the Laravel application's code
+5. Configure it to use port 80
+6. Click continue
 
-You should see some fields with long gibberish values, you don't need to update these per se but I suggest you do for your own future selfs oversight.
+You should see fields with randomly generated identifiers. Update these for clarity in the future and for other developers.
 
-Scroll down to the Post-deployment field and type `php artisan migrate --force` into said field. After that navigate to the Environment Variables page, press the developer view button and just copy the variables from the **Required Environment Variables** below into the **Production Environment Variables** field.
+Scroll down to the Post-deployment field and type `php artisan migrate --force && php artisan optimize` into said field.
 
-Reminder that the env variables with a value of **...** should be filled in with new values. You need to create a database before you can do that though so maybe scroll down first.
+After that navigate to the Environment Variables page, press the developer view button and copy the variables from the **Required Environment Variables** below into the **Production Environment Variables** field.
+
+Reminder that the env variables with a value of **...** should be filled in with new values. You need to create a MySQL database before you can do fill in all the env variables though so maybe scroll down past the **Required Environment Variables** first where you'll find instructions to setup the MySQL database.
 
 #### Required Environment Variables
 
@@ -91,7 +98,7 @@ LOG_CHANNEL=stack
 LOG_DEPRECATIONS_CHANNEL=null
 
 # Minimum log level (debug, info, warning, error).
-LOG_LEVEL=debug
+LOG_LEVEL=warning
 
 # Defines how logs are stacked (single file, daily, etc.).
 LOG_STACK=single
@@ -129,7 +136,7 @@ VITE_APP_NAME=${APP_NAME}
 
 #### Creating a database
 
-This project uses MySQL and luckily creating a MySQL database using Coolify is just pressing a button in the create a resource page. After you've pressed said button I again suggest updating the gibberish values found on the general page and persistent storage page.
+Creating a MySQL database using Coolify is just pressing a button in the "create a resource page". After you've pressed said button I again suggest updating the randomly generated identifiers found on the general page AND the persistent storage page.
 
 #### Finding Your Database Credentials
 
@@ -148,17 +155,3 @@ Use these values to fill in the env variables:
 - DB_USERNAME
 - DB_PASSWORD
 
-#### Choosing a Database User
-
-Coolifys MySQL provides two users by default:
-
-##### mysql
-
-- More secure and appropriate for production
-
-##### root
-
-- Full administrative permissions
-- Not recommended for production use
-
-You can use either, but for production always use the **mysql** user

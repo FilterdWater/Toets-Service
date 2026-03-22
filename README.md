@@ -7,5 +7,5 @@ Tech Stack
 
 Project Documentation
 
-- [Local development](./development.md)
-- [Coolify deployment](./deployment.md)
+- [Local development guide](./local-development-guide.md)
+- [Coolify deployment guide](./coolify-deployment-guide.md)
