@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -48,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => Role::class,
             'two_factor_confirmed_at' => 'datetime',
         ];
     }

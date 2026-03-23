@@ -2,20 +2,25 @@
 
 namespace App\Actions\Fortify;
 
-use Illuminate\Http\Request;
+use App\Enums\Role;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 
 class CustomLoginResponse implements LoginResponseContract
 {
-  public function toResponse($request)
-  {
-    $role = Auth::user()->role;
-    return match ($role) {
-      'admin' => redirect()->intended('/admin/dashboard'),
-      'teacher' => redirect()->intended('/teacher/dashboard'),
-      'student' => redirect()->intended('/student/dashboard'),
-      default => redirect()->intended('/'),
-    };
-  }
+    public function toResponse($request)
+    {
+        $role = Auth::user()->role;
+
+        if ($role instanceof Role) {
+            $role = $role->value;
+        }
+
+        return redirect()->intended(match ($role) {
+            'admin' => route('admin', absolute: false),
+            'teacher' => route('teacher', absolute: false),
+            'student' => route('student', absolute: false),
+            default => route('root', absolute: false),
+        });
+    }
 }
