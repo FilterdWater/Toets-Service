@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Concerns\PasswordValidationRules;
 use App\Concerns\ProfileValidationRules;
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -11,6 +12,8 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules, ProfileValidationRules;
+
+    private const SCHOOL_EMAIL_IDENTIFIER = 'roc';
 
     /**
      * Validate and create a newly registered user.
@@ -22,12 +25,19 @@ class CreateNewUser implements CreatesNewUsers
         Validator::make($input, [
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
+            'email' => [
+                ...$this->emailRules(),
+                'regex:/'.self::SCHOOL_EMAIL_IDENTIFIER.'/i',
+            ],
+        ], [
+            'email.regex' => 'Gebruik een schoolmailadres (moet "'.self::SCHOOL_EMAIL_IDENTIFIER.'" bevatten).',
         ])->validate();
 
         return User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'role' => Role::Student,
         ]);
     }
 }
