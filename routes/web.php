@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login')->name('root');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'RoleCheck'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 });
 
