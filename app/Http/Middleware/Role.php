@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Enums\Role;
+use App\Enums\Role as RoleEnum;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,7 +22,7 @@ class Role
         }
 
         $user = Auth::user();
-        $role = $user->role instanceof Role
+        $role = $user->role instanceof RoleEnum
             ? $user->role->value
             : (string) $user->role;
 
