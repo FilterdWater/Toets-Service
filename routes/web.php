@@ -1,8 +1,9 @@
 <?php
 
 use App\Enums\Role;
-use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\ExamController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -42,10 +43,11 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
         Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
         Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
 
+    Route::prefix('docent')->group(function () {
         /*
-        * Exams
-        */
-        Route::inertia('toetsen', 'exams')->name('exams');
+         * Exams
+         */
+        Route::get('toetsen', [ExamController::class, 'index'])->name('exams');
     });
 });
 

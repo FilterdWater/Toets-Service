@@ -15,8 +15,6 @@ import {
 import { accounts, groups, login, exams } from '@/routes';
 import type { NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [];
-
 export function AppSidebar() {
     //TODO: Add rol specific items
     const mainNavItems: NavItem[] = [
