@@ -52,6 +52,9 @@ curl http://localhost:3306
 # Run database migrations (creates/updates your local DB tables)
 ./vendor/bin/sail artisan migrate
 
+# Run seeders (creates fake data for local testing / development)
+./vendor/bin/sail artisan db:seed
+
 # Start the Vite dev server for hot-reloading frontend assets
 ./vendor/bin/sail npm run dev
 ```
@@ -139,4 +142,3 @@ This Starterkit uses [Pest](https://pestphp.com/) for testing.
 - File names: `PascalCaseTest.php`
 - Test names: `snake_case` (e.g., `test('users_can_login')`)
 - Use `assertSuccessful()` instead of `assertStatus(200)`
-
