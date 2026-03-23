@@ -161,3 +161,13 @@ This Starterkit uses [Pest](https://pestphp.com/) for testing.
 - File names: `PascalCaseTest.php`
 - Test names: `snake_case` (e.g., `test('users_can_login')`)
 - Use `assertSuccessful()` instead of `assertStatus(200)`
+
+## debug tools
+
+### laradumps
+
+nice debugging application for php and js. More documentation can be found here [laradumps](https://laradumps.dev/)
+if laradumps doesnt work open te port 9191 in your firewall
+- linux firewall: `sudo ufw allow 9191`
+
+on arch linux dont use the snap package of laradumps but the appimage instead
