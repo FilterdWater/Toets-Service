@@ -16,11 +16,11 @@ class CustomLoginResponse implements LoginResponseContract
             $role = $role->value;
         }
 
-        return redirect()->intended(match ($role) {
-            'admin' => route('admin', absolute: false),
-            'teacher' => route('teacher', absolute: false),
-            'student' => route('student', absolute: false),
-            default => route('root', absolute: false),
+        return redirect()->route(match ($role) {
+            'admin' => 'admin',
+            'teacher' => 'teacher',
+            'student' => 'student',
+            default => 'login',
         });
     }
 }

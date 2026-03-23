@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\Role::class
+            'role' => Role::class,
         ]);
 
         // Safe to do with a default Coolify + Traefik setup
