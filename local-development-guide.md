@@ -81,6 +81,25 @@ curl http://localhost:3306
 
 ### Tips
 
+#### Test users
+
+After running the seeders you should have some test users you can log in as using these credentials:
+
+**Admin**
+
+- Email: `beheerder@roca12.nl`
+- Password: `B3he3rd3r@r0ca!2`
+
+**Teacher**
+
+- Email: `docent@roca12.nl`
+- Password: `D0c3nt@r0ca!2`
+
+**Student**
+
+- Email: `student@st.roc.a12.nl`
+- Password: `Stud3nt@r0ca!`
+
 #### Laravel Sail
 
 Some services are accessible in your browser via `localhost:{port}`. To see which ports are being used, check the `compose.yaml` file in the codebase's root. Keep in mind that not all services (such as MySQL) are intended to be accessed through a browser.
@@ -142,3 +161,13 @@ This Starterkit uses [Pest](https://pestphp.com/) for testing.
 - File names: `PascalCaseTest.php`
 - Test names: `snake_case` (e.g., `test('users_can_login')`)
 - Use `assertSuccessful()` instead of `assertStatus(200)`
+
+## debug tools
+
+### laradumps
+
+nice debugging application for php and js. More documentation can be found here [laradumps](https://laradumps.dev/)
+if laradumps doesnt work open te port 9191 in your firewall
+- linux firewall: `sudo ufw allow 9191`
+
+on arch linux dont use the snap package of laradumps but the appimage instead
