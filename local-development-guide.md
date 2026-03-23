@@ -52,6 +52,9 @@ curl http://localhost:3306
 # Run database migrations (creates/updates your local DB tables)
 ./vendor/bin/sail artisan migrate
 
+# Run seeders (creates fake data for local testing / development)
+./vendor/bin/sail artisan db:seed
+
 # Start the Vite dev server for hot-reloading frontend assets
 ./vendor/bin/sail npm run dev
 ```
@@ -77,6 +80,25 @@ curl http://localhost:3306
 ---
 
 ### Tips
+
+#### Test users
+
+After running the seeders you should have some test users you can log in as using these credentials:
+
+**Admin**
+
+- Email: `beheerder@roca12.nl`
+- Password: `B3he3rd3r@r0ca!2`
+
+**Teacher**
+
+- Email: `docent@roca12.nl`
+- Password: `D0c3nt@r0ca!2`
+
+**Student**
+
+- Email: `student@st.roc.a12.nl`
+- Password: `Stud3nt@r0ca!`
 
 #### Laravel Sail
 
@@ -139,4 +161,3 @@ This Starterkit uses [Pest](https://pestphp.com/) for testing.
 - File names: `PascalCaseTest.php`
 - Test names: `snake_case` (e.g., `test('users_can_login')`)
 - Use `assertSuccessful()` instead of `assertStatus(200)`
-
