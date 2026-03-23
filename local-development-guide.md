@@ -50,10 +50,8 @@ curl http://localhost:3306
 
 ```bash
 # Run database migrations (creates/updates your local DB tables)
-./vendor/bin/sail artisan migrate
-
 # Run seeders (creates fake data for local testing / development)
-./vendor/bin/sail artisan db:seed
+./vendor/bin/sail artisan migrate:fresh --seed
 
 # Start the Vite dev server for hot-reloading frontend assets
 ./vendor/bin/sail npm run dev
