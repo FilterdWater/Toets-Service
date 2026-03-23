@@ -29,6 +29,9 @@ Route::middleware(['auth', 'verified', 'role:student,teacher,admin'])->group(fun
 
 Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function () {
     Route::prefix('docent')->group(function () {
+        /*
+        * Groups
+        */
         Route::inertia('/', 'teacher')->name('teacher');
         Route::get('groepen', [GroupController::class, 'index'])->name('groups');
         Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
@@ -38,6 +41,11 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
         Route::post('groepen/{id}/examen', [GroupController::class, 'attachExam'])->name('attachExam');
         Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
         Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
+
+        /*
+        * Exams
+        */
+        Route::inertia('toetsen', 'exams')->name('exams');
     });
 });
 
