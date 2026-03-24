@@ -9,6 +9,14 @@ import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
     TableBody,
     TableCell,
     TableHead,
@@ -52,14 +60,40 @@ export default function Account() {
         <AppLayout
             breadcrumbs={breadcrumbs}
             rightContent={
-                <div className="flex gap-2">
-                    <Button>
-                        <ImportIcon /> Importeer account
-                    </Button>
-                    <Button>
-                        <UserRoundPlus /> Creëer account
-                    </Button>
-                </div>
+                <>
+                    <div className="hidden gap-2 md:flex">
+                        <Button>
+                            <ImportIcon /> Importeer account(s)
+                        </Button>
+                        <Button>
+                            <UserRoundPlus /> Creëer account
+                        </Button>
+                    </div>
+                    <div className="block md:hidden">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline">
+                                    Importeer of Creëer
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                <DropdownMenuGroup className="flex flex-col gap-2 p-2">
+                                    <DropdownMenuItem asChild>
+                                        <Button>
+                                            <ImportIcon /> Importeer account(s)
+                                        </Button>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem asChild>
+                                        <Button>
+                                            <UserRoundPlus /> Creëer account
+                                        </Button>
+                                    </DropdownMenuItem>
+                                </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </>
             }
         >
             <Head title="Account" />
@@ -104,7 +138,7 @@ export default function Account() {
                                         <UserRoundPen /> Wijzig
                                     </Button>
                                     <Button>
-                                        <UserRoundX /> Inactief
+                                        <UserRoundX /> Deactiveer
                                     </Button>
                                 </TableCell>
                             </TableRow>
