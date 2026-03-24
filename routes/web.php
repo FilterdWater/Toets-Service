@@ -7,8 +7,9 @@ Route::redirect('/', '/login')->name('root');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
-    Route::prefix('exams')->group(function () {
-        Route::get('/{id}', [ExamController::class, 'show'])->name('exam');
+    Route::prefix('examens')->group(function () {
+        Route::get('/{id}/edit', [ExamController::class, 'edit'])->name('exam');
+        Route::get('/create', [ExamController::class, 'create'])->name('exam.create');
     });
 });
 
