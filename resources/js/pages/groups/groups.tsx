@@ -1,7 +1,7 @@
-import { Form, Head } from '@inertiajs/react';
+import { Form, Head, router } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Exam, User } from '@/types';
-import { groups, storeGroups, teacher } from '@/routes';
+import { destroyGroup, groups, storeGroup, teacher } from '@/routes';
 import { Group } from '@/types/group';
 import {
     Card,
@@ -28,6 +28,7 @@ import {
     DialogHeader,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { DeleteDialog } from '@/components/delete-dialog';
 
 type GroupOverviewProps = Group & {
     users: User[];
@@ -51,16 +52,32 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Groups({ groups }: GroupProps) {
-    const [selectedGroup, setSelectedGroup] =
-        useState<GroupOverviewProps | null>(null);
+    const [selectedGroup, setSelectedGroup] = useState<GroupOverviewProps | null>(null);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
+            <DeleteDialog
+                title="Groep verwijderen"
+                description={`Weet je zeker dat je de groep "${selectedGroup?.name}" wilt verwijderen?`}
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={() => {
+                    if (!selectedGroup) return;
+
+                    router.delete(destroyGroup.url({ id: selectedGroup.id }), {
+                        onSuccess: () => {
+                            setSelectedGroup(null);
+                            setDeleteDialogOpen(false);
+                        },
+                    });
+                }}
+            />
             <Head title="Docent" />
             <Button onClick={() => setDialogOpen(true)}>Groep aanmaken</Button>
-            <div className="flex h-full flex-1 flex-row gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="w-1/2">
+            <div className="flex h-full flex-1 flex-col md:flex-row gap-4 overflow-x-auto rounded-xl p-4">
+                <div className="w-full md:w-1/2">
                     {groups.map((g) => {
                         return (
                             <Card
@@ -84,12 +101,20 @@ export default function Groups({ groups }: GroupProps) {
                         );
                     })}
                 </div>
-                <div className="w-1/2">
+                <div className="w-full md:w-1/2">
                     <Card>
-                        <CardHeader>
+                        <CardHeader className='flex flex-row items-center justify-between'>
                             <CardTitle className="text-lg">
                                 {selectedGroup?.name ?? 'Geen groep gekozen'}
                             </CardTitle>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                disabled={selectedGroup === null}
+                                onClick={() => setDeleteDialogOpen(true)}
+                            >
+                                Verwijderen
+                            </Button>
                         </CardHeader>
                         {selectedGroup !== null && (
                             <CardContent>
@@ -132,7 +157,7 @@ export default function Groups({ groups }: GroupProps) {
                     </DialogHeader>
 
                     <Form
-                        {...storeGroups.form()}
+                        {...storeGroup.form()}
                         className="flex flex-col gap-6"
                         onSuccess={() => setDialogOpen(false)}
                     >

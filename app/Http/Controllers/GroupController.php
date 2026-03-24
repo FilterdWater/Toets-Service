@@ -24,31 +24,11 @@ class GroupController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
+        $request->validate(['name' => 'required|string|max:255']);
 
-        Group::create([
-            'name' => $request->name,
-        ]);
+        Group::create(['name' => $request->name]);
 
         return redirect()->route('groups')->with('success', 'Groep succesvol aangemaakt!');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
     }
 
     /**
@@ -64,6 +44,14 @@ class GroupController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        if(!Group::find($id)) {
+            return redirect()->route('groups')->with('error', 'Groep niet gevonden!');
+        }
+
+        Group::findOrFail($id)->users()->detach();
+        Group::findOrFail($id)->exams()->detach();
+        Group::destroy($id);
+
+        return redirect()->route('groups')->with('success', 'Groep succesvol verwijderd!');
     }
 }
