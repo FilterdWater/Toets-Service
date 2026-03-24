@@ -11,10 +11,18 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { login } from '@/routes';
+import { groups, login } from '@/routes';
 import type { NavItem } from '@/types';
+import { Users } from 'lucide-react';
 
 export function AppSidebar() {
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Groepen',
+            href: groups.url(),
+            icon: Users
+        }
+    ];
     const { auth } = usePage().props;
     const role = auth.user?.role as string | undefined;
 
@@ -28,7 +36,6 @@ export function AppSidebar() {
                 : //TODO: Add 403 page
                   login();
 
-    const mainNavItems: NavItem[] = [];
 
     return (
         <Sidebar collapsible="icon" variant="inset">
