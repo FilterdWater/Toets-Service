@@ -31,12 +31,15 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::inertia('beheerder', 'admin')->name('admin');
-
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
+
     Route::prefix('examens')->group(function () {
-        Route::get('/{id}/edit', [ExamController::class, 'edit'])->name('exam');
-        Route::get('/create', [ExamController::class, 'create'])->name('exam.create');
+        Route::get('/{id}/edit', [ExamController::class, 'edit'])->name('getexam');
+        Route::get('/create', [ExamController::class, 'create'])->name('createexam');
+        Route::post('/store', [ExamController::class, 'store'])->name('storeexam');
+        Route::put('/{exam}/update', [ExamController::class, 'update'])->name('updateexam');
     });
 });
 
