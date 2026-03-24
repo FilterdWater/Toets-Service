@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
         Route::inertia('/', 'teacher')->name('teacher');
         Route::get('groepen', [GroupController::class, 'index'])->name('groups');
         Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
+        Route::put('groepen/{id}', [GroupController::class, 'update'])->name('updateGroup');
         Route::delete('groepen/{id}', [GroupController::class, 'destroy'])->name('destroyGroup');
     });
 });

@@ -1,7 +1,7 @@
-import { Form, Head, router } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import AppLayout from '@/layouts/app-layout';
 import type { BreadcrumbItem, Exam, User } from '@/types';
-import { destroyGroup, groups, storeGroup, teacher } from '@/routes';
+import { destroyGroup, groups, storeGroup, teacher, updateGroup } from '@/routes';
 import { Group } from '@/types/group';
 import {
     Card,
@@ -53,8 +53,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Groups({ groups }: GroupProps) {
     const [selectedGroup, setSelectedGroup] = useState<GroupOverviewProps | null>(null);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+
+    const { data, setData, processing, post, put, delete: deleteMethod, reset } = useForm({
+        name: ""
+    });
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -66,7 +71,7 @@ export default function Groups({ groups }: GroupProps) {
                 onConfirm={() => {
                     if (!selectedGroup) return;
 
-                    router.delete(destroyGroup.url({ id: selectedGroup.id }), {
+                    deleteMethod(destroyGroup.url({ id: selectedGroup.id }), {
                         onSuccess: () => {
                             setSelectedGroup(null);
                             setDeleteDialogOpen(false);
@@ -75,14 +80,22 @@ export default function Groups({ groups }: GroupProps) {
                 }}
             />
             <Head title="Docent" />
-            <Button onClick={() => setDialogOpen(true)}>Groep aanmaken</Button>
+            <Button onClick={() => {
+                reset();
+                setIsEditing(false);
+                setDialogOpen(true);
+            }}
+            >
+                Groep aanmaken
+            </Button>
             <div className="flex h-full flex-1 flex-col md:flex-row gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="w-full md:w-1/2">
                     {groups.map((g) => {
                         return (
                             <Card
                                 className="relative mb-3"
-                                onClick={() => setSelectedGroup(g)}
+                                key={g.id}
+                                onClick={() => setSelectedGroup(selectedGroup?.id === g.id ? null : g)}
                             >
                                 {selectedGroup?.id === g.id ? (
                                     <ChevronRight className="absolute top-3 right-3" />
@@ -107,18 +120,37 @@ export default function Groups({ groups }: GroupProps) {
                             <CardTitle className="text-lg">
                                 {selectedGroup?.name ?? 'Geen groep gekozen'}
                             </CardTitle>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                disabled={selectedGroup === null}
-                                onClick={() => setDeleteDialogOpen(true)}
-                            >
-                                Verwijderen
-                            </Button>
+                            <div>
+                                <Button
+                                    size="sm"
+                                    className='mr-2'
+                                    disabled={selectedGroup === null}
+                                    onClick={() => {
+                                        setData("name", selectedGroup?.name ?? "");
+                                        setIsEditing(true);
+                                        setDialogOpen(true);
+                                    }}
+                                >
+                                    Bewerken
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    disabled={selectedGroup === null}
+                                    onClick={() => setDeleteDialogOpen(true)}
+                                >
+                                    Verwijderen
+                                </Button>
+                            </div>
                         </CardHeader>
                         {selectedGroup !== null && (
                             <CardContent>
-                                <CardTitle>Toetsen</CardTitle>
+                                <div className="flex items-center justify-between">
+                                    <CardTitle>Toetsen</CardTitle>
+                                    <Button size="sm" onClick={() => console.log("Add exam")}>
+                                        +
+                                    </Button>
+                                </div>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     {selectedGroup?.exams?.map((e) => (
                                         <Card key={e.id} className="p-2">
@@ -126,9 +158,12 @@ export default function Groups({ groups }: GroupProps) {
                                         </Card>
                                     ))}
                                 </div>
-                                <CardTitle className="mt-6">
-                                    Studenten
-                                </CardTitle>
+                                <div className="flex items-center justify-between mt-6">
+                                    <CardTitle>Studenten</CardTitle>
+                                    <Button size="sm" onClick={() => console.log("Add student")}>
+                                        +                                    
+                                    </Button>
+                                </div>
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
@@ -153,22 +188,43 @@ export default function Groups({ groups }: GroupProps) {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Groep aanmaken</DialogTitle>
+                        <DialogTitle>{isEditing ? 'Groep bewerken' : 'Groep aanmaken'}</DialogTitle>
                     </DialogHeader>
 
-                    <Form
-                        {...storeGroup.form()}
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            if (isEditing && selectedGroup) {
+                                put(updateGroup.url({ id: selectedGroup.id }), {
+                                    onSuccess: () => {
+                                        setDialogOpen(false);
+                                        setSelectedGroup(null);
+                                        reset();
+                                    }
+                                });
+                            } else {
+                                post(storeGroup.url(), {
+                                    onSuccess: () => {
+                                        setDialogOpen(false);
+                                        reset();
+                                    }
+                                });
+                            }
+                        }}
                         className="flex flex-col gap-6"
-                        onSuccess={() => setDialogOpen(false)}
                     >
                         <Input
                             type="text"
                             name="name"
+                            value={data.name}
+                            onChange={(e) => setData("name", e.target.value)}
                             placeholder="Groep naam"
                             className="input input-bordered w-full"
                         />
-                        <Button type="submit">Toevoegen</Button>
-                    </Form>
+                        <Button type="submit" disabled={processing}>
+                            {isEditing ? 'Bijwerken' : 'Toevoegen'}
+                        </Button>
+                    </form>
                 </DialogContent>
             </Dialog>
         </AppLayout>

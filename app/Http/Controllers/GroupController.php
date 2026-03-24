@@ -36,7 +36,11 @@ class GroupController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate(['name' => 'required|string|max:255']);
+        $group = Group::where('id', $id)->firstOrFail();
+        $group->update(['name' => $request->name]);
+
+        return back()->with('success', 'Groep succesvol bijgewerkt!');
     }
 
     /**
@@ -44,7 +48,7 @@ class GroupController extends Controller
      */
     public function destroy(string $id)
     {
-        if(!Group::find($id)) {
+        if (!Group::find($id)) {
             return redirect()->route('groups')->with('error', 'Groep niet gevonden!');
         }
 
