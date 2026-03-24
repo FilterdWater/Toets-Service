@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import { User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -11,7 +12,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { login } from '@/routes';
+import { accounts, login } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -28,7 +29,13 @@ export function AppSidebar() {
                 : //TODO: Add 403 page
                   login();
 
-    const mainNavItems: NavItem[] = [];
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Accounts',
+            href: accounts(),
+            icon: User,
+        },
+    ];
 
     return (
         <Sidebar collapsible="icon" variant="inset">
