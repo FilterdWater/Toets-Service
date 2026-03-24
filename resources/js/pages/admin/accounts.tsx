@@ -17,8 +17,7 @@ import {
     Table,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
-import type {
-    RoleFilter} from '@/pages/admin/components/rol-selector';
+import type { RoleFilter } from '@/pages/admin/components/rol-selector';
 import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
