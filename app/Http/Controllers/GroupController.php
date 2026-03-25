@@ -14,8 +14,9 @@ class GroupController extends Controller
     public function index()
     {
         $groups = Group::with('users', 'exams')->withCount('users')->get();
+
         return Inertia::render('groups/groups', [
-            'groups' => $groups
+            'groups' => $groups,
         ]);
     }
 
@@ -48,7 +49,7 @@ class GroupController extends Controller
      */
     public function destroy(string $id)
     {
-        if (!Group::find($id)) {
+        if (! Group::find($id)) {
             return redirect()->route('groups')->with('error', 'Groep niet gevonden!');
         }
 

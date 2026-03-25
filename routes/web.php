@@ -40,4 +40,4 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::inertia('beheerder', 'admin')->name('admin');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

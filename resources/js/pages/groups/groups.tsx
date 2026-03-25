@@ -1,8 +1,8 @@
 import { Head, useForm } from '@inertiajs/react';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem, Exam, User } from '@/types';
-import { destroyGroup, groups, storeGroup, teacher, updateGroup } from '@/routes';
-import { Group } from '@/types/group';
+import { ChevronDown, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { DeleteDialog } from '@/components/delete-dialog';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
@@ -10,8 +10,13 @@ import {
     CardHeader,
     CardTitle,
 } from '@/components/ui/card';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import {
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogHeader,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import {
     Table,
     TableBody,
@@ -20,15 +25,15 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
+import AppLayout from '@/layouts/app-layout';
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogHeader,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { DeleteDialog } from '@/components/delete-dialog';
+    destroyGroup,
+    groups,
+    storeGroup,
+    teacher,
+    updateGroup,
+} from '@/routes';
+import type { BreadcrumbItem, Exam, User, Group } from '@/types';
 
 type GroupOverviewProps = Group & {
     users: User[];
@@ -52,13 +57,22 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function Groups({ groups }: GroupProps) {
-    const [selectedGroup, setSelectedGroup] = useState<GroupOverviewProps | null>(null);
+    const [selectedGroup, setSelectedGroup] =
+        useState<GroupOverviewProps | null>(null);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
 
-    const { data, setData, processing, post, put, delete: deleteMethod, reset } = useForm({
-        name: ""
+    const {
+        data,
+        setData,
+        processing,
+        post,
+        put,
+        delete: deleteMethod,
+        reset,
+    } = useForm({
+        name: '',
     });
 
     return (
@@ -80,22 +94,27 @@ export default function Groups({ groups }: GroupProps) {
                 }}
             />
             <Head title="Docent" />
-            <Button onClick={() => {
-                reset();
-                setIsEditing(false);
-                setDialogOpen(true);
-            }}
+            <Button
+                onClick={() => {
+                    reset();
+                    setIsEditing(false);
+                    setDialogOpen(true);
+                }}
             >
                 Groep aanmaken
             </Button>
-            <div className="flex h-full flex-1 flex-col md:flex-row gap-4 overflow-x-auto rounded-xl p-4">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 md:flex-row">
                 <div className="w-full md:w-1/2">
                     {groups.map((g) => {
                         return (
                             <Card
                                 className="relative mb-3"
                                 key={g.id}
-                                onClick={() => setSelectedGroup(selectedGroup?.id === g.id ? null : g)}
+                                onClick={() =>
+                                    setSelectedGroup(
+                                        selectedGroup?.id === g.id ? null : g,
+                                    )
+                                }
                             >
                                 {selectedGroup?.id === g.id ? (
                                     <ChevronRight className="absolute top-3 right-3" />
@@ -116,17 +135,20 @@ export default function Groups({ groups }: GroupProps) {
                 </div>
                 <div className="w-full md:w-1/2">
                     <Card>
-                        <CardHeader className='flex flex-row items-center justify-between'>
+                        <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-lg">
                                 {selectedGroup?.name ?? 'Geen groep gekozen'}
                             </CardTitle>
                             <div>
                                 <Button
                                     size="sm"
-                                    className='mr-2'
+                                    className="mr-2"
                                     disabled={selectedGroup === null}
                                     onClick={() => {
-                                        setData("name", selectedGroup?.name ?? "");
+                                        setData(
+                                            'name',
+                                            selectedGroup?.name ?? '',
+                                        );
                                         setIsEditing(true);
                                         setDialogOpen(true);
                                     }}
@@ -147,7 +169,10 @@ export default function Groups({ groups }: GroupProps) {
                             <CardContent>
                                 <div className="flex items-center justify-between">
                                     <CardTitle>Toetsen</CardTitle>
-                                    <Button size="sm" onClick={() => console.log("Add exam")}>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => console.log('Add exam')}
+                                    >
                                         +
                                     </Button>
                                 </div>
@@ -158,10 +183,15 @@ export default function Groups({ groups }: GroupProps) {
                                         </Card>
                                     ))}
                                 </div>
-                                <div className="flex items-center justify-between mt-6">
+                                <div className="mt-6 flex items-center justify-between">
                                     <CardTitle>Studenten</CardTitle>
-                                    <Button size="sm" onClick={() => console.log("Add student")}>
-                                        +                                    
+                                    <Button
+                                        size="sm"
+                                        onClick={() =>
+                                            console.log('Add student')
+                                        }
+                                    >
+                                        +
                                     </Button>
                                 </div>
                                 <Table>
@@ -188,7 +218,9 @@ export default function Groups({ groups }: GroupProps) {
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>{isEditing ? 'Groep bewerken' : 'Groep aanmaken'}</DialogTitle>
+                        <DialogTitle>
+                            {isEditing ? 'Groep bewerken' : 'Groep aanmaken'}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <form
@@ -200,14 +232,14 @@ export default function Groups({ groups }: GroupProps) {
                                         setDialogOpen(false);
                                         setSelectedGroup(null);
                                         reset();
-                                    }
+                                    },
                                 });
                             } else {
                                 post(storeGroup.url(), {
                                     onSuccess: () => {
                                         setDialogOpen(false);
                                         reset();
-                                    }
+                                    },
                                 });
                             }
                         }}
@@ -217,7 +249,7 @@ export default function Groups({ groups }: GroupProps) {
                             type="text"
                             name="name"
                             value={data.name}
-                            onChange={(e) => setData("name", e.target.value)}
+                            onChange={(e) => setData('name', e.target.value)}
                             placeholder="Groep naam"
                             className="input input-bordered w-full"
                         />

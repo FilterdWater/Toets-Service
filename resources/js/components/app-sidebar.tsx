@@ -1,4 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
+import { Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,15 +14,14 @@ import {
 } from '@/components/ui/sidebar';
 import { groups, login } from '@/routes';
 import type { NavItem } from '@/types';
-import { Users } from 'lucide-react';
 
 export function AppSidebar() {
     const mainNavItems: NavItem[] = [
         {
             title: 'Groepen',
             href: groups.url(),
-            icon: Users
-        }
+            icon: Users,
+        },
     ];
     const { auth } = usePage().props;
     const role = auth.user?.role as string | undefined;
@@ -35,7 +35,6 @@ export function AppSidebar() {
                 ? '/beheerder'
                 : //TODO: Add 403 page
                   login();
-
 
     return (
         <Sidebar collapsible="icon" variant="inset">

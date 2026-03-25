@@ -11,7 +11,8 @@ class Exam extends Model
 
     protected $fillable = ['name', 'description', 'active_from', 'active_until', 'globally_available', 'max_mistakes', 'created_at', 'updated_at'];
 
-    public function groups() {
+    public function groups()
+    {
         return $this->belongsToMany(Group::class, 'groups_has_exams');
     }
 }

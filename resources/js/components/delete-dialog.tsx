@@ -1,5 +1,10 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 export function DeleteDialog({
     title,
@@ -24,7 +29,10 @@ export function DeleteDialog({
                     </p>
                 </DialogHeader>
                 <div className="mt-4 flex justify-end gap-2">
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                    >
                         Annuleren
                     </Button>
                     <Button variant="destructive" onClick={onConfirm}>
