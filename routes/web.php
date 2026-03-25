@@ -42,7 +42,8 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-    Route::inertia('beheerder', 'admin')->name('admin');
+    Route::inertia('beheerder', 'admin/admin')->name('admin');
+    Route::get('accounts', [UserController::class, 'index'])->name('accounts');
 });
 
 require __DIR__ . '/settings.php';

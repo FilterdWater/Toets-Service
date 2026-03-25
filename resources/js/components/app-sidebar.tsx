@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Users } from 'lucide-react';
+import { User } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -12,20 +12,27 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { groups, login } from '@/routes';
+import { accounts, groups, login } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
+    //TODO: Add rol specific items
     const mainNavItems: NavItem[] = [
         {
             title: 'Groepen',
             href: groups.url(),
             icon: Users,
         },
+        {
+            title: 'Accounts',
+            href: accounts(),
+            icon: User,
+        },
     ];
     const { auth } = usePage().props;
     const role = auth.user?.role as string | undefined;
 
+    //TODO: Refactor to use role enum & use inertia links
     const homeHref =
         role === 'student'
             ? '/student'
