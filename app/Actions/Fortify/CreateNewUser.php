@@ -30,7 +30,7 @@ class CreateNewUser implements CreatesNewUsers
                 'regex:/'.self::SCHOOL_EMAIL_IDENTIFIER.'/i',
             ],
         ], [
-            'email.regex' => ' Ongeldig schoolmailadres.',
+            'email.regex' => 'Ongeldig schoolmailadres.',
         ])->validate();
 
         return User::create([
