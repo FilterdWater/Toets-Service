@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Exam;
 use App\Models\Group;
+use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -14,9 +17,21 @@ class GroupController extends Controller
     public function index()
     {
         $groups = Group::with('users', 'exams')->withCount('users')->get();
+        $students = Inertia::lazy(
+            fn() =>
+            User::where('role', 'student')
+                ->select('id', 'name', 'email')
+                ->get()
+        );
+        $exams = Inertia::lazy(
+            fn() =>
+            Exam::all()
+        );
 
         return Inertia::render('groups/groups', [
             'groups' => $groups,
+            'students' => $students,
+            'exams' => $exams
         ]);
     }
 
@@ -58,5 +73,44 @@ class GroupController extends Controller
         Group::destroy($id);
 
         return redirect()->route('groups')->with('success', 'Groep succesvol verwijderd!');
+    }
+
+    public function attachExam(Request $request, string $id)
+    {
+        $request->validate(['exam_id' => 'required|exists:exams,id']);
+        $group = Group::findOrFail($id);
+        $group->exams()->syncWithoutDetaching([$request->exam_id]);
+
+        return back()->with('success', 'Toets succesvol toegevoegd aan groep!');
+    }
+
+    public function detachExam(string $groupId, string $examId)
+    {
+        $group = Group::findOrFail($groupId);
+        $group->exams()->detach($examId);
+
+        return back()->with('success', 'Toets succesvol verwijderd uit groep!');
+    }
+
+    public function attachUser(Request $request, string $id)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id'
+        ]);
+
+        $group = Group::findOrFail($id);
+        $group->users()->syncWithoutDetaching([$request->user_id]);
+        return back()->with('success', 'Student succesvol toegevoegd aan groep!');
+
+        return back()->with('error', 'Er is iets fout gegaan');
+    }
+
+    public function detachUser(string $id, string $userId)
+    {
+        $group = Group::findOrFail($id);
+
+        $group->users()->detach($userId);
+
+        return back()->with('success', 'Student succesvol verwijderd uit de groep!');
     }
 }

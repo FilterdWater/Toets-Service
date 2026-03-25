@@ -1,6 +1,6 @@
-import { Head, useForm } from '@inertiajs/react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
+import { Head, router, useForm } from '@inertiajs/react';
+import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,11 +27,15 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import {
+    attachExam,
+    attachUser,
     destroyGroup,
+    detachUser,
     groups,
     storeGroup,
     teacher,
     updateGroup,
+    detachExam as detachExamRoute
 } from '@/routes';
 import type { BreadcrumbItem, Exam, User, Group } from '@/types';
 
@@ -43,6 +47,8 @@ type GroupOverviewProps = Group & {
 
 type GroupProps = {
     groups: GroupOverviewProps[];
+    students?: User[];
+    exams?: Exam[];
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -56,24 +62,87 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function Groups({ groups }: GroupProps) {
+export default function Groups({ groups, students, exams }: GroupProps) {
     const [selectedGroup, setSelectedGroup] =
         useState<GroupOverviewProps | null>(null);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
+    const [dialogStudentOpen, setDialogStudentOpen] = useState<boolean>(false);
+    const [dialogExamsOpen, setDialogExamsOpen] = useState<boolean>(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
+    const [loadingStudents, setLoadingStudents] = useState<boolean>(false);
+    const [loadingExams, setLoadingExams] = useState<boolean>(false);
 
-    const {
-        data,
-        setData,
-        processing,
-        post,
-        put,
-        delete: deleteMethod,
-        reset,
-    } = useForm({
+    const groupForm = useForm({
         name: '',
     });
+
+    const studentForm = useForm({
+        user_id: '',
+    });
+
+    const examForm = useForm({
+        exam_id: '',
+    });
+
+    useEffect(() => {
+        if (dialogStudentOpen && (!students || students.length === 0)) {
+            setLoadingStudents(true);
+
+            router.reload({
+                only: ['students'],
+                onFinish: () => {
+                    setLoadingStudents(false);
+                },
+            });
+        }
+    }, [dialogStudentOpen]);
+
+    useEffect(() => {
+        if (dialogExamsOpen && (!exams || exams.length === 0)) {
+            setLoadingExams(true);
+
+            router.reload({
+                only: ['exams'],
+                onFinish: () => {
+                    setLoadingExams(false);
+                },
+            });
+        }
+    }, [dialogExamsOpen]);
+
+    const detachStudent = (userId: number) => {
+        if (!selectedGroup) return;
+
+        studentForm.delete(
+            detachUser.url({ group: selectedGroup.id, user: userId }),
+            {
+                onSuccess: (page: any) => {
+                    const updatedGroup = page.props.groups.find(
+                        (g: GroupOverviewProps) => g.id === selectedGroup.id,
+                    );
+                    if (updatedGroup) setSelectedGroup(updatedGroup);
+                },
+            },
+        );
+    };
+
+    const detachExam = (examId: number) => {
+        if (!selectedGroup) return;
+        console.log(examId);
+
+        examForm.delete(
+            detachExamRoute.url({ group: selectedGroup.id, exam: examId }),
+            {
+                onSuccess: (page: any) => {
+                    const updatedGroup = page.props.groups.find(
+                        (g: GroupOverviewProps) => g.id === selectedGroup.id,
+                    );
+                    if (updatedGroup) setSelectedGroup(updatedGroup);
+                },
+            },
+        );
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -85,18 +154,21 @@ export default function Groups({ groups }: GroupProps) {
                 onConfirm={() => {
                     if (!selectedGroup) return;
 
-                    deleteMethod(destroyGroup.url({ id: selectedGroup.id }), {
-                        onSuccess: () => {
-                            setSelectedGroup(null);
-                            setDeleteDialogOpen(false);
+                    groupForm.delete(
+                        destroyGroup.url({ id: selectedGroup.id }),
+                        {
+                            onSuccess: () => {
+                                setSelectedGroup(null);
+                                setDeleteDialogOpen(false);
+                            },
                         },
-                    });
+                    );
                 }}
             />
             <Head title="Docent" />
             <Button
                 onClick={() => {
-                    reset();
+                    groupForm.reset();
                     setIsEditing(false);
                     setDialogOpen(true);
                 }}
@@ -145,7 +217,7 @@ export default function Groups({ groups }: GroupProps) {
                                     className="mr-2"
                                     disabled={selectedGroup === null}
                                     onClick={() => {
-                                        setData(
+                                        groupForm.setData(
                                             'name',
                                             selectedGroup?.name ?? '',
                                         );
@@ -171,16 +243,28 @@ export default function Groups({ groups }: GroupProps) {
                                     <CardTitle>Toetsen</CardTitle>
                                     <Button
                                         size="sm"
-                                        onClick={() => console.log('Add exam')}
+                                        onClick={() => setDialogExamsOpen(true)}
                                     >
                                         +
                                     </Button>
                                 </div>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     {selectedGroup?.exams?.map((e) => (
-                                        <Card key={e.id} className="p-2">
-                                            {e.name}
-                                        </Card>
+                                        <div
+                                            key={e.id}
+                                            className="flex items-center justify-between gap-2 rounded-full bg-blue-50 px-3 py-1 text-blue-900 shadow-sm transition-colors hover:bg-blue-100"
+                                        >
+                                            <span className="text-sm font-medium">
+                                                {e.name}
+                                            </span>
+                                            <button
+                                                onClick={() => detachExam(e.id)}
+                                                className="rounded-full p-1 transition-colors hover:bg-red-100"
+                                                title="Verwijderen"
+                                            >
+                                                <Trash2 className="h-4 w-4 text-red-600" />
+                                            </button>
+                                        </div>
                                     ))}
                                 </div>
                                 <div className="mt-6 flex items-center justify-between">
@@ -188,7 +272,7 @@ export default function Groups({ groups }: GroupProps) {
                                     <Button
                                         size="sm"
                                         onClick={() =>
-                                            console.log('Add student')
+                                            setDialogStudentOpen(true)
                                         }
                                     >
                                         +
@@ -199,6 +283,7 @@ export default function Groups({ groups }: GroupProps) {
                                         <TableRow>
                                             <TableHead>Naam</TableHead>
                                             <TableHead>Email</TableHead>
+                                            <TableHead>Verwijderen</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -206,6 +291,18 @@ export default function Groups({ groups }: GroupProps) {
                                             <TableRow key={u.id}>
                                                 <TableCell>{u.name}</TableCell>
                                                 <TableCell>{u.email}</TableCell>
+                                                <TableCell>
+                                                    {' '}
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            detachStudent(u.id)
+                                                        }
+                                                    >
+                                                        Verwijderen
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
@@ -215,6 +312,132 @@ export default function Groups({ groups }: GroupProps) {
                     </Card>
                 </div>
             </div>
+            <Dialog
+                open={dialogExamsOpen}
+                onOpenChange={setDialogExamsOpen}
+                modal
+            >
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Examen toewijzen aan groep</DialogTitle>
+                    </DialogHeader>
+
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+
+                            if (!selectedGroup) return;
+
+                            examForm.post(
+                                attachExam.url({ id: selectedGroup.id }),
+                                {
+                                    onSuccess: (page: any) => {
+                                        const updatedGroup =
+                                            page.props.groups.find(
+                                                (g: GroupOverviewProps) =>
+                                                    g.id === selectedGroup.id,
+                                            );
+
+                                        if (updatedGroup)
+                                            setSelectedGroup(updatedGroup);
+
+                                        setDialogExamsOpen(false);
+                                        examForm.reset();
+                                    },
+                                },
+                            );
+                        }}
+                        className="flex flex-col gap-4"
+                    >
+                        {loadingExams ? (
+                            <p>Laden...</p>
+                        ) : (
+                            <select
+                                className="rounded border p-2"
+                                value={examForm.data.exam_id}
+                                onChange={(e) =>
+                                    examForm.setData('exam_id', e.target.value)
+                                }
+                            >
+                                <option value="">Selecteer Examen</option>
+                                {exams?.map((exam) => (
+                                    <option key={exam.id} value={exam.id}>
+                                        {exam.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+
+                        <Button type="submit" disabled={examForm.processing}>
+                            Examen toewijzen aan groep
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
+            <Dialog
+                open={dialogStudentOpen}
+                onOpenChange={setDialogStudentOpen}
+                modal
+            >
+                <DialogContent className="sm:max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Student toewijzen aan groep</DialogTitle>
+                    </DialogHeader>
+
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+
+                            if (!selectedGroup) return;
+
+                            studentForm.post(
+                                attachUser.url({ id: selectedGroup.id }),
+                                {
+                                    onSuccess: (page: any) => {
+                                        const updatedGroup =
+                                            page.props.groups.find(
+                                                (g: GroupOverviewProps) =>
+                                                    g.id === selectedGroup.id,
+                                            );
+                                        if (updatedGroup)
+                                            setSelectedGroup(updatedGroup);
+
+                                        setDialogStudentOpen(false);
+                                        studentForm.reset();
+                                    },
+                                },
+                            );
+                        }}
+                        className="flex flex-col gap-4"
+                    >
+                        {loadingStudents ? (
+                            <p>Laden...</p>
+                        ) : (
+                            <select
+                                className="rounded border p-2"
+                                value={studentForm.data.user_id}
+                                onChange={(e) =>
+                                    studentForm.setData(
+                                        'user_id',
+                                        e.target.value,
+                                    )
+                                }
+                            >
+                                <option value="">Selecteer student</option>
+                                {students?.map((student) => (
+                                    <option key={student.id} value={student.id}>
+                                        {student.name} ({student.email})
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+
+                        <Button type="submit" disabled={studentForm.processing}>
+                            Student toewijzen aan groep
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen} modal>
                 <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
@@ -227,18 +450,21 @@ export default function Groups({ groups }: GroupProps) {
                         onSubmit={(e) => {
                             e.preventDefault();
                             if (isEditing && selectedGroup) {
-                                put(updateGroup.url({ id: selectedGroup.id }), {
-                                    onSuccess: () => {
-                                        setDialogOpen(false);
-                                        setSelectedGroup(null);
-                                        reset();
+                                groupForm.put(
+                                    updateGroup.url({ id: selectedGroup.id }),
+                                    {
+                                        onSuccess: () => {
+                                            setDialogOpen(false);
+                                            setSelectedGroup(null);
+                                            groupForm.reset();
+                                        },
                                     },
-                                });
+                                );
                             } else {
-                                post(storeGroup.url(), {
+                                groupForm.post(storeGroup.url(), {
                                     onSuccess: () => {
                                         setDialogOpen(false);
-                                        reset();
+                                        groupForm.reset();
                                     },
                                 });
                             }
@@ -248,12 +474,14 @@ export default function Groups({ groups }: GroupProps) {
                         <Input
                             type="text"
                             name="name"
-                            value={data.name}
-                            onChange={(e) => setData('name', e.target.value)}
+                            value={groupForm.data.name}
+                            onChange={(e) =>
+                                groupForm.setData('name', e.target.value)
+                            }
                             placeholder="Groep naam"
                             className="input input-bordered w-full"
                         />
-                        <Button type="submit" disabled={processing}>
+                        <Button type="submit" disabled={groupForm.processing}>
                             {isEditing ? 'Bijwerken' : 'Toevoegen'}
                         </Button>
                     </form>

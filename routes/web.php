@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\GroupController;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,10 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
         Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
         Route::put('groepen/{id}', [GroupController::class, 'update'])->name('updateGroup');
         Route::delete('groepen/{id}', [GroupController::class, 'destroy'])->name('destroyGroup');
+        Route::post('groepen/{id}/student', [GroupController::class, 'attachUser'])->name('attachUser');
+        Route::post('groepen/{id}/examen', [GroupController::class, 'attachExam'])->name('attachExam');
+        Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
+        Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
     });
 });
 
@@ -40,4 +45,4 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::inertia('beheerder', 'admin')->name('admin');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
