@@ -53,4 +53,9 @@ class User extends Authenticatable
             'two_factor_confirmed_at' => 'datetime',
         ];
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'groups_has_users');
+    }
 }

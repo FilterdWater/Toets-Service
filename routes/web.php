@@ -1,13 +1,15 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login')->name('root');
 
 Route::middleware(['auth', 'verified'])->get('dashboard', function () {
-    $role = auth()->user()->role;
+    $role = Auth::user()->role;
 
     if ($role instanceof Role) {
         $role = $role->value;
@@ -26,7 +28,17 @@ Route::middleware(['auth', 'verified', 'role:student,teacher,admin'])->group(fun
 });
 
 Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function () {
-    Route::inertia('docent', 'teacher')->name('teacher');
+    Route::prefix('docent')->group(function () {
+        Route::inertia('/', 'teacher')->name('teacher');
+        Route::get('groepen', [GroupController::class, 'index'])->name('groups');
+        Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
+        Route::put('groepen/{id}', [GroupController::class, 'update'])->name('updateGroup');
+        Route::delete('groepen/{id}', [GroupController::class, 'destroy'])->name('destroyGroup');
+        Route::post('groepen/{id}/student', [GroupController::class, 'attachUser'])->name('attachUser');
+        Route::post('groepen/{id}/examen', [GroupController::class, 'attachExam'])->name('attachExam');
+        Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
+        Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
+    });
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
