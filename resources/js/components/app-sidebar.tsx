@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { User } from 'lucide-react';
+import { User, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';

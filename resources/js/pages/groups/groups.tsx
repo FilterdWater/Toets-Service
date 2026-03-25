@@ -18,6 +18,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import {
     Table,
     TableBody,
     TableCell,
@@ -35,7 +42,7 @@ import {
     storeGroup,
     teacher,
     updateGroup,
-    detachExam as detachExamRoute
+    detachExam as detachExamRoute,
 } from '@/routes';
 import type { BreadcrumbItem, Exam, User, Group } from '@/types';
 
@@ -70,8 +77,8 @@ export default function Groups({ groups, students, exams }: GroupProps) {
     const [dialogStudentOpen, setDialogStudentOpen] = useState<boolean>(false);
     const [dialogExamsOpen, setDialogExamsOpen] = useState<boolean>(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-    const [loadingStudents, setLoadingStudents] = useState<boolean>(false);
-    const [loadingExams, setLoadingExams] = useState<boolean>(false);
+    const [loadingStudents, setLoadingStudents] = useState<boolean>(true);
+    const [loadingExams, setLoadingExams] = useState<boolean>(true);
 
     const groupForm = useForm({
         name: '',
@@ -87,8 +94,6 @@ export default function Groups({ groups, students, exams }: GroupProps) {
 
     useEffect(() => {
         if (dialogStudentOpen && (!students || students.length === 0)) {
-            setLoadingStudents(true);
-
             router.reload({
                 only: ['students'],
                 onFinish: () => {
@@ -96,12 +101,10 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                 },
             });
         }
-    }, [dialogStudentOpen]);
+    }, [dialogStudentOpen, students]);
 
     useEffect(() => {
         if (dialogExamsOpen && (!exams || exams.length === 0)) {
-            setLoadingExams(true);
-
             router.reload({
                 only: ['exams'],
                 onFinish: () => {
@@ -109,7 +112,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                 },
             });
         }
-    }, [dialogExamsOpen]);
+    }, [dialogExamsOpen, exams]);
 
     const detachStudent = (userId: number) => {
         if (!selectedGroup) return;
@@ -129,7 +132,6 @@ export default function Groups({ groups, students, exams }: GroupProps) {
 
     const detachExam = (examId: number) => {
         if (!selectedGroup) return;
-        console.log(examId);
 
         examForm.delete(
             detachExamRoute.url({ group: selectedGroup.id, exam: examId }),
@@ -145,7 +147,20 @@ export default function Groups({ groups, students, exams }: GroupProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout
+            breadcrumbs={breadcrumbs}
+            rightContent={
+                <Button
+                    onClick={() => {
+                        groupForm.reset();
+                        setIsEditing(false);
+                        setDialogOpen(true);
+                    }}
+                >
+                    Groep aanmaken
+                </Button>
+            }
+        >
             <DeleteDialog
                 title="Groep verwijderen"
                 description={`Weet je zeker dat je de groep "${selectedGroup?.name}" wilt verwijderen?`}
@@ -166,16 +181,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                 }}
             />
             <Head title="Docent" />
-            <Button
-                onClick={() => {
-                    groupForm.reset();
-                    setIsEditing(false);
-                    setDialogOpen(true);
-                }}
-            >
-                Groep aanmaken
-            </Button>
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4 md:flex-row">
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-auto rounded-xl p-4 md:flex-row">
                 <div className="w-full md:w-1/2">
                     {groups.map((g) => {
                         return (
@@ -206,7 +212,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                     })}
                 </div>
                 <div className="w-full md:w-1/2">
-                    <Card>
+                    <Card className="md:fixed md:w-[40%]">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="text-lg">
                                 {selectedGroup?.name ?? 'Geen groep gekozen'}
@@ -266,6 +272,8 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                             </button>
                                         </div>
                                     ))}
+                                    {selectedGroup?.exams?.length === 0 &&
+                                        'Geen data gevonden'}
                                 </div>
                                 <div className="mt-6 flex items-center justify-between">
                                     <CardTitle>Studenten</CardTitle>
@@ -292,7 +300,6 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                                 <TableCell>{u.name}</TableCell>
                                                 <TableCell>{u.email}</TableCell>
                                                 <TableCell>
-                                                    {' '}
                                                     <Button
                                                         variant="destructive"
                                                         size="sm"
@@ -305,6 +312,11 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                                 </TableCell>
                                             </TableRow>
                                         ))}
+                                        {selectedGroup?.users.length === 0 && (
+                                            <TableCell>
+                                                Geen data gevonden
+                                            </TableCell>
+                                        )}
                                     </TableBody>
                                 </Table>
                             </CardContent>
@@ -352,20 +364,27 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                         {loadingExams ? (
                             <p>Laden...</p>
                         ) : (
-                            <select
-                                className="rounded border p-2"
-                                value={examForm.data.exam_id}
-                                onChange={(e) =>
-                                    examForm.setData('exam_id', e.target.value)
+                            <Select
+                                value={examForm.data.exam_id?.toString() || ''}
+                                onValueChange={(value: string) =>
+                                    examForm.setData('exam_id', value)
                                 }
                             >
-                                <option value="">Selecteer Examen</option>
-                                {exams?.map((exam) => (
-                                    <option key={exam.id} value={exam.id}>
-                                        {exam.name}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Selecteer Examen" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {exams?.map((exam) => (
+                                        <SelectItem
+                                            key={exam.id}
+                                            value={String(exam.id)}
+                                        >
+                                            {exam.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         )}
 
                         <Button type="submit" disabled={examForm.processing}>
@@ -413,23 +432,29 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                         {loadingStudents ? (
                             <p>Laden...</p>
                         ) : (
-                            <select
-                                className="rounded border p-2"
-                                value={studentForm.data.user_id}
-                                onChange={(e) =>
-                                    studentForm.setData(
-                                        'user_id',
-                                        e.target.value,
-                                    )
+                            <Select
+                                value={
+                                    studentForm.data.user_id?.toString() || ''
+                                }
+                                onValueChange={(value: string) =>
+                                    studentForm.setData('user_id', value)
                                 }
                             >
-                                <option value="">Selecteer student</option>
-                                {students?.map((student) => (
-                                    <option key={student.id} value={student.id}>
-                                        {student.name} ({student.email})
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Selecteer student" />
+                                </SelectTrigger>
+
+                                <SelectContent>
+                                    {students?.map((student) => (
+                                        <SelectItem
+                                            key={student.id}
+                                            value={String(student.id)}
+                                        >
+                                            {student.name} ({student.email})
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         )}
 
                         <Button type="submit" disabled={studentForm.processing}>

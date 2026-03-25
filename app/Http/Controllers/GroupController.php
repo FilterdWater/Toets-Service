@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Exam;
 use App\Models\Group;
 use App\Models\User;
-use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -18,20 +17,18 @@ class GroupController extends Controller
     {
         $groups = Group::with('users', 'exams')->withCount('users')->get();
         $students = Inertia::lazy(
-            fn() =>
-            User::where('role', 'student')
+            fn () => User::where('role', 'student')
                 ->select('id', 'name', 'email')
                 ->get()
         );
         $exams = Inertia::lazy(
-            fn() =>
-            Exam::all()
+            fn () => Exam::all()
         );
 
         return Inertia::render('groups/groups', [
             'groups' => $groups,
             'students' => $students,
-            'exams' => $exams
+            'exams' => $exams,
         ]);
     }
 
@@ -95,14 +92,13 @@ class GroupController extends Controller
     public function attachUser(Request $request, string $id)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id'
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $group = Group::findOrFail($id);
         $group->users()->syncWithoutDetaching([$request->user_id]);
-        return back()->with('success', 'Student succesvol toegevoegd aan groep!');
 
-        return back()->with('error', 'Er is iets fout gegaan');
+        return back()->with('success', 'Student succesvol toegevoegd aan groep!');
     }
 
     public function detachUser(string $id, string $userId)

@@ -2,7 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\GroupController;
-use App\Models\User;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -46,4 +46,4 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('accounts', [UserController::class, 'index'])->name('accounts');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
