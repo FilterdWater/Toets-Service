@@ -5,7 +5,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Role } from '@/types';
+import { Role } from '@/enums/role';
 
 export type RoleFilter = 'all' | Role.Admin | Role.Teacher | Role.Student;
 

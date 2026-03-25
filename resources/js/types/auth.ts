@@ -1,3 +1,5 @@
+import type { Role } from '@/enums/role';
+
 export type User = {
     id: number;
     name: string;
@@ -10,35 +12,6 @@ export type User = {
     role: Role;
     [key: string]: unknown;
 };
-
-export enum Role {
-    Student = 'student',
-    Teacher = 'teacher',
-    Admin = 'admin',
-}
-
-export function roleToReadableString(role: Role): string {
-    switch (role) {
-        case Role.Student:
-            return 'Student';
-        case Role.Teacher:
-            return 'Docent';
-        case Role.Admin:
-            return 'Beheerder';
-        default:
-            return 'Niet gevonden';
-    }
-}
-
-export function dateToReadableString(date: string): string {
-    return new Date(date).toLocaleDateString('nl-NL', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-}
 
 export type Auth = {
     user: User;

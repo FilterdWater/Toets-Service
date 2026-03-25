@@ -19,6 +19,7 @@ export function AppSidebar() {
     const { auth } = usePage().props;
     const role = auth.user?.role as string | undefined;
 
+    //TODO: Refactor to use role enum & use inertia links
     const homeHref =
         role === 'student'
             ? '/student'
@@ -29,6 +30,7 @@ export function AppSidebar() {
                 : //TODO: Add 403 page
                   login();
 
+    //TODO: Add rol specific items
     const mainNavItems: NavItem[] = [
         {
             title: 'Accounts',

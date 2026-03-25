@@ -25,12 +25,12 @@ import {
     Table,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import { dateToReadableString, roleToReadableString } from '@/lib/utils';
 import type { RoleFilter } from '@/pages/admin/components/rol-selector';
 import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
 import { accounts } from '@/routes';
-import { dateToReadableString, roleToReadableString } from '@/types';
 import type { BreadcrumbItem, User } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
