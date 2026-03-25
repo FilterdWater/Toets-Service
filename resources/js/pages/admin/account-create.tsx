@@ -5,12 +5,14 @@ import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
 import { accounts, accountCreate } from '@/routes';
-import type { BreadcrumbItem, Role } from '@/types';
+import type { BreadcrumbItem } from '@/types';
+import { Role } from '@/enums/role';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { accountStore } from '@/routes';
 import Heading from '@/components/heading';
 import { Spinner } from '@/components/ui/spinner';
+import InputError from '@/components/input-error';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,7 +26,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AccountCreate() {
-    const { data, setData, post, processing } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',
         password: '',
@@ -59,6 +61,7 @@ export default function AccountCreate() {
                                     setData('role', value)
                                 }
                             />
+                            <InputError message={errors.role} />
                         </div>
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col gap-2">
@@ -70,6 +73,7 @@ export default function AccountCreate() {
                                         setData('name', event.target.value)
                                     }
                                 />
+                                <InputError message={errors.name} />
                             </div>
                         </div>
                         <div className="flex flex-col gap-2">
@@ -81,6 +85,7 @@ export default function AccountCreate() {
                                     setData('email', event.target.value)
                                 }
                             />
+                            <InputError message={errors.email} />
                         </div>
                         <div className="flex flex-col gap-2">
                             <Label>Wachtwoord</Label>
@@ -92,6 +97,7 @@ export default function AccountCreate() {
                                     setData('password', event.target.value)
                                 }
                             />
+                            <InputError message={errors.password} />
                         </div>
                         <div className="flex flex-col gap-2">
                             <Label>Wachtwoord bevestigen</Label>
@@ -105,6 +111,9 @@ export default function AccountCreate() {
                                         event.target.value,
                                     )
                                 }
+                            />
+                            <InputError
+                                message={errors.password_confirmation}
                             />
                         </div>
                         <div className="flex gap-3">

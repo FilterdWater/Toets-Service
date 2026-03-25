@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,16 +21,22 @@ class UserController extends Controller
         return Inertia::render('admin/account-create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:student,teacher,admin',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:3', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'unique:users',
+            ],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', 'in:student,teacher,admin'],
         ]);
 
-        User::create($request->all());
+        unset($validated['password_confirmation']);
+
+        User::create($validated);
 
         return redirect()->route('accounts');
     }
