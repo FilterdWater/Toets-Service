@@ -1,9 +1,10 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     ImportIcon,
     UserRoundPlus,
     UserRoundPen,
     UserRoundX,
+    Link,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +31,7 @@ import type { RoleFilter } from '@/pages/admin/components/rol-selector';
 import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
-import { accounts } from '@/routes';
+import { accountCreate, accounts } from '@/routes';
 import type { BreadcrumbItem, User } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -65,7 +66,9 @@ export default function Account() {
                         <Button>
                             <ImportIcon /> Importeer account(s)
                         </Button>
-                        <Button>
+                        <Button
+                            onClick={() => router.visit(accountCreate.url())}
+                        >
                             <UserRoundPlus /> Creëer account
                         </Button>
                     </div>
@@ -85,7 +88,13 @@ export default function Account() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Button>
+                                        <Button
+                                            onClick={() =>
+                                                router.visit(
+                                                    accountCreate.url(),
+                                                )
+                                            }
+                                        >
                                             <UserRoundPlus /> Creëer account
                                         </Button>
                                     </DropdownMenuItem>
@@ -137,7 +146,11 @@ export default function Account() {
                                     <Button>
                                         <UserRoundPen /> Wijzig
                                     </Button>
-                                    <Button>
+                                    <Button
+                                        onClick={() =>
+                                            router.visit(accountCreate.url())
+                                        }
+                                    >
                                         <UserRoundX /> Deactiveer
                                     </Button>
                                 </TableCell>
