@@ -1,9 +1,4 @@
-export type Group = {
-    id: number;
-    name: string;
-    created_at: string;
-    updated_at: string;
-};
+import type { Group } from './group';
 
 export type Exam = {
     id: number;
