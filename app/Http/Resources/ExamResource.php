@@ -20,8 +20,8 @@ class ExamResource extends JsonResource
             'description' => $this->description,
             'max_mistakes' => $this->max_mistakes,
             'globally_available' => $this->globally_available,
-            'active_from' => $this->active_from?->format('Y-m-d'),
-            'active_until' => $this->active_until?->format('Y-m-d'),
+            'active_from' => $this->active_from,
+            'active_until' => $this->active_until,
             'created_at' => $this->created_at?->format('d-m-Y H:i'),
             'updated_at' => $this->updated_at?->format('d-m-Y H:i'),
         ];
