@@ -55,7 +55,7 @@ class UserController extends Controller
         $file = $request->file('csv');
         if ($file === null) {
             return redirect()->route('accounts')->withErrors([
-                'csv' => 'CSV file is required.',
+                'csv' => 'CSV file is verplicht.',
             ]);
         }
 
@@ -63,7 +63,7 @@ class UserController extends Controller
         $handle = fopen($file->getRealPath(), 'r');
         if ($handle === false) {
             return redirect()->route('accounts')->withErrors([
-                'csv' => 'Unable to read CSV file.',
+                'csv' => 'CSV file is niet leesbaar.',
             ]);
         }
 
@@ -73,7 +73,7 @@ class UserController extends Controller
             fclose($handle);
 
             return redirect()->route('accounts')->withErrors([
-                'csv' => 'CSV header row is missing.',
+                'csv' => 'CSV header row is verplicht.',
             ]);
         }
 
@@ -102,14 +102,27 @@ class UserController extends Controller
                 continue;
             }
 
-            if (in_array($column, ['name', 'naam'], true)) {
-                $columnIndexes['name'] = (int) $index;
-            } elseif (in_array($column, ['email', 'mail', 'e_mail'], true)) {
-                $columnIndexes['email'] = (int) $index;
-            } elseif (in_array($column, ['password', 'wachtwoord'], true)) {
-                $columnIndexes['password'] = (int) $index;
-            } elseif (in_array($column, ['role', 'rol'], true)) {
-                $columnIndexes['role'] = (int) $index;
+            switch ($column) {
+                case 'name':
+                case 'naam':
+                    $columnIndexes['name'] = (int) $index;
+                    break;
+                case 'email':
+                case 'mail':
+                case 'e_mail':
+                case 'e-mail':
+                    $columnIndexes['email'] = (int) $index;
+                    break;
+                case 'password':
+                case 'wachtwoord':
+                    $columnIndexes['password'] = (int) $index;
+                    break;
+                case 'role':
+                case 'rol':
+                    $columnIndexes['role'] = (int) $index;
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -119,7 +132,7 @@ class UserController extends Controller
                 fclose($handle);
 
                 return redirect()->route('accounts')->withErrors([
-                    'csv' => 'CSV missing required column: '.$requiredKey.'.',
+                    'csv' => 'CSV mist vereiste kolom: '.$requiredKey.'.',
                 ]);
             }
         }
@@ -148,6 +161,14 @@ class UserController extends Controller
                 'role' => $data[$columnIndexes['role']] ?? null,
             ];
 
+            $normalizedRole = strtolower(trim((string) ($row['role'] ?? '')));
+            $row['role'] = match ($normalizedRole) {
+                'student' => 'student',
+                'docent' => 'teacher',
+                'beheerder' => 'admin',
+                default => $normalizedRole,
+            };
+
             $row['password_confirmation'] = $row['password'];
 
             $rows[] = [
@@ -175,7 +196,7 @@ class UserController extends Controller
         // If duplicates exist, return a single `csv` error with email list.
         if ($duplicateEmails !== []) {
             return redirect()->route('accounts')->withErrors([
-                'email' => 'Duplicate emails in CSV: '.implode(', ', $duplicateEmails).'.',
+                'email' => 'Dubbele emails in CSV: '.implode(', ', $duplicateEmails).'.',
             ]);
         }
 
