@@ -162,7 +162,7 @@ export default function Account() {
                         <DialogHeader>
                             <DialogTitle>Importeer accounts</DialogTitle>
                             <DialogDescription>
-                                Hieronder kunt je een CSV file uploaden met de
+                                Hieronder kun je een CSV file uploaden met de
                                 accounts die je wilt importeren.
                             </DialogDescription>
                         </DialogHeader>
