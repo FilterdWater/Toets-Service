@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\ApplicationStatisticsController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\TakeExamController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -27,8 +28,10 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     })->name('dashboard');
 
     Route::middleware(['role:student,teacher,admin'])->group(function () {
-        Route::inertia('student', 'student')->name('student');
-    });
+    Route::prefix('student')->group(function () {
+        Route::get('/', [TakeExamController::class, 'index'])->name('student');
+        Route::get('/toets/{id}', [TakeExamController::class, 'makeExam'])->name('makeExam');
+    });    });
 
     Route::middleware(['role:teacher,admin'])->group(function () {
         Route::prefix('docent')->group(function () {

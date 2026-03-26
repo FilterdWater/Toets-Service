@@ -36,4 +36,9 @@ class Exam extends Model
     {
         return $this->belongsToMany(Group::class, 'groups_has_exams');
     }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
 }

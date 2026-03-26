@@ -31,5 +31,8 @@ class Submission extends Model
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class);
+    public function userAnswers()
+    {
+        return $this->hasMany(UserAnswer::class);
     }
 }
