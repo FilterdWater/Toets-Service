@@ -1,9 +1,9 @@
 <?php
 
 use App\Enums\Role;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\GroupController;
 use App\Http\Controllers\ExamController;
+use App\Http\Controllers\GroupController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
         Route::post('groepen/{id}/examen', [GroupController::class, 'attachExam'])->name('attachExam');
         Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
         Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
+    });
 
     Route::prefix('docent')->group(function () {
         /*

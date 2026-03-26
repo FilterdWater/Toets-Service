@@ -12,21 +12,21 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { accounts, groups, login, exams } from '@/routes';
+import { accounts, groups, exams, login } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     //TODO: Add rol specific items
     const mainNavItems: NavItem[] = [
         {
-            title: 'Groepen',
-            href: groups.url(),
-            icon: Users,
-        },
-        {
             title: 'Accounts',
             href: accounts(),
             icon: User,
+        },
+        {
+            title: 'Groepen',
+            href: groups.url(),
+            icon: Users,
         },
         {
             title: 'Toetsen',
