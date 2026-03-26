@@ -40,7 +40,7 @@ import type { RoleFilter } from '@/pages/admin/components/rol-selector';
 import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
-import { accountCreate, accountImport, accounts } from '@/routes';
+import { accountCreate, accountEdit, accountImport, accounts } from '@/routes';
 import type { BreadcrumbItem, User } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -157,66 +157,6 @@ export default function Account() {
         >
             <Head title="Account" />
             <div className="flex h-full flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Importeer accounts</DialogTitle>
-                            <DialogDescription>
-                                Hieronder kun je een CSV file uploaden met de
-                                accounts die je wilt importeren.
-                            </DialogDescription>
-                        </DialogHeader>
-
-                        <div className="space-y-4">
-                            {importResponse?.success === false && (
-                                <AlertError errors={[importResponse.message]} />
-                            )}
-                            {importResponse?.success === true && (
-                                <Alert>
-                                    <AlertTitle>Succes</AlertTitle>
-                                    <AlertDescription>
-                                        {importResponse.message}
-                                    </AlertDescription>
-                                </Alert>
-                            )}
-
-                            <div className="space-y-2">
-                                <p className="text-sm font-medium">
-                                    Voorbeeld CSV
-                                </p>
-                                <pre className="max-h-48 overflow-auto rounded-md border bg-muted p-3 font-mono text-xs">
-                                    {`name,email,password,role
-Alice,alice@example.com,Password123!,student
-Bob,bob@example.com,Password123!,teacher`}
-                                </pre>
-                            </div>
-
-                            <input
-                                ref={csvInputRef}
-                                type="file"
-                                accept=".csv,text/csv"
-                                className="absolute h-px w-px opacity-0"
-                                onChange={(event) => {
-                                    const file = event.target.files?.[0];
-                                    if (!file) {
-                                        return;
-                                    }
-
-                                    void importCsv(file);
-                                    if (csvInputRef.current) {
-                                        csvInputRef.current.value = '';
-                                    }
-                                }}
-                            />
-
-                            <DialogFooter className="gap-2 sm:gap-2">
-                                <Button onClick={openCsvPicker}>
-                                    Kies CSV
-                                </Button>
-                            </DialogFooter>
-                        </div>
-                    </DialogContent>
-                </Dialog>
                 <Table className="w-full">
                     <TableHeader>
                         <TableRow>
@@ -253,7 +193,13 @@ Bob,bob@example.com,Password123!,teacher`}
                                     {dateToReadableString(user.updated_at)}
                                 </TableCell>
                                 <TableCell className="flex gap-2">
-                                    <Button>
+                                    <Button
+                                        onClick={() =>
+                                            router.visit(
+                                                accountEdit.url(user.id),
+                                            )
+                                        }
+                                    >
                                         <UserRoundPen /> Wijzig
                                     </Button>
                                     <Button>
@@ -265,6 +211,64 @@ Bob,bob@example.com,Password123!,teacher`}
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Import Dialog */}
+            <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Importeer accounts</DialogTitle>
+                        <DialogDescription>
+                            Hieronder kun je een CSV file uploaden met de
+                            accounts die je wilt importeren.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        {importResponse?.success === false && (
+                            <AlertError errors={[importResponse.message]} />
+                        )}
+                        {importResponse?.success === true && (
+                            <Alert>
+                                <AlertTitle>Succes</AlertTitle>
+                                <AlertDescription>
+                                    {importResponse.message}
+                                </AlertDescription>
+                            </Alert>
+                        )}
+
+                        <div className="space-y-2">
+                            <p className="text-sm font-medium">Voorbeeld CSV</p>
+                            <pre className="max-h-48 overflow-auto rounded-md border bg-muted p-3 font-mono text-xs">
+                                {`name,email,password,role
+Alice,alice@example.com,Password123!,student
+Bob,bob@example.com,Password123!,teacher`}
+                            </pre>
+                        </div>
+
+                        <input
+                            ref={csvInputRef}
+                            type="file"
+                            accept=".csv,text/csv"
+                            className="absolute h-px w-px opacity-0"
+                            onChange={(event) => {
+                                const file = event.target.files?.[0];
+                                if (!file) {
+                                    return;
+                                }
+
+                                void importCsv(file);
+                                if (csvInputRef.current) {
+                                    csvInputRef.current.value = '';
+                                }
+                            }}
+                        />
+
+                        <DialogFooter className="gap-2 sm:gap-2">
+                            <Button onClick={openCsvPicker}>Upload CSV</Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </AppLayout>
     );
 }
