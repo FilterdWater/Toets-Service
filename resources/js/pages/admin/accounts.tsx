@@ -171,6 +171,7 @@ export default function Account() {
                                     onValueChange={setSelectedRole}
                                 />
                             </TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead>Gemaakt op</TableHead>
                             <TableHead>Laatst bijgewerkt op</TableHead>
                             <TableHead>Acties</TableHead>
@@ -184,6 +185,19 @@ export default function Account() {
                                 <TableCell>
                                     <Badge variant={user.role}>
                                         {roleToReadableString(user.role)}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        variant={
+                                            user.is_active
+                                                ? 'active'
+                                                : 'destructive'
+                                        }
+                                    >
+                                        {user.is_active
+                                            ? 'Actief'
+                                            : 'Gedeactiveerd'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-mono tabular-nums">
@@ -201,9 +215,6 @@ export default function Account() {
                                         }
                                     >
                                         <UserRoundPen /> Wijzig
-                                    </Button>
-                                    <Button>
-                                        <UserRoundX /> Deactiveer
                                     </Button>
                                 </TableCell>
                             </TableRow>

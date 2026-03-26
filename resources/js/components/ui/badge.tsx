@@ -23,6 +23,8 @@ const badgeVariants = cva(
             'border-transparent bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
         student:
             'border-transparent bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+        active:
+            'border-transparent bg-green-700 text-white dark:bg-green-900/40 dark:text-green-600',
         },
     },
     defaultVariants: {

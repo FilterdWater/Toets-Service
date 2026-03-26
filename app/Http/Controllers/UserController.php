@@ -40,7 +40,7 @@ class UserController extends Controller
 
         unset($validated['password_confirmation']);
 
-        User::create($validated);
+        User::create($validated + ['is_active' => true]);
 
         return redirect()->route('accounts')->with('success', 'Account succesful aangemaakt.');
     }
@@ -240,7 +240,7 @@ class UserController extends Controller
             foreach ($rows as $rowEntry) {
                 $data = $rowEntry['data'];
                 unset($data['password_confirmation']);
-                User::create($data);
+                User::create($data + ['is_active' => true]);
             }
         });
 
@@ -282,5 +282,17 @@ class UserController extends Controller
         $user->update($validated);
 
         return redirect()->route('accounts')->with('success', 'Wachtwoord succesful reset.');
+    }
+
+    public function updateIsActive(Request $request, string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $validated = $request->validate([
+            'is_active' => ['required', 'boolean'],
+        ]);
+
+        $user->update(['is_active' => $validated['is_active']]);
+
+        return redirect()->back()->with('success', $validated['is_active'] ? 'Account succesful geactiveerd.' : 'Account succesful gedeactiveerd.');
     }
 }
