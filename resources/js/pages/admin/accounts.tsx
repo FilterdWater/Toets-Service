@@ -4,7 +4,6 @@ import {
     UserRoundPlus,
     UserRoundPen,
     UserRoundX,
-    Link,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -146,11 +145,7 @@ export default function Account() {
                                     <Button>
                                         <UserRoundPen /> Wijzig
                                     </Button>
-                                    <Button
-                                        onClick={() =>
-                                            router.visit(accountCreate.url())
-                                        }
-                                    >
+                                    <Button>
                                         <UserRoundX /> Deactiveer
                                     </Button>
                                 </TableCell>

@@ -1,18 +1,18 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import type { Role } from '@/enums/role';
 import AppLayout from '@/layouts/app-layout';
 import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
 import { accounts, accountCreate } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
-import { Role } from '@/enums/role';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { accountStore } from '@/routes';
-import Heading from '@/components/heading';
-import { Spinner } from '@/components/ui/spinner';
-import InputError from '@/components/input-error';
+import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
