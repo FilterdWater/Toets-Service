@@ -13,19 +13,20 @@ import {
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import { getexam, storeexam, updateexam } from '@/routes';
+import { getexam, storeexam, updateexam, deleteeexam } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
 
 type Props = {
     exam?: Exam | null;
 };
+
 // als het exam leeg is dan wordt het automatisch een creation page
 export default function ExamPage({ exam }: Props) {
     const mode = exam ? 'edit' : 'create';
     const { errors } = usePage().props;
-    console.error('errors: ', errors);
-    console.log('exam: ', exam);
+    // console.error('errors: ', errors);
+    // console.log('exam: ', exam);
 
     const initialValues = useMemo(
         () => ({
@@ -37,8 +38,6 @@ export default function ExamPage({ exam }: Props) {
             created_at: exam?.created_at || '',
             updated_at: exam?.updated_at || '',
             globally_available: exam?.globally_available || false,
-            // active_from: exam?.active_from || '',
-            // active_until: exam?.active_until || '',
             active_from: exam ? new Date(exam?.active_from).toISOString() : '',
             active_until: exam
                 ? new Date(exam?.active_until).toISOString()
@@ -54,8 +53,8 @@ export default function ExamPage({ exam }: Props) {
         [values, initialValues],
     );
 
-    console.log('initialValues: ', JSON.stringify(initialValues));
-    console.log('values: ', JSON.stringify(values));
+    // console.log('initialValues: ', JSON.stringify(initialValues));
+    // console.log('values: ', JSON.stringify(values));
 
     const handleDiscard = () => {
         setValues(initialValues);
@@ -72,8 +71,11 @@ export default function ExamPage({ exam }: Props) {
     };
 
     const deleteExam = () => {
-        if (mode === 'edit' && confirm('Are you sure you want to delete?')) {
-            router.delete(getexam.url(values.id!), {
+        if (
+            mode === 'edit' &&
+            confirm('weet je zeker dat je deze toets wilt verwijderen?')
+        ) {
+            router.delete(deleteeexam.url(values.id!), {
                 preserveScroll: true,
             });
         }
@@ -104,7 +106,7 @@ export default function ExamPage({ exam }: Props) {
         <>
             <AppLayout breadcrumbs={breadcrumbs}>
                 <div className="flex flex-row gap-4 p-4">
-                    <div className="flex-9/12 flex flex-col gap-4">
+                    <div className="flex flex-9/12 flex-col gap-4">
                         <Card>
                             <CardHeader className="flex flex-row justify-between">
                                 <div className="flex flex-row gap-2">

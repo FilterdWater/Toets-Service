@@ -17,12 +17,6 @@ class ExamController extends Controller
         $exam = Exam::where('id', $examId)->firstOrFail();
 
         return Inertia::render('ExamPage/ExamPage', [
-//            'exam' => array_merge($exam->toArray(), [
-//                'created_at' => $exam->created_at?->format('d-m-Y H:i'),
-//                'updated_at' => $exam->updated_at?->format('d-m-Y H:i'),
-//                'active_from' => $exam->active_from?->format('Y-m-d'),
-//                'active_until' => $exam->active_until?->format('Y-m-d'),
-//            ]),
             'exam' => new ExamResource($exam),
         ]);
     }
@@ -50,5 +44,12 @@ class ExamController extends Controller
         $exam->update($validatedData);
 
         return back()->with('success', 'Exam updated successfully.');
+    }
+
+    public function destroy(Exam $exam): RedirectResponse
+    {
+        $exam->delete();
+
+        return redirect('/examens')->with('success', 'Exam succesvol verwijderd');
     }
 }
