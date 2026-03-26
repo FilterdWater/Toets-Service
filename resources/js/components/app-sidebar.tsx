@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { User, Users } from 'lucide-react';
+import { User, Users, LibraryBig } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -12,21 +12,26 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { accounts, groups, login } from '@/routes';
+import { accounts, groups, exams, login } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
     //TODO: Add rol specific items
     const mainNavItems: NavItem[] = [
         {
+            title: 'Accounts',
+            href: accounts(),
+            icon: User,
+        },
+        {
             title: 'Groepen',
             href: groups.url(),
             icon: Users,
         },
         {
-            title: 'Accounts',
-            href: accounts(),
-            icon: User,
+            title: 'Toetsen',
+            href: exams(),
+            icon: LibraryBig,
         },
     ];
     const { auth } = usePage().props;

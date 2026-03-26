@@ -25,8 +25,11 @@ export function roleToReadableString(role: Role): string {
     }
 }
 
-export function dateToReadableString(date: string): string {
-    return new Date(date).toLocaleDateString('nl-NL', {
+export function dateToReadableString(date: string | null | undefined): string {
+    if (!date) return '-';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return '-';
+    return d.toLocaleDateString('nl-NL', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
