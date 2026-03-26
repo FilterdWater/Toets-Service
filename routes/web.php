@@ -42,9 +42,7 @@ Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function ()
         Route::post('groepen/{id}/examen', [GroupController::class, 'attachExam'])->name('attachExam');
         Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
         Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
-    });
 
-    Route::prefix('docent')->group(function () {
         /*
          * Exams
          */
