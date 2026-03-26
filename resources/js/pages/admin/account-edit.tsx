@@ -1,10 +1,8 @@
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeftIcon, CheckIcon, LockIcon, SaveIcon } from 'lucide-react';
+import { ArrowLeftIcon, LockIcon, SaveIcon } from 'lucide-react';
 import { useState } from 'react';
-import AlertError from '@/components/alert-error';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
-import { Alert, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -56,7 +54,7 @@ export default function AccountEdit({ user }: AccountEditProps) {
     const {
         data: passwordData,
         setData: setPasswordData,
-        post: postPassword,
+        put: putPassword,
         processing: passwordProcessing,
         errors: passwordErrors,
     } = useForm({
@@ -206,7 +204,7 @@ export default function AccountEdit({ user }: AccountEditProps) {
                                 type="button"
                                 disabled={passwordProcessing}
                                 onClick={() =>
-                                    postPassword(
+                                    putPassword(
                                         accountResetPassword.url(user.id),
                                     )
                                 }

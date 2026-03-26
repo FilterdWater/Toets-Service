@@ -13,7 +13,7 @@ return [
     |
     */
 
- 'accepted' => 'Het veld :attribute moet geaccepteerd worden.',
+    'accepted' => 'Het veld :attribute moet geaccepteerd worden.',
     'accepted_if' => 'Het veld :attribute moet geaccepteerd worden wanneer :other gelijk is aan :value.',
     'active_url' => 'Het veld :attribute moet een geldige URL zijn.',
     'after' => 'Het veld :attribute moet een datum na :date zijn.',
