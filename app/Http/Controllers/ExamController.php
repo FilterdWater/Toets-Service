@@ -17,7 +17,7 @@ class ExamController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
-        return Inertia::render('ExamsPage', [
+        return Inertia::render('exams-page', [
             'exams' => $exams,
         ]);
     }
@@ -27,7 +27,7 @@ class ExamController extends Controller
     {
         $exam = Exam::where('id', $examId)->firstOrFail();
 
-        return Inertia::render('ExamPage/ExamPage', [
+        return Inertia::render('exam-page/exam-page', [
             'exam' => new ExamResource($exam),
         ]);
     }
@@ -35,13 +35,12 @@ class ExamController extends Controller
     // this is used to show the page for creating a new exam
     public function create(): Response
     {
-        return Inertia::render('ExamPage/ExamPage');
+        return Inertia::render('exam-page/exam-page');
     }
 
     // this is used to store the exam in the database
     public function store(Request $request): RedirectResponse
     {
-        ds(1);
         $validatedData = $request->validate([
             'name' => ['required', 'string', 'max:255', 'min:4'],
             'description' => ['nullable', 'string', 'max:255'], // TODO should be longer
