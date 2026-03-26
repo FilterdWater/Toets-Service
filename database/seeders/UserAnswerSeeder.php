@@ -9,7 +9,7 @@ class UserAnswerSeeder extends Seeder
 {
     public function run(): void
     {
-        $submissions = DB::table('submission')->whereNotNull('submitted_at')->get();
+        $submissions = DB::table('submissions')->whereNotNull('submitted_at')->get();
 
         foreach ($submissions as $submission) {
             $exam = DB::table('exams')->where('id', $submission->exam_id)->first();
