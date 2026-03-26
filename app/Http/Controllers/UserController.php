@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -247,5 +248,39 @@ class UserController extends Controller
             'success',
             count($rows).' accounts geïmporteerd.',
         );
+    }
+
+    public function showEdit(string $id)
+    {
+        return Inertia::render('admin/account-edit', [
+            'user' => User::findOrFail($id),
+        ]);
+    }
+
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'min:3', 'max:255'],
+            'email' => ['required', 'email', Rule::unique('users')->ignore($user->id)],
+            'role' => ['required', 'in:student,teacher,admin'],
+        ]);
+        $user->update($validated);
+
+        return redirect()->route('accounts')->with('success', 'Account succesful bijgewerkt.');
+    }
+
+    public function resetPassword(Request $request, string $id): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        unset($validated['password_confirmation']);
+
+        $user->update($validated);
+
+        return redirect()->route('accounts')->with('success', 'Wachtwoord succesful reset.');
     }
 }

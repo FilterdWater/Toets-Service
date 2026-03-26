@@ -56,6 +56,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('accounts/create', [UserController::class, 'showCreate'])->name('accountCreate');
     Route::post('accounts/create', [UserController::class, 'store'])->name('accountStore');
     Route::post('accounts/import', [UserController::class, 'import'])->name('accountImport');
+    Route::get('accounts/{id}/edit', [UserController::class, 'showEdit'])->name('accountEdit');
+    Route::put('accounts/{id}/update', [UserController::class, 'update'])->name('accountUpdate');
+    Route::put('accounts/{id}/reset-password', [UserController::class, 'resetPassword'])->name('accountResetPassword');
 });
 
 require __DIR__.'/settings.php';
