@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     ImportIcon,
     UserRoundPlus,
@@ -30,7 +30,7 @@ import type { RoleFilter } from '@/pages/admin/components/rol-selector';
 import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
-import { accounts } from '@/routes';
+import { accountCreate, accounts } from '@/routes';
 import type { BreadcrumbItem, User } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -65,7 +65,9 @@ export default function Account() {
                         <Button>
                             <ImportIcon /> Importeer account(s)
                         </Button>
-                        <Button>
+                        <Button
+                            onClick={() => router.visit(accountCreate.url())}
+                        >
                             <UserRoundPlus /> Creëer account
                         </Button>
                     </div>
@@ -85,7 +87,13 @@ export default function Account() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Button>
+                                        <Button
+                                            onClick={() =>
+                                                router.visit(
+                                                    accountCreate.url(),
+                                                )
+                                            }
+                                        >
                                             <UserRoundPlus /> Creëer account
                                         </Button>
                                     </DropdownMenuItem>

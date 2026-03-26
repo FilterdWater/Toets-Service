@@ -9,18 +9,16 @@ import { Role } from '@/enums/role';
 
 export type RoleFilter = 'all' | Role.Admin | Role.Teacher | Role.Student;
 
-export type RoleSelect = Role.Admin | Role.Teacher | Role.Student;
-
 export enum SelectorMode {
     Filter,
     Select,
 }
 
 type RolSelectorProps = {
-    value: RoleFilter | RoleSelect;
+    value: RoleFilter | Role | undefined;
     placeholder?: string;
     mode: SelectorMode;
-    onValueChange: (value: RoleFilter | RoleSelect) => void;
+    onValueChange: (value: RoleFilter | Role) => void;
 };
 
 export default function RolSelector({
@@ -33,7 +31,7 @@ export default function RolSelector({
         <Select
             value={value}
             onValueChange={(newValue) =>
-                onValueChange(newValue as RoleFilter | RoleSelect)
+                onValueChange(newValue as RoleFilter | Role)
             }
         >
             <SelectTrigger>
