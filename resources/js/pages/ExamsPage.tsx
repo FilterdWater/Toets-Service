@@ -9,8 +9,9 @@ import {
 } from '@tanstack/react-table';
 import { ArrowUpDown } from 'lucide-react';
 import { useState, useMemo } from 'react';
+import { twMerge } from 'tailwind-merge';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
     Table,
     TableHeader,
@@ -21,10 +22,10 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
-import { exams } from '@/routes';
-
+import { createexam, exams } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam, PaginatedExams } from '@/types';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Toetsen',
@@ -129,6 +130,15 @@ export default function ExamsPage() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Toetsen" />
+            <a
+                href={createexam().url}
+                className={twMerge(
+                    'w-fit',
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                )}
+            >
+                + nieuwe toets toevoegen
+            </a>
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="rounded-md border">
                     <Table>
