@@ -1,0 +1,221 @@
+import { Head, Link, useForm } from '@inertiajs/react';
+import { ArrowLeftIcon, LockIcon, SaveIcon } from 'lucide-react';
+import { useState } from 'react';
+import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import type { Role } from '@/enums/role';
+import AppLayout from '@/layouts/app-layout';
+import RolSelector, {
+    SelectorMode,
+} from '@/pages/admin/components/rol-selector';
+import {
+    accounts,
+    accountEdit,
+    accountResetPassword,
+    accountUpdate,
+} from '@/routes';
+import type { BreadcrumbItem, User } from '@/types';
+
+type AccountEditProps = {
+    user: User;
+};
+
+export default function AccountEdit({ user }: AccountEditProps) {
+    const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Accounts',
+            href: accounts(),
+        },
+        {
+            title: 'Wijzig account',
+            href: accountEdit(user.id),
+        },
+    ];
+
+    const { data, setData, put, processing, errors } = useForm({
+        name: user.name,
+        email: user.email,
+        role: user.role as Role,
+    });
+
+    const {
+        data: passwordData,
+        setData: setPasswordData,
+        put: putPassword,
+        processing: passwordProcessing,
+        errors: passwordErrors,
+    } = useForm({
+        password: '',
+        password_confirmation: '',
+    });
+
+    return (
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Creëer account" />
+            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+                <div className="mx-auto w-full max-w-md space-y-6">
+                    <Heading
+                        variant="small"
+                        title="Wijzig account"
+                        description="Wijzig een bestaande account"
+                    />
+                    <form
+                        className="space-y-6"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            put(accountUpdate.url(user.id));
+                        }}
+                    >
+                        <div className="flex flex-col gap-2">
+                            <Label>Rol</Label>
+                            <RolSelector
+                                value={data.role as Role}
+                                placeholder="Selecteer een rol"
+                                mode={SelectorMode.Select}
+                                onValueChange={(value) =>
+                                    setData(
+                                        'role',
+                                        value === 'all'
+                                            ? (user.role as Role)
+                                            : value,
+                                    )
+                                }
+                            />
+                            <InputError message={errors.role} />
+                        </div>
+                        <div className="flex flex-col gap-4">
+                            <div className="flex flex-col gap-2">
+                                <Label>Naam</Label>
+                                <Input
+                                    name="name"
+                                    value={data.name}
+                                    onChange={(event) =>
+                                        setData('name', event.target.value)
+                                    }
+                                />
+                                <InputError message={errors.name} />
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <Label>Email</Label>
+                            <Input
+                                name="email"
+                                value={data.email}
+                                onChange={(event) =>
+                                    setData('email', event.target.value)
+                                }
+                            />
+                            <InputError message={errors.email} />
+                        </div>
+                        <div className="flex gap-3">
+                            <Button disabled={processing}>
+                                {(processing && <Spinner />) || <SaveIcon />}
+                                Wijzigingen opslaan
+                            </Button>
+                        </div>
+
+                        {/* Reset Password Button */}
+                        <div className="flex flex-col gap-3">
+                            <Heading
+                                variant="small"
+                                title="Wachtwoord"
+                                description="Wijzig het wachtwoord van de gebruiker"
+                            />
+                            <div className="flex gap-3">
+                                <Button
+                                    type="button"
+                                    onClick={() => setIsPasswordOpen(true)}
+                                >
+                                    <LockIcon />
+                                    Wachtwoord wijzigen
+                                </Button>
+                            </div>
+                        </div>
+                    </form>
+                    <Button variant="outline" className="mt-4 w-full" asChild>
+                        <Link href={accounts()}>
+                            <ArrowLeftIcon />
+                            Terug naar accounts
+                        </Link>
+                    </Button>
+                </div>
+            </div>
+
+            {/* Reset Password Dialog */}
+            <Dialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Reset wachtwoord</DialogTitle>
+                        <DialogDescription>
+                            Hieronder kun je het wachtwoord van de gebruiker
+                            resetten.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex flex-col gap-2">
+                        <Label className="text-sm font-medium">
+                            Nieuw wachtwoord
+                        </Label>
+                        <Input
+                            name="password"
+                            // type="password"
+                            value={passwordData.password}
+                            onChange={(event) =>
+                                setPasswordData('password', event.target.value)
+                            }
+                        />
+                        <InputError message={passwordErrors?.password} />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <Label className="text-sm font-medium">
+                            Nieuw wachtwoord bevestigen
+                        </Label>
+                        <Input
+                            name="password_confirmation"
+                            type="password"
+                            value={passwordData.password_confirmation}
+                            onChange={(event) =>
+                                setPasswordData(
+                                    'password_confirmation',
+                                    event.target.value,
+                                )
+                            }
+                        />
+                        <InputError
+                            message={passwordErrors?.password_confirmation}
+                        />
+                    </div>
+                    <div className="space-y-4">
+                        <DialogFooter className="gap-2 sm:gap-2">
+                            <Button
+                                type="button"
+                                disabled={passwordProcessing}
+                                onClick={() =>
+                                    putPassword(
+                                        accountResetPassword.url(user.id),
+                                    )
+                                }
+                            >
+                                {passwordProcessing && <Spinner />}
+                                Reset wachtwoord
+                            </Button>
+                        </DialogFooter>
+                    </div>
+                </DialogContent>
+            </Dialog>
+        </AppLayout>
+    );
+}

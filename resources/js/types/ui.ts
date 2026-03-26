@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { BreadcrumbItem } from '@/types/navigation';
+import type { Auth } from './auth';
 
 export type AppLayoutProps = {
     children: ReactNode;
@@ -14,4 +15,15 @@ export type AuthLayoutProps = {
     name?: string;
     title?: string;
     description?: string;
+};
+
+export type SharedData = {
+    name: string;
+    auth: Auth;
+    sidebarOpen: boolean;
+    flash?: {
+        success?: string;
+        error?: string;
+    };
+    [key: string]: unknown;
 };

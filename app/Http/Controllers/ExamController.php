@@ -11,6 +11,16 @@ use Inertia\Response;
 
 class ExamController extends Controller
 {
+    public function index(): Response
+    {
+        $exams = Exam::with('groups')
+            ->orderBy('created_at', 'desc')
+            ->paginate(25);
+
+        return Inertia::render('exams', [
+            'exams' => $exams,
+        ]);
+    }
     // the edit function is at the same time also the show method for the admin and teacher
     public function edit(Request $request, $examId): Response
     {
