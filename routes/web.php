@@ -57,6 +57,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('accounts', [UserController::class, 'index'])->name('accounts');
     Route::get('accounts/create', [UserController::class, 'showCreate'])->name('accountCreate');
     Route::post('accounts/create', [UserController::class, 'store'])->name('accountStore');
+    Route::post('accounts/import', [UserController::class, 'import'])->name('accountImport');
 });
 
 require __DIR__.'/settings.php';
