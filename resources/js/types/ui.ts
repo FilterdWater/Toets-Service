@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import type { BreadcrumbItem } from '@/types/navigation';
-import { Auth } from './auth';
+import type { Auth } from './auth';
 
 export type AppLayoutProps = {
     children: ReactNode;
