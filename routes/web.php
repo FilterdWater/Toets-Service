@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\TakeExamController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -24,8 +25,11 @@ Route::middleware(['auth', 'verified'])->get('dashboard', function () {
     };
 })->name('dashboard');
 
-Route::middleware(['auth', 'verified', 'role:student,teacher,admin'])->group(function () {
-    Route::inertia('student', 'student')->name('student');
+Route::middleware(['role:student,teacher,admin'])->group(function () {
+    Route::prefix('student')->group(function () {
+        Route::get('/', [TakeExamController::class, 'index'])->name('student');
+        Route::get('/toets/{id}', [TakeExamController::class, 'makeExam'])->name('makeExam');
+    });
 });
 
 Route::middleware(['auth', 'verified', 'role:teacher,admin'])->group(function () {
@@ -61,4 +65,4 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('accounts/{id}/reset-password', [UserController::class, 'resetPassword'])->name('accountResetPassword');
 });
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
