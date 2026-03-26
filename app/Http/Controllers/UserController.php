@@ -38,6 +38,6 @@ class UserController extends Controller
 
         User::create($validated);
 
-        return redirect()->route('accounts');
+        return redirect()->route('accounts')->with('success', 'Account succesful aangemaakt.');
     }
 }
