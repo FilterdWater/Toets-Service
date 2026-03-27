@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { User, Users, LibraryBig } from 'lucide-react';
+import { User, Users, LibraryBig, PieChart } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -23,6 +23,11 @@ export function AppSidebar() {
             title: 'Accounts',
             href: accounts(),
             icon: User,
+        },
+        {
+            title: 'Applicatie Statistieken',
+            href: applicationStatistics(),
+            icon: PieChart,
         },
         {
             title: 'Groepen',
