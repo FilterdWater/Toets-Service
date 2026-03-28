@@ -23,7 +23,7 @@ export function DatePickerWithRange({
     className,
     selected,
     onSelect,
-    label = 'Date Picker Range',
+    label = 'Datum kiezer',
 }: DatePickerWithRangeProps) {
     return (
         <Field className={cn('w-60', className)}>
@@ -46,7 +46,7 @@ export function DatePickerWithRange({
                                 format(selected.from, 'LLL dd, y')
                             )
                         ) : (
-                            <span>Pick a date</span>
+                            <span>Kies een datum</span>
                         )}
                     </Button>
                 </PopoverTrigger>

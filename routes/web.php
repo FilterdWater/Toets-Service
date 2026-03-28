@@ -50,11 +50,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
              */
             Route::prefix('toetsen')->group(function () {
                 Route::get('/', [ExamController::class, 'index'])->name('exams');
-                Route::get('/{id}/wijzigen', [ExamController::class, 'edit'])->name('getexam');
-                Route::get('/aanmaken', [ExamController::class, 'create'])->name('createexam');
-                Route::post('/opslaan', [ExamController::class, 'store'])->name('storeexam');
-                Route::put('/{exam}', [ExamController::class, 'update'])->name('updateexam');
-                Route::delete('/{exam}', [ExamController::class, 'destroy'])->name('deleteeexam');
+                Route::get('/{id}/wijzigen', [ExamController::class, 'showEdit'])->name('getExam');
+                Route::get('/aanmaken', [ExamController::class, 'showCreate'])->name('createExam');
+                Route::post('/opslaan', [ExamController::class, 'store'])->name('storeExam');
+                Route::put('/{exam}', [ExamController::class, 'update'])->name('updateExam');
+                Route::delete('/{exam}', [ExamController::class, 'destroy'])->name('deleteExam');
             });
         });
     });

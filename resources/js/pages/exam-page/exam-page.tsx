@@ -13,7 +13,7 @@ import {
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import AppLayout from '@/layouts/app-layout';
-import { getexam, storeexam, updateexam, deleteeexam } from '@/routes';
+import { getExam, storeExam, updateExam, deleteExam } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
 
@@ -22,6 +22,7 @@ type Props = {
 };
 
 // als het exam leeg is dan wordt het automatisch een creation page
+//TODO de create pagina scheiden van de edit pagina dit moet gebeuren als er aan us-12-15 wordt gewerkt
 export default function ExamPage({ exam }: Props) {
     const mode = exam ? 'edit' : 'create';
     const { errors } = usePage().props;
@@ -63,19 +64,19 @@ export default function ExamPage({ exam }: Props) {
     const handleSave = () => {
         if (exam) {
             console.log('PUT');
-            router.put(updateexam.url(exam.id), values);
+            router.put(updateExam.url(exam.id), values);
         } else {
             console.log('POST');
-            router.post(storeexam.url(), values);
+            router.post(storeExam.url(), values);
         }
     };
 
-    const deleteExam = () => {
+    const handleDelete = () => {
         if (
             mode === 'edit' &&
             confirm('weet je zeker dat je deze toets wilt verwijderen?')
         ) {
-            router.delete(deleteeexam.url(values.id!), {
+            router.delete(deleteExam.url(values.id!), {
                 preserveScroll: true,
             });
         }
@@ -96,7 +97,7 @@ export default function ExamPage({ exam }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Exam',
-            href: exam ? getexam(exam.id).url : '',
+            href: exam ? getExam(exam.id).url : '',
         },
     ];
 
@@ -221,7 +222,7 @@ export default function ExamPage({ exam }: Props) {
                                     className="w-full"
                                     variant="destructive"
                                     disabled={mode !== 'edit'}
-                                    onClick={deleteExam}
+                                    onClick={handleDelete}
                                 >
                                     Delete
                                 </Button>

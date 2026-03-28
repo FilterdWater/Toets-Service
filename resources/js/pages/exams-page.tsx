@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
-import { createexam, exams } from '@/routes';
+import { createExam, exams } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam, PaginatedExams } from '@/types';
 
@@ -128,17 +128,27 @@ export default function ExamsPage() {
         getSortedRowModel: getSortedRowModel(),
     });
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout
+            rightContent={
+                <>
+                    <a
+                        href={createExam().url}
+                        className={twMerge(
+                            'w-fit',
+                            buttonVariants({
+                                variant: 'default',
+                                size: 'sm',
+                            }),
+                        )}
+                    >
+                        + nieuwe toets toevoegen
+                    </a>
+                </>
+            }
+            breadcrumbs={breadcrumbs}
+        >
             <Head title="Toetsen" />
-            <a
-                href={createexam().url}
-                className={twMerge(
-                    'w-fit',
-                    buttonVariants({ variant: 'secondary', size: 'sm' }),
-                )}
-            >
-                + nieuwe toets toevoegen
-            </a>
+
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="rounded-md border">
                     <Table>

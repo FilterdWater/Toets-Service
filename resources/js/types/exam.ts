@@ -8,7 +8,7 @@ export type Exam = {
     active_from: string;
     active_until: string;
     globally_available: boolean;
-    max_mistakes?: number;
+    max_mistakes: number;
     created_at: string;
     updated_at: string;
     groups?: Group[];

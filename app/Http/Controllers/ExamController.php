@@ -23,7 +23,7 @@ class ExamController extends Controller
     }
 
     // the edit function is at the same time also the show method for the admin and teacher
-    public function edit(Request $request, $examId): Response
+    public function showEdit(Request $request, $examId): Response
     {
         $exam = Exam::where('id', $examId)->firstOrFail();
 
@@ -33,7 +33,7 @@ class ExamController extends Controller
     }
 
     // this is used to show the page for creating a new exam
-    public function create(): Response
+    public function showCreate(): Response
     {
         return Inertia::render('exam-page/exam-page');
     }
@@ -68,7 +68,7 @@ class ExamController extends Controller
 
         $exam->update($validatedData);
 
-        return back()->with('success', 'Exam updated successfully.');
+        return back()->with('success', 'Exam succesvol gewijzigd.');
     }
 
     public function destroy(Exam $exam): RedirectResponse
