@@ -13,7 +13,15 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Role } from '@/enums/role';
-import { accounts, groups, exams, student, teacher, admin } from '@/routes';
+import {
+    accounts,
+    applicationStatistics,
+    groups,
+    exams,
+    student,
+    teacher,
+    admin,
+} from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {

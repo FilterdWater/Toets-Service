@@ -51,6 +51,13 @@
     --color-chart-4: var(--chart-4);
     --color-chart-5: var(--chart-5);
 
+    --color-role-admin: var(--role-admin);
+    --color-role-admin-foreground: var(--role-admin-foreground);
+    --color-role-teacher: var(--role-teacher);
+    --color-role-teacher-foreground: var(--role-teacher-foreground);
+    --color-role-student: var(--role-student);
+    --color-role-student-foreground: var(--role-student-foreground);
+
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar-primary: var(--sidebar-primary);
@@ -62,6 +69,9 @@
 }
 
 :root {
+    --role-admin: oklch(63.7% 0.237 25.331); /* TailwindCSS Red 500 */
+    --role-teacher: oklch(62.3% 0.214 259.815); /* TailwindCSS Blue 500 */
+    --role-student: oklch(69.6% 0.17 162.48); /* TailwindCSS Emerald 500 */
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
