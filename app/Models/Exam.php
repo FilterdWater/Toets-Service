@@ -41,4 +41,9 @@ class Exam extends Model
     {
         return $this->hasMany(Submission::class);
     }
+
+    public function sections()
+    {
+        return $this->hasMany(Section::class);
+    }
 }

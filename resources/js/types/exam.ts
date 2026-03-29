@@ -1,5 +1,6 @@
 import type { Section } from '@/types/section';
 import type { Group } from './group';
+import { Section } from './section';
 
 export type Exam = {
     id: number;
@@ -11,6 +12,7 @@ export type Exam = {
     max_mistakes: number;
     created_at: string;
     updated_at: string;
+    sections?: Section[];
     groups?: Group[];
     sections?: Section[];
 };

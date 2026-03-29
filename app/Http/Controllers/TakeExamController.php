@@ -45,7 +45,7 @@ class TakeExamController extends Controller
 
     public function makeExam(string $id) 
     {
-        $exam = Exam::where('id', $id)->firstOrFail();
+        $exam = Exam::with(['sections.questions.answers'])->where('id', $id)->firstOrFail();
 
         return Inertia::render('student/make-exam', [
             'exam' => $exam
