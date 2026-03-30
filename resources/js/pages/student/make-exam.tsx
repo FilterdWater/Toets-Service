@@ -1,10 +1,10 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import { makeExam, student } from '@/routes';
+import { makeExam, startExam, student, submitExam } from '@/routes';
 import type { BreadcrumbItem, Exam } from '@/types';
 
 type MakeExamProps = {
@@ -12,6 +12,7 @@ type MakeExamProps = {
 };
 
 export default function MakeExam({ exam }: MakeExamProps) {
+    console.log(exam);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Student',
@@ -55,28 +56,60 @@ export default function MakeExam({ exam }: MakeExamProps) {
         );
     }, [answers]);
 
+    useEffect(() => {
+        if (exam && exam.submissions!.length > 0) {
+            setPage(1);
+        }
+    }, [exam?.submissions]);
+
     const handleNextPage = () => setPage(Math.min(page + 1, pages.length));
     const handlePrevPage = () => setPage(Math.max(page - 1, 0));
 
     const handleAnswerChange = (
         questionId: number,
-        value: any,
+        value: number | string,
         multiple = false,
+        isText = false,
     ) => {
         setAnswers((prev) => {
+            if (isText) {
+                return { ...prev, [questionId]: value };
+            }
+
             if (multiple) {
-                const prevValues: string[] = prev[questionId] || [];
-                const updated = prevValues.includes(value)
+                const prevValues: number[] = prev[questionId] || [];
+                const updated = prevValues.includes(value as number)
                     ? prevValues.filter((v) => v !== value)
-                    : [...prevValues, value];
+                    : [...prevValues, value as number];
                 return { ...prev, [questionId]: updated };
             }
-            return { ...prev, [questionId]: value };
+
+            return { ...prev, [questionId]: value as number };
         });
     };
 
+    const handleStartExam = () => {
+        router.post(startExam.url(exam.id));
+    };
+
+    const handleSubmitExam = () => {
+        router.post(
+            submitExam.url(exam.id),
+            { answers },
+            {
+                onSuccess: () => {
+                    localStorage.removeItem(`exam-${exam.id}-answers`);
+                },
+                onError: (errors) => {
+                    console.error(errors);
+                    alert('Failed to submit exam');
+                },
+            },
+        );
+    };
+
     return (
-        <AppHeaderLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout breadcrumbs={page === 0 ? breadcrumbs : undefined}>
             <Head title={`Examen - ${exam.name}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 {page === 0 && (
@@ -89,7 +122,12 @@ export default function MakeExam({ exam }: MakeExamProps) {
                             }}
                         />
                         <div className="self-end">
-                            <Button onClick={handleNextPage}>
+                            <Button
+                                onClick={() => {
+                                    handleNextPage();
+                                    handleStartExam();
+                                }}
+                            >
                                 Start toets <ArrowRight />
                             </Button>
                         </div>
@@ -140,15 +178,15 @@ export default function MakeExam({ exam }: MakeExamProps) {
                                                 <input
                                                     type="radio"
                                                     name={`q-${question.id}`}
-                                                    value={ans.answer_option}
+                                                    value={ans.id} // use ID here
                                                     checked={
                                                         answers[question.id] ===
-                                                        ans.answer_option
+                                                        ans.id
                                                     }
                                                     onChange={() =>
                                                         handleAnswerChange(
                                                             question.id,
-                                                            ans.answer_option,
+                                                            ans.id,
                                                         )
                                                     }
                                                 />
@@ -164,18 +202,17 @@ export default function MakeExam({ exam }: MakeExamProps) {
                                             >
                                                 <input
                                                     type="checkbox"
-                                                    value={ans.answer_option}
+                                                    value={ans.id} // use ID here
                                                     checked={
                                                         answers[
                                                             question.id
-                                                        ]?.includes(
-                                                            ans.answer_option,
-                                                        ) || false
+                                                        ]?.includes(ans.id) ||
+                                                        false
                                                     }
                                                     onChange={() =>
                                                         handleAnswerChange(
                                                             question.id,
-                                                            ans.answer_option,
+                                                            ans.id,
                                                             true,
                                                         )
                                                     }
@@ -192,6 +229,8 @@ export default function MakeExam({ exam }: MakeExamProps) {
                                                 handleAnswerChange(
                                                     question.id,
                                                     e.target.value,
+                                                    false,
+                                                    true,
                                                 )
                                             }
                                         />
@@ -219,7 +258,12 @@ export default function MakeExam({ exam }: MakeExamProps) {
                         <Button onClick={handlePrevPage}>
                             Vorige <ArrowLeft />
                         </Button>
-                        <Button className="bg-green-600">Inleveren</Button>
+                        <Button
+                            className="bg-green-600"
+                            onClick={handleSubmitExam}
+                        >
+                            Inleveren
+                        </Button>
                     </div>
                 )}
             </div>

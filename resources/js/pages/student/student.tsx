@@ -31,7 +31,7 @@ export default function Student({
                 <Label className="text-lg">Beschikbare toetsen</Label>
                 <Card className="w-full overflow-x-auto p-4">
                     <div className="flex flex-row space-x-4">
-                        {availableExams.slice(0, 5).map((e) => (
+                        {availableExams.map((e) => (
                             <Card
                                 key={e.id}
                                 className="flex max-w-72 min-w-72 flex-col"
@@ -70,6 +70,9 @@ export default function Student({
                                 </CardFooter>
                             </Card>
                         ))}
+                        {finishedExams.length === 0 &&
+                            "Geen gemaakte examens gevonden"
+                        }
                     </div>
                 </Card>
             </div>

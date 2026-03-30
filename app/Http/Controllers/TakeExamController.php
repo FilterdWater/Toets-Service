@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\Submission;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,26 +16,35 @@ class TakeExamController extends Controller
      */
     public function index()
     {
-        $now = Carbon::now();
+        $now = now();
+        $userId = Auth::id();
 
-        $availableExams = Exam::with(['groups', 'users'])
-            ->where(function ($query) {
-                $query->whereHas('groups.users', fn ($q) => $q->whereKey(Auth::id()))
-                    ->orWhereHas('users', fn ($q) => $q->whereKey(Auth::id()));
+        $baseQuery = Exam::query()
+            ->with(['groups', 'users'])
+            ->where(function ($query) use ($userId) {
+                $query->whereHas('groups.users', fn($q) => $q->whereKey($userId))
+                    ->orWhereHas('users', fn($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
-            ->where('active_until', '>=', $now)
-            ->whereDoesntHave('submissions', fn ($q) => $q->where('user_id', Auth::id()))
+            ->where('active_until', '>=', $now);
+
+        $availableExams = (clone $baseQuery)
+            ->where(function ($query) use ($userId) {
+                $query->whereDoesntHave('submissions', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
+                    ->orWhereHas('submissions', function ($q) use ($userId) {
+                        $q->where('user_id', $userId)
+                            ->whereNull('submitted_at');
+                    });
+            })
             ->get();
 
-        $finishedExams = Exam::with(['groups', 'users'])
-            ->where(function ($query) {
-                $query->whereHas('groups.users', fn ($q) => $q->whereKey(Auth::id()))
-                    ->orWhereHas('users', fn ($q) => $q->whereKey(Auth::id()));
+        $finishedExams = (clone $baseQuery)
+            ->whereHas('submissions', function ($q) use ($userId) {
+                $q->where('user_id', $userId)
+                    ->whereNotNull('submitted_at');
             })
-            ->where('active_from', '<=', $now)
-            ->where('active_until', '>=', $now)
-            ->whereHas('submissions', fn ($q) => $q->where('user_id', Auth::id()))
             ->get();
 
         return Inertia::render('student/student', [
@@ -45,21 +55,85 @@ class TakeExamController extends Controller
 
     public function makeExam(string $id)
     {
-        $exam = Exam::with(['sections.questions.answers'])->where('id', $id)->firstOrFail();
-
+        $exam = Exam::with([
+            'sections.questions.answers',
+            'submissions' => function ($query) {
+                $query->where('user_id', Auth::id());
+            }
+        ])->where('id', $id)->firstOrFail();
         return Inertia::render('student/make-exam', [
             'exam' => $exam,
         ]);
     }
 
+    public function startExam(string $id)
+    {
+        Submission::create([
+            'user_id' => Auth::id(),
+            'exam_id' => $id,
+            'started_at' => now(),
+            'submitted_at' => null
+        ]);
+
+        return;
+    }
+
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, string $id)
     {
         $validated = $request->validate([
-
+            'answers' => 'required|array',
         ]);
 
+        $exam = Exam::findOrFail($id);
+
+        $now = Carbon::now();
+        if ($now < $exam->active_from || $now > $exam->active_until) {
+            return back()->withErrors(['exam' => 'Exam is not active']);
+        }
+
+        // get current user's submission
+        $submission = $exam->submissions()->firstOrCreate(
+            ['user_id' => Auth::id()],
+            ['started_at' => now()]
+        );
+
+        // prevent resubmission
+        if ($submission->submitted_at) {
+            return back()->withErrors(['exam' => 'Already submitted']);
+        }
+
+        // mark submitted
+        $submission->update(['submitted_at' => now()]);
+
+        // save answers
+        foreach ($validated['answers'] as $questionId => $answer) {
+            if (is_array($answer)) {
+                foreach ($answer as $ansId) {
+                    $submission->userAnswers()->create([
+                        'question_id' => $questionId,
+                        'selected_answer' => $ansId, // single choice
+                        'text_answer' => null,
+                    ]);
+                }
+            } else if (is_int($answer)) {
+                $submission->userAnswers()->create([
+                    'question_id' => $questionId,
+                    'selected_answer' => $answer, // single choice
+                    'text_answer' => null,
+                ]);
+            } else if (is_string($answer)) {
+                // text answer
+                $submission->userAnswers()->create([
+                    'question_id' => $questionId,
+                    'selected_answer' => null,
+                    'text_answer' => $answer,
+                ]);
+            }
+        }
+
+        return redirect()->route('student')->with('success', 'Exam submitted successfully!');
     }
 }
