@@ -23,7 +23,7 @@ type Props = {
 
 // als het exam leeg is dan wordt het automatisch een creation page
 //TODO de create pagina scheiden van de edit pagina dit moet gebeuren als er aan us-12-15 wordt gewerkt
-export default function ExamPage({ exam }: Props) {
+export default function Exam({ exam }: Props) {
     const mode = exam ? 'edit' : 'create';
     const { errors } = usePage().props;
     // console.error('errors: ', errors);

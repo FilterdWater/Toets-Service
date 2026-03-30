@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import {
     flexRender,
@@ -7,11 +7,10 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, BookPlus } from 'lucide-react';
 import { useState, useMemo } from 'react';
-import { twMerge } from 'tailwind-merge';
 import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
     Table,
     TableHeader,
@@ -32,7 +31,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: exams(),
     },
 ];
-export default function ExamsPage() {
+export default function Exams() {
     const { exams } = usePage<{ exams: PaginatedExams }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
     const columns = useMemo<ColumnDef<Exam>[]>(
@@ -116,6 +115,8 @@ export default function ExamsPage() {
         ],
         [],
     );
+
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data: exams.data,
         columns,
@@ -131,18 +132,12 @@ export default function ExamsPage() {
         <AppLayout
             rightContent={
                 <>
-                    <a
-                        href={createExam().url}
-                        className={twMerge(
-                            'w-fit',
-                            buttonVariants({
-                                variant: 'default',
-                                size: 'sm',
-                            }),
-                        )}
+                    <Button
+                        size="sm"
+                        onClick={() => router.visit(createExam.url())}
                     >
-                        + nieuwe toets toevoegen
-                    </a>
+                        <BookPlus /> + nieuwe toets toevoegen
+                    </Button>
                 </>
             }
             breadcrumbs={breadcrumbs}
