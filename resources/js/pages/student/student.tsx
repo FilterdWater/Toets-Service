@@ -1,10 +1,10 @@
 import { Head, router } from '@inertiajs/react';
-import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import type { BreadcrumbItem, Exam } from '@/types';
-import { makeExam, student } from '@/routes';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import { makeExam, student } from '@/routes';
+import type { BreadcrumbItem, Exam } from '@/types';
 
 type StudentPageProps = {
     availableExams: Exam[];
