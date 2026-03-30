@@ -1,8 +1,9 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeftIcon, LockIcon, SaveIcon } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -15,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { Switch } from '@/components/ui/switch';
 import type { Role } from '@/enums/role';
 import AppLayout from '@/layouts/app-layout';
 import RolSelector, {
@@ -25,6 +27,7 @@ import {
     accountEdit,
     accountResetPassword,
     accountUpdate,
+    accountUpdateIsActive,
 } from '@/routes';
 import type { BreadcrumbItem, User } from '@/types';
 
@@ -34,6 +37,7 @@ type AccountEditProps = {
 
 export default function AccountEdit({ user }: AccountEditProps) {
     const [isPasswordOpen, setIsPasswordOpen] = useState(false);
+    const [activeProcessing, setActiveProcessing] = useState(false);
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Accounts',
@@ -49,6 +53,7 @@ export default function AccountEdit({ user }: AccountEditProps) {
         name: user.name,
         email: user.email,
         role: user.role as Role,
+        is_active: Boolean(user.is_active),
     });
 
     const {
@@ -60,6 +65,10 @@ export default function AccountEdit({ user }: AccountEditProps) {
     } = useForm({
         password: '',
         password_confirmation: '',
+    });
+
+    const { data: activeData, setData: setActiveData } = useForm({
+        is_active: Boolean(user.is_active),
     });
 
     return (
@@ -144,6 +153,46 @@ export default function AccountEdit({ user }: AccountEditProps) {
                                 </Button>
                             </div>
                         </div>
+
+                        {/* Active Switch */}
+                        <div className="flex flex-col gap-3">
+                            <Heading
+                                variant="small"
+                                title="Account activiteit"
+                                description="Wijzig de activiteit van de gebruiker"
+                            />
+                            <div className="flex gap-3">
+                                <Switch
+                                    size="lg"
+                                    checked={activeData.is_active}
+                                    disabled={activeProcessing}
+                                    onCheckedChange={(checked) => {
+                                        setActiveData('is_active', checked);
+                                        setActiveProcessing(true);
+                                        router.put(
+                                            accountUpdateIsActive.url(user.id),
+                                            { is_active: checked },
+                                            {
+                                                preserveScroll: true,
+                                                onFinish: () =>
+                                                    setActiveProcessing(false),
+                                            },
+                                        );
+                                    }}
+                                />
+                                <Badge
+                                    variant={
+                                        activeData.is_active
+                                            ? 'active'
+                                            : 'destructive'
+                                    }
+                                >
+                                    {activeData.is_active
+                                        ? 'Actief'
+                                        : 'Inactief'}
+                                </Badge>
+                            </div>
+                        </div>
                     </form>
                     <Button variant="outline" className="mt-4 w-full" asChild>
                         <Link href={accounts()}>
@@ -171,7 +220,7 @@ export default function AccountEdit({ user }: AccountEditProps) {
                         </Label>
                         <Input
                             name="password"
-                            // type="password"
+                            type="password"
                             value={passwordData.password}
                             onChange={(event) =>
                                 setPasswordData('password', event.target.value)

@@ -38,6 +38,7 @@ class CreateNewUser implements CreatesNewUsers
             'email' => $input['email'],
             'password' => $input['password'],
             'role' => Role::Student,
+            'is_active' => true,
         ]);
     }
 }
