@@ -19,36 +19,36 @@ class TakeExamController extends Controller
 
         $availableExams = Exam::with(['groups', 'users'])
             ->where(function ($query) {
-                $query->whereHas('groups.users', fn($q) => $q->whereKey(Auth::id()))
-                    ->orWhereHas('users', fn($q) => $q->whereKey(Auth::id()));
+                $query->whereHas('groups.users', fn ($q) => $q->whereKey(Auth::id()))
+                    ->orWhereHas('users', fn ($q) => $q->whereKey(Auth::id()));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now)
-            ->whereDoesntHave('submissions', fn($q) => $q->where('user_id', Auth::id()))
+            ->whereDoesntHave('submissions', fn ($q) => $q->where('user_id', Auth::id()))
             ->get();
 
         $finishedExams = Exam::with(['groups', 'users'])
             ->where(function ($query) {
-                $query->whereHas('groups.users', fn($q) => $q->whereKey(Auth::id()))
-                    ->orWhereHas('users', fn($q) => $q->whereKey(Auth::id()));
+                $query->whereHas('groups.users', fn ($q) => $q->whereKey(Auth::id()))
+                    ->orWhereHas('users', fn ($q) => $q->whereKey(Auth::id()));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now)
-            ->whereHas('submissions', fn($q) => $q->where('user_id', Auth::id()))
+            ->whereHas('submissions', fn ($q) => $q->where('user_id', Auth::id()))
             ->get();
 
         return Inertia::render('student/student', [
             'availableExams' => $availableExams,
-            'finishedExams' => $finishedExams
+            'finishedExams' => $finishedExams,
         ]);
     }
 
-    public function makeExam(string $id) 
+    public function makeExam(string $id)
     {
         $exam = Exam::with(['sections.questions.answers'])->where('id', $id)->firstOrFail();
 
         return Inertia::render('student/make-exam', [
-            'exam' => $exam
+            'exam' => $exam,
         ]);
     }
 
@@ -57,6 +57,9 @@ class TakeExamController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+
+        ]);
+
     }
 }

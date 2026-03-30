@@ -15,7 +15,7 @@ class Section extends Model
         'sequence_nr',
         'exam_id',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     public function exam()
@@ -23,7 +23,7 @@ class Section extends Model
         return $this->belongsTo(Exam::class);
     }
 
-    public function questions() 
+    public function questions()
     {
         return $this->hasMany(Question::class);
     }

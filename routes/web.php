@@ -29,6 +29,7 @@ Route::middleware(['role:student,teacher,admin'])->group(function () {
     Route::prefix('student')->group(function () {
         Route::get('/', [TakeExamController::class, 'index'])->name('student');
         Route::get('/toets/{id}', [TakeExamController::class, 'makeExam'])->name('makeExam');
+        Route::post('/toets/{id}/start', [TakeExamController::class, 'startExam'])->name('startExam');
     });
 });
 
@@ -65,4 +66,4 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('accounts/{id}/reset-password', [UserController::class, 'resetPassword'])->name('accountResetPassword');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

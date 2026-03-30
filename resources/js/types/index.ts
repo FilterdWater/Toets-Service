@@ -6,3 +6,4 @@ export type * from './group';
 export type * from './section';
 export type * from './question';
 export type * from './answer';
+export type * from './submission';

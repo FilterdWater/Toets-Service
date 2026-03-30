@@ -1,5 +1,5 @@
 import type { Group } from './group';
-import { Section } from './section';
+import type { Section } from './section';
 
 export type Exam = {
     id: number;

@@ -1,4 +1,4 @@
-import { Answer } from "./answer";
+import type { Answer } from './answer';
 
 export type Question = {
     id: number;
