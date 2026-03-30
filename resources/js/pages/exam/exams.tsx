@@ -132,11 +132,8 @@ export default function Exams() {
         <AppLayout
             rightContent={
                 <>
-                    <Button
-                        size="sm"
-                        onClick={() => router.visit(createExam.url())}
-                    >
-                        <BookPlus /> + nieuwe toets toevoegen
+                    <Button onClick={() => router.visit(createExam.url())}>
+                        <BookPlus /> Nieuwe toets toevoegen
                     </Button>
                 </>
             }
