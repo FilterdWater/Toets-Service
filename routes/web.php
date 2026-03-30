@@ -82,13 +82,13 @@ Route::middleware(['auth', 'verified', 'is_active', 'role:teacher,admin'])->grou
 Route::middleware(['auth', 'verified', 'is_active', 'role:admin'])->group(function () {
     Route::inertia('beheerder', 'admin/admin')->name('admin');
     Route::get('accounts', [UserController::class, 'index'])->name('accounts');
-    Route::get('accounts/create', [UserController::class, 'showCreate'])->name('accountCreate');
-    Route::post('accounts/create', [UserController::class, 'store'])->name('accountStore');
-    Route::post('accounts/import', [UserController::class, 'import'])->name('accountImport');
-    Route::get('accounts/{id}/edit', [UserController::class, 'showEdit'])->name('accountEdit');
-    Route::put('accounts/{id}/update', [UserController::class, 'update'])->name('accountUpdate');
-    Route::put('accounts/{id}/reset-password', [UserController::class, 'resetPassword'])->name('accountResetPassword');
-    Route::put('accounts/{id}/update-is-active', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
+    Route::get('accounts/aanmaken', [UserController::class, 'showCreate'])->name('accountCreate');
+    Route::post('accounts/opslaan', [UserController::class, 'store'])->name('accountStore');
+    Route::post('accounts/importeren', [UserController::class, 'import'])->name('accountImport');
+    Route::get('accounts/{id}/bewerken', [UserController::class, 'showEdit'])->name('accountEdit');
+    Route::put('accounts/{id}/bijwerken', [UserController::class, 'update'])->name('accountUpdate');
+    Route::put('accounts/{id}/wachtwoord-resetten', [UserController::class, 'resetPassword'])->name('accountResetPassword');
+    Route::put('accounts/{id}/actief-aanpassen', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
 });
 
 require __DIR__.'/settings.php';
