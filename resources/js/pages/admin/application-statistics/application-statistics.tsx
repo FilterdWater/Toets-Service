@@ -15,8 +15,9 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import AppLayout from '@/layouts/app-layout';
+import { dateToReadableString } from '@/lib/utils';
 import { accounts, applicationStatistics, exams, groups } from '@/routes';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, Submission } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -47,6 +48,7 @@ interface Props {
     totalAdmins: number;
     totalExams: number;
     totalGroups: number;
+    recentSubmissions: Submission[];
 }
 
 export default function ApplicatieStatistieken({
@@ -56,6 +58,7 @@ export default function ApplicatieStatistieken({
     totalAdmins,
     totalExams,
     totalGroups,
+    recentSubmissions,
 }: Props) {
     const userDistribution = [
         {
@@ -79,7 +82,7 @@ export default function ApplicatieStatistieken({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Applicatie Statistieken" />
             <div className="space-y-6 p-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
                     <Link href={accounts()} className="cursor-pointer">
                         <Card>
                             <CardHeader>
@@ -123,44 +126,100 @@ export default function ApplicatieStatistieken({
                     </Link>
                 </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Gebruikersverdeling</CardTitle>
-                        <CardDescription>
-                            Verdeling van gebruikers op rol
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ChartContainer
-                            config={chartConfig}
-                            className="mx-auto aspect-square max-h-62.5"
-                        >
-                            <PieChart>
-                                <ChartTooltip
-                                    content={
-                                        <ChartTooltipContent
-                                            nameKey="value"
-                                            hideLabel
-                                        />
-                                    }
-                                />
-                                <Pie
-                                    data={userDistribution}
-                                    dataKey="value"
-                                    nameKey="name"
-                                >
-                                    <LabelList
-                                        dataKey="name"
-                                        className="fill-background"
-                                        stroke="none"
-                                        fontSize={12}
-                                        formatter={(value) => value}
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recente Indientingen</CardTitle>
+                            <CardDescription>
+                                De meest recente toetsinzendingen
+                            </CardDescription>
+                        </CardHeader>
+                        {/* Possible TODO: Put a link to the specific submission (no page for this yet) */}
+                        <CardContent className="max-h-62.5 overflow-auto">
+                            <div className="space-y-4">
+                                {recentSubmissions.map((submission) => (
+                                    <div
+                                        key={submission.id}
+                                        className="flex items-center justify-between border-b pb-2 last:border-0"
+                                    >
+                                        <div className="space-y-1">
+                                            <p className="text-sm leading-none font-medium">
+                                                {submission.studentName}
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {submission.examTitle}
+                                            </p>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">
+                                            {dateToReadableString(
+                                                submission.submittedAt,
+                                            )}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Gebruikersverdeling</CardTitle>
+                            <CardDescription>
+                                Verdeling van gebruikers op rol
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <ChartContainer
+                                config={chartConfig}
+                                className="mx-auto aspect-square max-h-62.5"
+                            >
+                                <PieChart>
+                                    <ChartTooltip
+                                        content={
+                                            <ChartTooltipContent
+                                                nameKey="value"
+                                                hideLabel
+                                            />
+                                        }
                                     />
-                                </Pie>
-                            </PieChart>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
+                                    <Pie
+                                        data={userDistribution}
+                                        dataKey="value"
+                                        nameKey="name"
+                                        labelLine={false}
+                                        label={({ payload, ...props }) => {
+                                            return (
+                                                <text
+                                                    cx={props.cx}
+                                                    cy={props.cy}
+                                                    x={props.x}
+                                                    y={props.y}
+                                                    textAnchor={
+                                                        props.textAnchor
+                                                    }
+                                                    dominantBaseline={
+                                                        props.dominantBaseline
+                                                    }
+                                                    className="fill-primary"
+                                                >
+                                                    {payload.value}
+                                                </text>
+                                            );
+                                        }}
+                                    >
+                                        <LabelList
+                                            dataKey="name"
+                                            className="fill-primary"
+                                            stroke="none"
+                                            fontSize={12}
+                                            formatter={(value) => value}
+                                        />
+                                    </Pie>
+                                </PieChart>
+                            </ChartContainer>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
         </AppLayout>
     );

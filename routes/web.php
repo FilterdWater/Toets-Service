@@ -75,6 +75,13 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
         Route::get('accounts/{id}/bewerken', [UserController::class, 'showEdit'])->name('accountEdit');
         Route::put('accounts/{id}/bijwerken', [UserController::class, 'update'])->name('accountUpdate');
         Route::put('accounts/{id}/wachtwoord-resetten', [UserController::class, 'resetPassword'])->name('accountResetPassword');
+
+        /*
+        * Application statistics
+        */
+        Route::prefix('applicatie-statistieken')->group(function () {
+            Route::get('/', [ApplicationStatisticsController::class, 'index'])->name('applicationStatistics');
+        });
         Route::put('accounts/{id}/actief-aanpassen', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
     });
 });
