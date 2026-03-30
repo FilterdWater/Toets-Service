@@ -1,5 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
@@ -157,7 +157,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                         setDialogOpen(true);
                     }}
                 >
-                    Groep aanmaken
+                    <Plus /> Groep aanmaken
                 </Button>
             }
         >

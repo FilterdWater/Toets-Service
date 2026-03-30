@@ -17,7 +17,7 @@ class ExamController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(25);
 
-        return Inertia::render('exams-page', [
+        return Inertia::render('exam/exams', [
             'exams' => $exams,
         ]);
     }
@@ -27,7 +27,7 @@ class ExamController extends Controller
     {
         $exam = Exam::where('id', $examId)->firstOrFail();
 
-        return Inertia::render('exam-page/exam-page', [
+        return Inertia::render('exam/exam', [
             'exam' => new ExamResource($exam),
         ]);
     }
@@ -35,7 +35,7 @@ class ExamController extends Controller
     // this is used to show the page for creating a new exam
     public function showCreate(): Response
     {
-        return Inertia::render('exam-page/exam-page');
+        return Inertia::render('exam/exam');
     }
 
     // this is used to store the exam in the database
