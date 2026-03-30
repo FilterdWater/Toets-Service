@@ -24,7 +24,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
             default => redirect()->route('login'),
         };
     })->name('dashboard');
-    
+
     Route::middleware(['role:student,teacher,admin'])->group(function () {
         Route::inertia('student', 'student')->name('student');
     });

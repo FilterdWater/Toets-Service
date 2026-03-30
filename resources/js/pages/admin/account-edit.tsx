@@ -3,6 +3,7 @@ import { ArrowLeftIcon, LockIcon, SaveIcon } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
 import InputError from '@/components/input-error';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -15,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { Switch } from '@/components/ui/switch';
 import type { Role } from '@/enums/role';
 import AppLayout from '@/layouts/app-layout';
 import RolSelector, {
@@ -28,8 +30,6 @@ import {
     accountUpdateIsActive,
 } from '@/routes';
 import type { BreadcrumbItem, User } from '@/types';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 
 type AccountEditProps = {
     user: User;
