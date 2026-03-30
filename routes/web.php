@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login')->name('root');
 
-Route::middleware(['auth', 'verified', 'is_active'])->get('dashboard', function () {
-    $role = Auth::user()->role;
-
+Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     Route::get('dashboard', function () {
         $role = Auth::user()->role;
 
@@ -19,24 +17,17 @@ Route::middleware(['auth', 'verified', 'is_active'])->get('dashboard', function 
             $role = $role->value;
         }
 
-Route::middleware(['auth', 'verified', 'is_active', 'role:student,teacher,admin'])->group(function () {
-    Route::inertia('student', 'student')->name('student');
-});
-
-Route::middleware(['auth', 'verified', 'is_active', 'role:teacher,admin'])->group(function () {
-    Route::prefix('docent')->group(function () {
-        /*
-        * Groups
-        */
-        Route::inertia('/', 'teacher')->name('teacher');
-        Route::get('groepen', [GroupController::class, 'index'])->name('groups');
-        Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
-        Route::put('groepen/{id}', [GroupController::class, 'update'])->name('updateGroup');
-        Route::delete('groepen/{id}', [GroupController::class, 'destroy'])->name('destroyGroup');
-        Route::post('groepen/{id}/student', [GroupController::class, 'attachUser'])->name('attachUser');
-        Route::post('groepen/{id}/examen', [GroupController::class, 'attachExam'])->name('attachExam');
-        Route::delete('/groepen/{group}/studenten/{user}', [GroupController::class, 'detachUser'])->name('detachUser');
-        Route::delete('/groepen/{group}/examen/{exam}', [GroupController::class, 'detachExam'])->name('detachExam');
+        return match ($role) {
+            'student' => redirect()->route('student'),
+            'teacher' => redirect()->route('teacher'),
+            'admin' => redirect()->route('admin'),
+            default => redirect()->route('login'),
+        };
+    })->name('dashboard');
+    
+    Route::middleware(['role:student,teacher,admin'])->group(function () {
+        Route::inertia('student', 'student')->name('student');
+    });
 
     Route::middleware(['role:teacher,admin'])->group(function () {
         Route::prefix('docent')->group(function () {
@@ -70,25 +61,14 @@ Route::middleware(['auth', 'verified', 'is_active', 'role:teacher,admin'])->grou
     Route::middleware(['role:admin'])->group(function () {
         Route::inertia('beheerder', 'admin/admin')->name('admin');
         Route::get('accounts', [UserController::class, 'index'])->name('accounts');
-        Route::get('accounts/create', [UserController::class, 'showCreate'])->name('accountCreate');
-        Route::post('accounts/create', [UserController::class, 'store'])->name('accountStore');
-        Route::post('accounts/import', [UserController::class, 'import'])->name('accountImport');
-        Route::get('accounts/{id}/edit', [UserController::class, 'showEdit'])->name('accountEdit');
-        Route::put('accounts/{id}/update', [UserController::class, 'update'])->name('accountUpdate');
-        Route::put('accounts/{id}/reset-password', [UserController::class, 'resetPassword'])->name('accountResetPassword');
+        Route::get('accounts/aanmaken', [UserController::class, 'showCreate'])->name('accountCreate');
+        Route::post('accounts/opslaan', [UserController::class, 'store'])->name('accountStore');
+        Route::post('accounts/importeren', [UserController::class, 'import'])->name('accountImport');
+        Route::get('accounts/{id}/bewerken', [UserController::class, 'showEdit'])->name('accountEdit');
+        Route::put('accounts/{id}/bijwerken', [UserController::class, 'update'])->name('accountUpdate');
+        Route::put('accounts/{id}/wachtwoord-resetten', [UserController::class, 'resetPassword'])->name('accountResetPassword');
+        Route::put('accounts/{id}/actief-aanpassen', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
     });
-});
-
-Route::middleware(['auth', 'verified', 'is_active', 'role:admin'])->group(function () {
-    Route::inertia('beheerder', 'admin/admin')->name('admin');
-    Route::get('accounts', [UserController::class, 'index'])->name('accounts');
-    Route::get('accounts/aanmaken', [UserController::class, 'showCreate'])->name('accountCreate');
-    Route::post('accounts/opslaan', [UserController::class, 'store'])->name('accountStore');
-    Route::post('accounts/importeren', [UserController::class, 'import'])->name('accountImport');
-    Route::get('accounts/{id}/bewerken', [UserController::class, 'showEdit'])->name('accountEdit');
-    Route::put('accounts/{id}/bijwerken', [UserController::class, 'update'])->name('accountUpdate');
-    Route::put('accounts/{id}/wachtwoord-resetten', [UserController::class, 'resetPassword'])->name('accountResetPassword');
-    Route::put('accounts/{id}/actief-aanpassen', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
 });
 
 require __DIR__.'/settings.php';
