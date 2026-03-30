@@ -11,7 +11,7 @@ class ApplicationStatisticsController extends Controller
 {
     public function index()
     {
-        return Inertia::render('admin/application-statistics', [
+        return Inertia::render('admin/application-statistics/application-statistics', [
             'totalUsers' => User::count(),
             'totalStudents' => User::where('role', 'student')->count(),
             'totalTeachers' => User::where('role', 'teacher')->count(),

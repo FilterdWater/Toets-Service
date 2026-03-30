@@ -1,4 +1,5 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
+import { ChevronRight } from 'lucide-react';
 import { LabelList, PieChart, Pie } from 'recharts';
 import {
     Card,
@@ -14,7 +15,7 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import AppLayout from '@/layouts/app-layout';
-import { applicationStatistics } from '@/routes';
+import { accounts, applicationStatistics, exams, groups } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -79,30 +80,47 @@ export default function ApplicatieStatistieken({
             <Head title="Applicatie Statistieken" />
             <div className="space-y-6 p-4">
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <Card>
-                        <CardHeader>
-                            <CardDescription>Gebruikers</CardDescription>
-                            <CardTitle className="text-3xl">
-                                {totalUsers}
-                            </CardTitle>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardDescription>Toetsen</CardDescription>
-                            <CardTitle className="text-3xl">
-                                {totalExams}
-                            </CardTitle>
-                        </CardHeader>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardDescription>Groepen</CardDescription>
-                            <CardTitle className="text-3xl">
-                                {totalGroups}
-                            </CardTitle>
-                        </CardHeader>
-                    </Card>
+                    <Link href={accounts()} className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardDescription>
+                                        Gebruikers
+                                    </CardDescription>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <CardTitle className="text-3xl">
+                                    {totalUsers}
+                                </CardTitle>
+                            </CardHeader>
+                        </Card>
+                    </Link>
+                    <Link href={exams()} className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardDescription>Toetsen</CardDescription>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <CardTitle className="text-3xl">
+                                    {totalExams}
+                                </CardTitle>
+                            </CardHeader>
+                        </Card>
+                    </Link>
+                    <Link href={groups.url()} className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardDescription>Groepen</CardDescription>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <CardTitle className="text-3xl">
+                                    {totalGroups}
+                                </CardTitle>
+                            </CardHeader>
+                        </Card>
+                    </Link>
                 </div>
 
                 <Card>
