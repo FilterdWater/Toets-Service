@@ -34,7 +34,7 @@ export default function Student({
                         {availableExams.slice(0, 5).map((e) => (
                             <Card
                                 key={e.id}
-                                className="flex max-w-72 min-w-72 flex-col"
+                                className="flex max-w-72 min-w-72 flex-col mb-3"
                             >
                                 <CardContent>
                                     <CardTitle>{e.name}</CardTitle>

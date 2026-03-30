@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import {
     flexRender,
@@ -7,7 +7,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, BookPlus } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -21,17 +21,17 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
-import { exams } from '@/routes';
-
+import { createExam, exams } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam, PaginatedExams } from '@/types';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Toetsen',
         href: exams(),
     },
 ];
-export default function ExamsPage() {
+export default function Exams() {
     const { exams } = usePage<{ exams: PaginatedExams }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
     const columns = useMemo<ColumnDef<Exam>[]>(
@@ -115,6 +115,8 @@ export default function ExamsPage() {
         ],
         [],
     );
+
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data: exams.data,
         columns,
@@ -127,8 +129,18 @@ export default function ExamsPage() {
         getSortedRowModel: getSortedRowModel(),
     });
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout
+            rightContent={
+                <>
+                    <Button onClick={() => router.visit(createExam.url())}>
+                        <BookPlus /> Nieuwe toets toevoegen
+                    </Button>
+                </>
+            }
+            breadcrumbs={breadcrumbs}
+        >
             <Head title="Toetsen" />
+
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="rounded-md border">
                     <Table>

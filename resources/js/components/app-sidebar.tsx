@@ -12,7 +12,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { accounts, groups, exams, login } from '@/routes';
+import { Role } from '@/enums/role';
+import { accounts, groups, exams, student, teacher, admin } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -37,16 +38,14 @@ export function AppSidebar() {
     const { auth } = usePage().props;
     const role = auth.user?.role as string | undefined;
 
-    //TODO: Refactor to use role enum & use inertia links
     const homeHref =
-        role === 'student'
-            ? '/student'
-            : role === 'teacher'
-              ? '/docent'
-              : role === 'admin'
-                ? '/beheerder'
-                : //TODO: Add 403 page
-                  login();
+        role === Role.Student
+            ? student()
+            : role === Role.Teacher
+              ? teacher()
+              : role === Role.Admin
+                ? admin()
+                : '#';
 
     return (
         <Sidebar collapsible="icon" variant="inset">

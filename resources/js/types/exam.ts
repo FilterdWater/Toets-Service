@@ -1,3 +1,4 @@
+import type { Section } from '@/types/section';
 import type { Group } from './group';
 import type { Section } from './section';
 
@@ -13,6 +14,7 @@ export type Exam = {
     updated_at: string;
     sections?: Section[];
     groups?: Group[];
+    sections?: Section[];
 };
 
 export type PaginatedExams = {
