@@ -17,7 +17,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
 import { accounts, applicationStatistics, exams, groups } from '@/routes';
-import type { BreadcrumbItem, Submission } from '@/types';
+import type { BreadcrumbItem, RecentSubmission } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -48,7 +48,7 @@ interface Props {
     totalAdmins: number;
     totalExams: number;
     totalGroups: number;
-    recentSubmissions: Submission[];
+    recentSubmissions: RecentSubmission[];
 }
 
 export default function ApplicatieStatistieken({

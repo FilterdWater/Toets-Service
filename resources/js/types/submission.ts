@@ -1,4 +1,4 @@
-export interface Submission {
+export interface RecentSubmission {
     id: number;
     studentName: string;
     examTitle: string;
