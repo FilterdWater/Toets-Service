@@ -51,7 +51,7 @@ interface Props {
     recentSubmissions: RecentSubmission[];
 }
 
-export default function ApplicatieStatistieken({
+export default function ApplicationStatistics({
     totalUsers,
     totalStudents,
     totalTeachers,
