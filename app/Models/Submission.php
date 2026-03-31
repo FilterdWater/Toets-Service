@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Submission extends Model
+{
+    protected $table = 'submission';
+
+    protected $fillable = [
+        'user_id',
+        'exam_id',
+        'started_at',
+        'submitted_at',
+        'outdated',
+    ];
+
+    protected $casts = [
+        'started_at' => 'datetime',
+        'submitted_at' => 'datetime',
+        'outdated' => 'boolean',
+    ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function exam(): BelongsTo
+    {
+        return $this->belongsTo(Exam::class);
+    }
+}
