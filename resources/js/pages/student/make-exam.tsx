@@ -100,10 +100,6 @@ export default function MakeExam({ exam }: MakeExamProps) {
                 onSuccess: () => {
                     localStorage.removeItem(`exam-${exam.id}-answers`);
                 },
-                onError: (errors) => {
-                    console.error(errors);
-                    alert('Failed to submit exam');
-                },
             },
         );
     };
@@ -152,7 +148,12 @@ export default function MakeExam({ exam }: MakeExamProps) {
                         <Button onClick={handlePrevPage}>
                             Vorige <ArrowLeft />
                         </Button>
-                        <Button className="bg-green-600">Inleveren</Button>
+                        <Button
+                            className="bg-green-600"
+                            onClick={handleSubmitExam}
+                        >
+                            Inleveren
+                        </Button>
                     </div>
                 )}
 
