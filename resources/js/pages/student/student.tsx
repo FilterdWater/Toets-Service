@@ -34,7 +34,7 @@ export default function Student({
                         {availableExams.map((e) => (
                             <Card
                                 key={e.id}
-                                className="flex max-w-72 min-w-72 flex-col mb-3"
+                                className="flex max-w-72 min-w-72 flex-col"
                             >
                                 <CardContent>
                                     <CardTitle>{e.name}</CardTitle>
@@ -71,8 +71,7 @@ export default function Student({
                             </Card>
                         ))}
                         {finishedExams.length === 0 &&
-                            "Geen gemaakte examens gevonden"
-                        }
+                            'Geen gemaakte examens gevonden'}
                     </div>
                 </Card>
             </div>

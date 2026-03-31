@@ -61,6 +61,39 @@ test('users can not authenticate with invalid password', function () {
     $this->assertGuest();
 });
 
+test('deactivated users can not authenticate', function () {
+    $user = User::factory()->create([
+        'is_active' => false,
+    ]);
+
+    $response = $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $response->assertSessionHasErrors('email');
+    $this->assertGuest();
+});
+
+test('deactivated users see explicit inactive account message', function () {
+    $user = User::factory()->create([
+        'is_active' => false,
+    ]);
+
+    $response = $this->from(route('login'))->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    $response
+        ->assertRedirect(route('login'))
+        ->assertSessionHasErrors([
+            'email' => 'Je account is gedeactiveerd. Neem contact op met de administratie.',
+        ]);
+
+    $this->assertGuest();
+});
+
 test('users can logout', function () {
     $user = User::factory()->create();
 

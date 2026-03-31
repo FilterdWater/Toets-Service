@@ -2,7 +2,10 @@ import { Head, router } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import { makeExam, startExam, student, submitExam } from '@/routes';
 import type { BreadcrumbItem, Exam } from '@/types';
@@ -43,7 +46,9 @@ export default function MakeExam({ exam }: MakeExamProps) {
         pages.push({ sections: currentPageSections });
     }
 
-    const [page, setPage] = useState<number>(0);
+    const [page, setPage] = useState<number>(() =>
+        exam?.submissions && exam.submissions.length > 0 ? 1 : 0,
+    );
     const [answers, setAnswers] = useState<Record<number, any>>(() => {
         const saved = localStorage.getItem(`exam-${exam.id}-answers`);
         return saved ? JSON.parse(saved) : {};
@@ -54,13 +59,7 @@ export default function MakeExam({ exam }: MakeExamProps) {
             `exam-${exam.id}-answers`,
             JSON.stringify(answers),
         );
-    }, [answers]);
-
-    useEffect(() => {
-        if (exam && exam.submissions!.length > 0) {
-            setPage(1);
-        }
-    }, [exam?.submissions]);
+    }, [exam.id, answers]);
 
     const handleNextPage = () => setPage(Math.min(page + 1, pages.length));
     const handlePrevPage = () => setPage(Math.max(page - 1, 0));
@@ -99,10 +98,6 @@ export default function MakeExam({ exam }: MakeExamProps) {
             {
                 onSuccess: () => {
                     localStorage.removeItem(`exam-${exam.id}-answers`);
-                },
-                onError: (errors) => {
-                    console.error(errors);
-                    alert('Failed to submit exam');
                 },
             },
         );
@@ -149,10 +144,17 @@ export default function MakeExam({ exam }: MakeExamProps) {
                 )}
                 {page > 0 && page === pages.length && (
                     <div className="flex justify-between">
-                        <Button onClick={handlePrevPage}>
-                            Vorige <ArrowLeft />
+                        {page > 1 && (
+                            <Button onClick={handlePrevPage}>
+                                Vorige <ArrowLeft />
+                            </Button>
+                        )}
+                        <Button
+                            className="bg-green-600"
+                            onClick={handleSubmitExam}
+                        >
+                            Inleveren
                         </Button>
-                        <Button className="bg-green-600">Inleveren</Button>
                     </div>
                 )}
 
@@ -169,30 +171,40 @@ export default function MakeExam({ exam }: MakeExamProps) {
                                         {question.title}: {question.text}
                                     </Label>
 
-                                    {question.type === 'single_choice' &&
-                                        question?.answers?.map((ans) => (
-                                            <div
-                                                key={ans.id}
-                                                className="mt-1 flex items-center gap-2"
+                                    {question.type === 'single_choice' && (
+                                        <div className="mt-1 flex items-center gap-2">
+                                            <RadioGroup
+                                                value={answers[question.id]}
+                                                onValueChange={(value) =>
+                                                    handleAnswerChange(
+                                                        question.id,
+                                                        value,
+                                                    )
+                                                }
                                             >
-                                                <input
-                                                    type="radio"
-                                                    name={`q-${question.id}`}
-                                                    value={ans.id} // use ID here
-                                                    checked={
-                                                        answers[question.id] ===
-                                                        ans.id
-                                                    }
-                                                    onChange={() =>
-                                                        handleAnswerChange(
-                                                            question.id,
-                                                            ans.id,
-                                                        )
-                                                    }
-                                                />
-                                                <span>{ans.answer_option}</span>
-                                            </div>
-                                        ))}
+                                                {question.answers?.map(
+                                                    (ans) => (
+                                                        <div
+                                                            key={ans.id}
+                                                            className="flex items-center gap-2"
+                                                        >
+                                                            <RadioGroupItem
+                                                                value={ans.id.toString()}
+                                                                id={ans.id.toString()}
+                                                            />
+                                                            <Label
+                                                                htmlFor={ans.id.toString()}
+                                                            >
+                                                                {
+                                                                    ans.answer_option
+                                                                }
+                                                            </Label>
+                                                        </div>
+                                                    ),
+                                                )}
+                                            </RadioGroup>
+                                        </div>
+                                    )}
 
                                     {question.type === 'multiple_choice' &&
                                         question?.answers?.map((ans) => (
@@ -200,30 +212,33 @@ export default function MakeExam({ exam }: MakeExamProps) {
                                                 key={ans.id}
                                                 className="mt-1 flex items-center gap-2"
                                             >
-                                                <input
-                                                    type="checkbox"
-                                                    value={ans.id} // use ID here
-                                                    checked={
-                                                        answers[
-                                                            question.id
-                                                        ]?.includes(ans.id) ||
-                                                        false
-                                                    }
-                                                    onChange={() =>
-                                                        handleAnswerChange(
-                                                            question.id,
-                                                            ans.id,
-                                                            true,
-                                                        )
-                                                    }
-                                                />
-                                                <span>{ans.answer_option}</span>
+                                                <Label className="flex cursor-pointer items-center gap-2">
+                                                    <Checkbox
+                                                        value={ans.id}
+                                                        checked={
+                                                            answers[
+                                                                question.id
+                                                            ]?.includes(
+                                                                ans.id,
+                                                            ) || false
+                                                        }
+                                                        onCheckedChange={() => {
+                                                            handleAnswerChange(
+                                                                question.id,
+                                                                ans.id,
+                                                                true,
+                                                            );
+                                                        }}
+                                                        id={ans.id.toString()}
+                                                    ></Checkbox>
+                                                    {ans.answer_option}
+                                                </Label>
                                             </div>
                                         ))}
 
                                     {question.type === 'text' && (
-                                        <textarea
-                                            className="mt-1 w-full rounded border p-2"
+                                        <Textarea
+                                            className="mt-1"
                                             value={answers[question.id] || ''}
                                             onChange={(e) =>
                                                 handleAnswerChange(
@@ -255,9 +270,11 @@ export default function MakeExam({ exam }: MakeExamProps) {
                 )}
                 {page > 0 && page === pages.length && (
                     <div className="flex justify-between">
-                        <Button onClick={handlePrevPage}>
-                            Vorige <ArrowLeft />
-                        </Button>
+                        {page > 1 && (
+                            <Button onClick={handlePrevPage}>
+                                Vorige <ArrowLeft />
+                            </Button>
+                        )}
                         <Button
                             className="bg-green-600"
                             onClick={handleSubmitExam}

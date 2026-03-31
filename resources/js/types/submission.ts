@@ -8,3 +8,9 @@ export type Submission = {
     created_at: string;
     updated_at: string;
 };
+export interface RecentSubmission {
+    id: number;
+    studentName: string;
+    examTitle: string;
+    submittedAt: string;
+}

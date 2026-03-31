@@ -2,18 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Submission extends Model
 {
-    use HasFactory;
+    protected $table = 'submissions';
 
-    protected $fillable = ['user_id', 'exam_id', 'started_at', 'submitted_at', 'outdated', 'created_at', 'updated_at'];
+    protected $fillable = [
+        'user_id',
+        'exam_id',
+        'started_at',
+        'submitted_at',
+        'outdated',
+    ];
 
-    public function user()
+    protected $casts = [
+        'started_at' => 'datetime',
+        'submitted_at' => 'datetime',
+        'outdated' => 'boolean',
+    ];
+
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function exam(): BelongsTo
+    {
+        return $this->belongsTo(Exam::class);
     }
 
     public function userAnswers()
