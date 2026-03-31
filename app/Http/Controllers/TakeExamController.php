@@ -23,8 +23,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
-                    ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
+                $query->whereHas('groups.users', fn($q) => $q->whereKey($userId))
+                    ->orWhereHas('users', fn($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now);
@@ -76,7 +76,6 @@ class TakeExamController extends Controller
             'started_at' => now(),
             'submitted_at' => null,
         ]);
-
     }
 
     /**
@@ -85,13 +84,6 @@ class TakeExamController extends Controller
     public function store(Request $request, string $id)
     {
         try {
-            $validated = $request->validate(
-                [
-                    'answers' => 'required|array',
-                ],
-                ['answers.required' => 'Er missen antwoorden, check of je alles hebt ingevuld.']
-            );
-
             $exam = Exam::findOrFail($id);
 
             $now = Carbon::now();
@@ -114,21 +106,25 @@ class TakeExamController extends Controller
             $questionIds = $exam->sections()
                 ->with('questions')
                 ->get()
-                ->flatMap(fn ($s) => $s->questions->pluck('id'))
+                ->flatMap(fn($s) => $s->questions->pluck('id'))
                 ->toArray();
 
             // Check which questions are unanswered
-            $answeredQuestionIds = array_keys($validated['answers']);
+            $answeredQuestionIds = array_keys($request['answers']);
             $missing = array_diff($questionIds, $answeredQuestionIds);
-            if (! empty($missing)) {
-                return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. '.count($missing).' vragen over.');
+
+            if (!empty($missing)) {
+                return back()->with([
+                    'error' => "Beantwoord eerst alle vragen.",
+                    'missing' => array_values($missing),
+                ]);
             }
 
             // mark submitted
             $submission->update(['submitted_at' => now()]);
 
             // save answers
-            foreach ($validated['answers'] as $questionId => $answer) {
+            foreach ($request['answers'] as $questionId => $answer) {
                 if (is_array($answer)) {
                     foreach ($answer as $ansId) {
                         $submission->userAnswers()->create([
@@ -153,7 +149,7 @@ class TakeExamController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', "Er is iets misgegaan");
         }
 
         return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
