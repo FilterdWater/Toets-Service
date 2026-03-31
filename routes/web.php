@@ -50,13 +50,6 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
              */
             Route::prefix('toetsen')->group(function () {
                 Route::get('/', [ExamController::class, 'index'])->name('exams');
-
-                /*
-                * Application statistics
-                */
-                Route::prefix('applicatie-statistieken')->group(function () {
-                    Route::get('/', [ApplicationStatisticsController::class, 'index'])->name('applicationStatistics');
-                });
                 Route::get('/{id}/wijzigen', [ExamController::class, 'showEdit'])->name('getExam');
                 Route::get('/aanmaken', [ExamController::class, 'showCreate'])->name('createExam');
                 Route::post('/opslaan', [ExamController::class, 'store'])->name('storeExam');
