@@ -52,11 +52,8 @@
     --color-chart-5: var(--chart-5);
 
     --color-role-admin: var(--role-admin);
-    --color-role-admin-foreground: var(--role-admin-foreground);
     --color-role-teacher: var(--role-teacher);
-    --color-role-teacher-foreground: var(--role-teacher-foreground);
     --color-role-student: var(--role-student);
-    --color-role-student-foreground: var(--role-student-foreground);
 
     --color-sidebar: var(--sidebar);
     --color-sidebar-foreground: var(--sidebar-foreground);
