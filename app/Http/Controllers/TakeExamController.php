@@ -85,74 +85,75 @@ class TakeExamController extends Controller
     public function store(Request $request, string $id)
     {
         try {
-        $validated = $request->validate([
-            'answers' => 'required|array',
-        ]);
+            $validated = $request->validate(
+                [
+                    'answers' => 'required|array',
+                ],
+                ['answers.required' => 'Er missen antwoorden, check of je alles hebt ingevuld.']
+            );
 
-        $exam = Exam::findOrFail($id);
+            $exam = Exam::findOrFail($id);
 
-        $now = Carbon::now();
-        if ($now < $exam->active_from || $now > $exam->active_until) {
-            return back()->withErrors(['exam' => 'Exam is not active']);
-        }
+            $now = Carbon::now();
+            if ($now < $exam->active_from || $now > $exam->active_until) {
+                return back()->with('error', 'Examen is niet actief');
+            }
 
-        // get current user's submission
-        $submission = $exam->submissions()->firstOrCreate(
-            ['user_id' => Auth::id()],
-            ['started_at' => now()]
-        );
+            // get current user's submission
+            $submission = $exam->submissions()->firstOrCreate(
+                ['user_id' => Auth::id()],
+                ['started_at' => now()]
+            );
 
-        // prevent resubmission
-        if ($submission->submitted_at) {
-            return back()->withErrors(['exam' => 'Already submitted']);
-        }
+            // prevent resubmission
+            if ($submission->submitted_at) {
+                return back()->with('error', 'Examen is al ingeleverd');
+            }
 
-        //Get all question IDs from the exam
-        $questionIds = $exam->sections()
-            ->with('questions')
-            ->get()
-            ->flatMap(fn($s) => $s->questions->pluck('id'))
-            ->toArray();
+            //Get all question IDs from the exam
+            $questionIds = $exam->sections()
+                ->with('questions')
+                ->get()
+                ->flatMap(fn($s) => $s->questions->pluck('id'))
+                ->toArray();
 
-        // dd($questionIds);
-        // Check which questions are unanswered
-        $answeredQuestionIds = array_keys($validated['answers']);
-        $missing = array_diff($questionIds, $answeredQuestionIds);
-        if (!empty($missing)) {
-            // dd("BLAAT");
-            return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. ' . count($missing) . ' vragen over.');
-        }
+            // Check which questions are unanswered
+            $answeredQuestionIds = array_keys($validated['answers']);
+            $missing = array_diff($questionIds, $answeredQuestionIds);
+            if (!empty($missing)) {
+                return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. ' . count($missing) . ' vragen over.');
+            }
 
-        // mark submitted
-        $submission->update(['submitted_at' => now()]);
+            // mark submitted
+            $submission->update(['submitted_at' => now()]);
 
-        // save answers
-        foreach ($validated['answers'] as $questionId => $answer) {
-            if (is_array($answer)) {
-                foreach ($answer as $ansId) {
+            // save answers
+            foreach ($validated['answers'] as $questionId => $answer) {
+                if (is_array($answer)) {
+                    foreach ($answer as $ansId) {
+                        $submission->userAnswers()->create([
+                            'question_id' => $questionId,
+                            'selected_answer' => $ansId, // single choice
+                            'text_answer' => null,
+                        ]);
+                    }
+                } else if (is_int($answer)) {
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
-                        'selected_answer' => $ansId, // single choice
+                        'selected_answer' => $answer, // single choice
                         'text_answer' => null,
                     ]);
+                } else if (is_string($answer)) {
+                    // text answer
+                    $submission->userAnswers()->create([
+                        'question_id' => $questionId,
+                        'selected_answer' => null,
+                        'text_answer' => $answer,
+                    ]);
                 }
-            } else if (is_int($answer)) {
-                $submission->userAnswers()->create([
-                    'question_id' => $questionId,
-                    'selected_answer' => $answer, // single choice
-                    'text_answer' => null,
-                ]);
-            } else if (is_string($answer)) {
-                // text answer
-                $submission->userAnswers()->create([
-                    'question_id' => $questionId,
-                    'selected_answer' => null,
-                    'text_answer' => $answer,
-                ]);
             }
-        }
         } catch (Exception $e) {
-            return back()->with('error', 'Er is iets fout gegaan');
+            return back()->with('error', $e->getMessage());
         }
 
         return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
