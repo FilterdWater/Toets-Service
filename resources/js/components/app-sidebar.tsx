@@ -57,7 +57,7 @@ export function AppSidebar() {
             : role === Role.Teacher
               ? teacher()
               : role === Role.Admin
-                ? admin()
+                ? admin() // TODO: Use the application statistics page instead
                 : '#';
 
     return (
