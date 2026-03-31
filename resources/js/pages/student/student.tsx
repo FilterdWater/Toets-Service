@@ -71,8 +71,7 @@ export default function Student({
                             </Card>
                         ))}
                         {finishedExams.length === 0 &&
-                            "Geen gemaakte examens gevonden"
-                        }
+                            'Geen gemaakte examens gevonden'}
                     </div>
                 </Card>
             </div>

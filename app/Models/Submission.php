@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Submission extends Model
 {
-    protected $table = 'submission';
+    protected $table = 'submissions';
 
     protected $fillable = [
         'user_id',
@@ -31,7 +31,7 @@ class Submission extends Model
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class);
-	}
+    }
 
     public function userAnswers()
     {

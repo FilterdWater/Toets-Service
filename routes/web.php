@@ -36,7 +36,6 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
         });
     });
 
-
     Route::middleware(['role:teacher,admin'])->group(function () {
         Route::prefix('docent')->group(function () {
             /*

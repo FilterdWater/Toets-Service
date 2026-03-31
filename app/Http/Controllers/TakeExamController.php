@@ -23,8 +23,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn($q) => $q->whereKey($userId))
-                    ->orWhereHas('users', fn($q) => $q->whereKey($userId));
+                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
+                    ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now);
@@ -60,8 +60,9 @@ class TakeExamController extends Controller
             'sections.questions.answers',
             'submissions' => function ($query) {
                 $query->where('user_id', Auth::id());
-            }
+            },
         ])->where('id', $id)->firstOrFail();
+
         return Inertia::render('student/make-exam', [
             'exam' => $exam,
         ]);
@@ -73,10 +74,9 @@ class TakeExamController extends Controller
             'user_id' => Auth::id(),
             'exam_id' => $id,
             'started_at' => now(),
-            'submitted_at' => null
+            'submitted_at' => null,
         ]);
 
-        return;
     }
 
     /**
@@ -110,18 +110,18 @@ class TakeExamController extends Controller
                 return back()->with('error', 'Examen is al ingeleverd');
             }
 
-            //Get all question IDs from the exam
+            // Get all question IDs from the exam
             $questionIds = $exam->sections()
                 ->with('questions')
                 ->get()
-                ->flatMap(fn($s) => $s->questions->pluck('id'))
+                ->flatMap(fn ($s) => $s->questions->pluck('id'))
                 ->toArray();
 
             // Check which questions are unanswered
             $answeredQuestionIds = array_keys($validated['answers']);
             $missing = array_diff($questionIds, $answeredQuestionIds);
-            if (!empty($missing)) {
-                return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. ' . count($missing) . ' vragen over.');
+            if (! empty($missing)) {
+                return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. '.count($missing).' vragen over.');
             }
 
             // mark submitted
@@ -137,13 +137,13 @@ class TakeExamController extends Controller
                             'text_answer' => null,
                         ]);
                     }
-                } else if (is_int($answer)) {
+                } elseif (is_int($answer)) {
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
                         'selected_answer' => $answer, // single choice
                         'text_answer' => null,
                     ]);
-                } else if (is_string($answer)) {
+                } elseif (is_string($answer)) {
                     // text answer
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
