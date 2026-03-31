@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Exam;
 use App\Models\Submission;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -83,6 +84,7 @@ class TakeExamController extends Controller
      */
     public function store(Request $request, string $id)
     {
+        try {
         $validated = $request->validate([
             'answers' => 'required|array',
         ]);
@@ -103,6 +105,22 @@ class TakeExamController extends Controller
         // prevent resubmission
         if ($submission->submitted_at) {
             return back()->withErrors(['exam' => 'Already submitted']);
+        }
+
+        //Get all question IDs from the exam
+        $questionIds = $exam->sections()
+            ->with('questions')
+            ->get()
+            ->flatMap(fn($s) => $s->questions->pluck('id'))
+            ->toArray();
+
+        // dd($questionIds);
+        // Check which questions are unanswered
+        $answeredQuestionIds = array_keys($validated['answers']);
+        $missing = array_diff($questionIds, $answeredQuestionIds);
+        if (!empty($missing)) {
+            // dd("BLAAT");
+            return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. ' . count($missing) . ' vragen over.');
         }
 
         // mark submitted
@@ -133,7 +151,10 @@ class TakeExamController extends Controller
                 ]);
             }
         }
+        } catch (Exception $e) {
+            return back()->with('error', 'Er is iets fout gegaan');
+        }
 
-        return redirect()->route('student')->with('success', 'Exam submitted successfully!');
+        return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
     }
 }
