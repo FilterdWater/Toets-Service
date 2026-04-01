@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exam extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
         'description',
         'active_from',
@@ -19,6 +21,8 @@ class Exam extends Model
         'max_mistakes',
         'created_at',
         'updated_at',
+        'sequence_nr',
+        'new_page',
     ];
 
     protected $casts = [
@@ -35,5 +39,15 @@ class Exam extends Model
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'groups_has_exams');
+    }
+
+    public function sections(): HasMany
+    {
+        return $this->hasMany(Section::class);
+    }
+
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 }

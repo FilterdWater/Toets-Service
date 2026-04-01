@@ -1,7 +1,8 @@
-import { Textarea } from '@headlessui/react';
 import { router, usePage } from '@inertiajs/react';
-import { useEffect, useMemo, useState } from 'react';
+import { SaveAll, Trash2 } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
+import { toast } from 'sonner';
 import { DatePickerWithRange } from '@/components/DatePickerWithRange';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,22 +13,40 @@ import {
 } from '@/components/ui/card';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
 import { getExam, storeExam, updateExam, deleteExam } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
+import type { Question } from '@/types/question';
+import type { Section } from '@/types/section';
 
-type Props = {
+type examProps = {
     exam?: Exam | null;
 };
 
 // als het exam leeg is dan wordt het automatisch een creation page
 //TODO de create pagina scheiden van de edit pagina dit moet gebeuren als er aan us-12-15 wordt gewerkt
-export default function Exam({ exam }: Props) {
+export default function Exam({ exam }: examProps) {
     const mode = exam ? 'edit' : 'create';
     const { errors } = usePage().props;
-    // console.error('errors: ', errors);
-    // console.log('exam: ', exam);
+    //creates temp ID's for the sections and questions'
+    const tempIdCounter = useRef(0);
+    // the fakeID is negative since it could otherwise conflict with actual valid ID's :D
+    function getTempId() {
+        return tempIdCounter.current--;
+    }
+
+    useEffect(() => {
+        if (errors) {
+            Object.values(errors).forEach((error) => {
+                toast.error(error);
+            });
+        }
+    }, [errors]);
 
     const initialValues = useMemo(
         () => ({
@@ -54,27 +73,39 @@ export default function Exam({ exam }: Props) {
         [values, initialValues],
     );
 
+    // USED FOR DEBUGGING DONT REMOVE FOR NOW
     // console.log('initialValues: ', JSON.stringify(initialValues));
     // console.log('values: ', JSON.stringify(values));
+    // console.log('mode: ', mode);
+    // console.log('exam: ', exam);
 
     const handleDiscard = () => {
         setValues(initialValues);
     };
 
-    const handleSave = () => {
+    function handleSave() {
+        //removes all the fake ID's from the sections
+        const payload = {
+            ...values,
+            sections: values.sections.map((section) => ({
+                ...section,
+                id: isNaN(Number(section.id)) ? undefined : section.id,
+            })),
+        };
+
+        console.log('payload: ', payload);
+
         if (exam) {
-            console.log('PUT');
-            router.put(updateExam.url(exam.id), values);
+            router.put(updateExam.url(exam.id), payload);
         } else {
-            console.log('POST');
-            router.post(storeExam.url(), values);
+            router.post(storeExam.url(), payload);
         }
-    };
+    }
 
     const handleDelete = () => {
         if (
             mode === 'edit' &&
-            confirm('weet je zeker dat je deze toets wilt verwijderen?')
+            confirm('Weet je zeker dat je deze toets wilt verwijderen?')
         ) {
             router.delete(deleteExam.url(values.id!), {
                 preserveScroll: true,
@@ -101,38 +132,149 @@ export default function Exam({ exam }: Props) {
         },
     ];
 
-    console.log('mode: ', mode);
+    function updateSection(
+        sections: Section[],
+        sectionIndex: number,
+        updatedSection: Section | null,
+    ) {
+        if (updatedSection == null) {
+            return sections.filter((_, i) => i !== sectionIndex);
+        }
+
+        const newSections = [...sections];
+        newSections[sectionIndex] = updatedSection;
+        return newSections;
+    }
+
+    function updateQuestion(
+        sections: Section[],
+        sectionIndex: number,
+        questionIndex: number,
+        updatedQuestion: Question,
+    ) {
+        const newSections = [...sections];
+        newSections[sectionIndex] = {
+            ...newSections[sectionIndex],
+            questions: [...(newSections[sectionIndex].questions || [])],
+        };
+        newSections[sectionIndex].questions![questionIndex] = updatedQuestion;
+        return newSections;
+    }
+
+    function handleAddSection() {
+        const newSection: Section = {
+            id: values.sections[values.sections.length - 1].id + 1, //fake ID this val can't be null
+            name: '',
+            sequence_nr: values.sections.length + 1,
+            new_page: false,
+            questions: [],
+        };
+
+        setValues((prev) => ({
+            ...prev,
+            sections: [...prev.sections, newSection],
+        }));
+    }
+
+    function handleAddQuestion(sectionIndex: number) {
+        const newQuestion: Question = {
+            id: getTempId(), //fake ID, the ID can't be null.
+            title: '',
+            text: '',
+            type: '',
+            sequence_nr: values.sections[sectionIndex].questions?.length
+                ? values.sections[sectionIndex].questions?.length + 1
+                : 0,
+        };
+
+        setValues((prev) => {
+            const sections = [...prev.sections];
+
+            sections[sectionIndex] = {
+                ...sections[sectionIndex],
+                questions: [
+                    ...(sections[sectionIndex].questions || []),
+                    newQuestion,
+                ],
+            };
+
+            return { ...prev, sections };
+        });
+    }
 
     return (
         <>
             <AppLayout breadcrumbs={breadcrumbs}>
-                <div className="flex flex-row gap-4 p-4">
-                    <div className="flex flex-9/12 flex-col gap-4">
-                        <Card>
-                            <CardHeader className="flex flex-row justify-between">
-                                <div className="flex flex-row gap-2">
-                                    <div>volorgde</div>
-                                    <div>section name</div>
-                                </div>
-                                <Button variant="destructive">
-                                    verwijderen
-                                </Button>
-                            </CardHeader>
-                        </Card>
-                        <Button className="w-full py-12" variant="none">
-                            + Voeg een niuewe sectie toe
+                <div className="flex flex-row gap-6 p-4">
+                    <div className="flex flex-9/12 flex-col gap-y-12">
+                        {values.sections.map(
+                            (section, sectionIndex: number) => (
+                                <SectionCard
+                                    key={section.id}
+                                    section={section}
+                                    errors={errors}
+                                    index={sectionIndex}
+                                    onChange={(updatedSection) =>
+                                        setValues((prev) => ({
+                                            ...prev,
+                                            sections: updateSection(
+                                                prev.sections,
+                                                sectionIndex,
+                                                updatedSection,
+                                            ),
+                                        }))
+                                    }
+                                    onAddQuestion={() =>
+                                        handleAddQuestion(sectionIndex)
+                                    }
+                                >
+                                    {section.questions &&
+                                        section.questions.map(
+                                            (
+                                                question,
+                                                questionIndex: number,
+                                            ) => (
+                                                <QuestionCard
+                                                    key={question.id}
+                                                    question={question}
+                                                    onChange={(
+                                                        updatedQuestion,
+                                                    ) =>
+                                                        setValues((prev) => ({
+                                                            ...prev,
+                                                            sections:
+                                                                updateQuestion(
+                                                                    prev.sections,
+                                                                    sectionIndex,
+                                                                    questionIndex,
+                                                                    updatedQuestion,
+                                                                ),
+                                                        }))
+                                                    }
+                                                />
+                                            ),
+                                        )}
+                                </SectionCard>
+                            ),
+                        )}
+                        <Button
+                            className="w-full py-12"
+                            variant="none"
+                            onClick={handleAddSection}
+                        >
+                            + Voeg een nieuwe sectie toe
                         </Button>
                     </div>
-                    <Card className="flex-3/12">
+                    <Card className="sticky top-4 h-fit flex-3/12 shadow-md">
                         <CardContent className="flex flex-col gap-4">
                             <Field>
                                 <FieldLabel htmlFor="examtitle">
-                                    Toets tietel
+                                    Toets titel
                                 </FieldLabel>
                                 <Input
                                     id="examtitle"
                                     type="text"
-                                    placeholder="rekentoets"
+                                    placeholder="Rekentoets"
                                     value={values.name}
                                     onChange={(e) =>
                                         setValues((prev) => ({
@@ -151,8 +293,7 @@ export default function Exam({ exam }: Props) {
                                 </FieldLabel>
                                 <Textarea
                                     id="testdescription"
-                                    placeholder="beschrijving van de opdracht/toets"
-                                    className="resize-none"
+                                    placeholder="Beschrijving van de opdracht/toets"
                                     value={values.description}
                                     onChange={(e) =>
                                         setValues((prev) => ({
@@ -224,7 +365,7 @@ export default function Exam({ exam }: Props) {
                                     disabled={mode !== 'edit'}
                                     onClick={handleDelete}
                                 >
-                                    Delete
+                                    <Trash2 /> Verwijderen
                                 </Button>
                             </CardFooter>
                         )}
@@ -234,17 +375,157 @@ export default function Exam({ exam }: Props) {
             {/*should only be visible when something on the page has changed */}
             {/* diffrent text should be shown when its the creation page */}
             {isDirty && (
-                <div className="absolute bottom-2.5 left-0 z-50 flex w-full justify-center">
-                    <div className="flex w-fit gap-2.5 rounded-lg border p-2.5 shadow-sm">
-                        <Button variant="destructive" onClick={handleDiscard}>
-                            Wijzigingen weggooien
-                        </Button>
-                        <Button variant="default" onClick={handleSave}>
-                            Wijzigingen opslaan
-                        </Button>
+                <div className="sticky bottom-2.5 left-0 z-50 flex w-full justify-center">
+                    <div className="bg-accent/50">
+                        <div className="flex w-fit gap-2.5 rounded-lg border p-3 shadow-lg">
+                            <Button
+                                variant="destructive"
+                                onClick={handleDiscard}
+                            >
+                                <Trash2 /> Wijzigingen weggooien
+                            </Button>
+                            <Button variant="default" onClick={handleSave}>
+                                <SaveAll /> Wijzigingen opslaan
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
         </>
     );
 }
+
+interface SectionCardProps {
+    section: Section;
+    index: number;
+    onChange: (updatedSection: Section | null) => void;
+    children?: React.ReactNode;
+    onAddQuestion: () => void;
+    errors?: any;
+}
+
+export function SectionCard({
+    section,
+    index,
+    onChange,
+    children,
+    onAddQuestion,
+    errors,
+}: SectionCardProps) {
+    const getError = (field: string) => errors[`sections.${index}.${field}`];
+
+    console.log('JA: ', errors);
+    return (
+        <Card className="shadow-md">
+            <CardHeader className="flex flex-row justify-between">
+                <div className="flex flex-row gap-2">
+                    <Field className="w-16">
+                        <Input
+                            id="sequence_nr"
+                            type="number"
+                            placeholder="1"
+                            value={section.sequence_nr}
+                            onChange={(e) =>
+                                onChange({
+                                    ...section,
+                                    sequence_nr: Number(e.target.value),
+                                })
+                            }
+                        />
+                    </Field>
+                    <Field className="w-fit">
+                        <Input
+                            id="section_name"
+                            type="text"
+                            placeholder="sectie naam"
+                            value={section.name}
+                            onChange={(e) =>
+                                onChange({ ...section, name: e.target.value })
+                            }
+                        />
+                        {getError('name') && (
+                            <FieldError>{getError('name')}</FieldError>
+                        )}
+                    </Field>
+                    <div className="flex items-center space-x-2">
+                        <Label htmlFor="airplane-mode">
+                            Begint op nieuwe pagina
+                        </Label>
+                        <Switch
+                            id="section_available"
+                            checked={section.new_page}
+                            onCheckedChange={(checked) =>
+                                onChange({ ...section, new_page: checked })
+                            }
+                        />
+                    </div>
+                </div>
+                <Button variant="destructive" onClick={() => onChange(null)}>
+                    <Trash2 /> Verwijderen
+                </Button>
+            </CardHeader>
+            <Separator />
+            <CardContent className="">
+                <div className="flex flex-col gap-4">
+                    {children}
+                    <Button
+                        className="w-fit self-center"
+                        variant="default"
+                        onClick={onAddQuestion}
+                    >
+                        + Voeg een nieuw vraag toe
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+interface QuestionCardProps {
+    question: Question;
+    onChange: (updatedQuestion: Question) => void;
+}
+export function QuestionCard({ question, onChange }: QuestionCardProps) {
+    return (
+        <Card>
+            <CardContent>
+                <div>{question.sequence_nr}</div>
+                <Field>
+                    <FieldLabel htmlFor="question_title">
+                        Vraag titel
+                    </FieldLabel>
+                    <Input
+                        id="question_title"
+                        type="text"
+                        placeholder="Titel"
+                        value={question.title}
+                        onChange={(e) =>
+                            onChange({
+                                ...question,
+                                title: e.target.value,
+                            })
+                        }
+                    />
+                </Field>
+                <Field>
+                    <FieldLabel htmlFor="question_description">
+                        Vraag beschrijving/uitleg
+                    </FieldLabel>
+                    <Textarea
+                        id="question_description"
+                        placeholder="Vraag beschrijving/uitleg"
+                        value={question.text}
+                        onChange={(e) =>
+                            onChange({
+                                ...question,
+                                text: e.target.value,
+                            })
+                        }
+                    />
+                </Field>
+            </CardContent>
+        </Card>
+    );
+}
+
+//TODO optioneel dndkit.com gebruiken voor drag en drop van sections
