@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Section extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'new_page',
+        'sequence_nr',
+        'exam_id',
+    ];
+
+    public function exam()
+    {
+        return $this->belongsTo(Exam::class);
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class)->orderBy('sequence_nr');
+    }
+}

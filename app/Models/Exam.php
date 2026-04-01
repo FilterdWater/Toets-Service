@@ -17,8 +17,6 @@ class Exam extends Model
         'active_until',
         'globally_available',
         'max_mistakes',
-        'created_at',
-        'updated_at',
     ];
 
     protected $casts = [
@@ -35,5 +33,15 @@ class Exam extends Model
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(Group::class, 'groups_has_exams');
+    }
+
+    public function submissions()
+    {
+        return $this->hasMany(Submission::class);
+    }
+
+    public function sections()
+    {
+        return $this->hasMany(Section::class)->orderBy('sequence_nr');
     }
 }

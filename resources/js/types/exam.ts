@@ -1,5 +1,6 @@
-import type { Section } from '@/types/section';
 import type { Group } from './group';
+import type { Section } from './section';
+import type { Submission } from './submission';
 
 export type Exam = {
     id: number;
@@ -11,8 +12,9 @@ export type Exam = {
     max_mistakes: number;
     created_at: string;
     updated_at: string;
-    groups?: Group[];
     sections?: Section[];
+    groups?: Group[];
+    submissions?: Submission[];
 };
 
 export type PaginatedExams = {
