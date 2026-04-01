@@ -1,22 +1,23 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import { makeExam, startExam, student, submitExam } from '@/routes';
 import type { BreadcrumbItem, Exam } from '@/types';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 type MakeExamProps = {
     exam: Exam;
 };
 
 export default function MakeExam({ exam }: MakeExamProps) {
-    console.log(exam);
+    // console.log(exam);
+    const missing = (usePage().props as any).missing || [];
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Student',
@@ -43,11 +44,14 @@ export default function MakeExam({ exam }: MakeExamProps) {
         currentPageSections?.push(section);
     });
 
+
     if (currentPageSections.length > 0) {
         pages.push({ sections: currentPageSections });
     }
 
-    const [page, setPage] = useState<number>(0);
+    const [page, setPage] = useState<number>(() =>
+        exam?.submissions && exam.submissions.length > 0 ? 1 : 0,
+    );
     const [answers, setAnswers] = useState<Record<number, any>>(() => {
         const saved = localStorage.getItem(`exam-${exam.id}-answers`);
         return saved ? JSON.parse(saved) : {};
@@ -58,15 +62,9 @@ export default function MakeExam({ exam }: MakeExamProps) {
             `exam-${exam.id}-answers`,
             JSON.stringify(answers),
         );
-    }, [answers]);
+    }, [exam.id, answers]);
 
-    useEffect(() => {
-        if (exam && exam.submissions!.length > 0) {
-            setPage(1);
-        }
-    }, [exam?.submissions]);
-
-    const handleNextPage = () => setPage(Math.min(page + 1, pages.length));
+    const handleNextPage = () => setPage(Math.min(page + 1, pages.length + 1));
     const handlePrevPage = () => setPage(Math.max(page - 1, 0));
 
     const handleAnswerChange = (
@@ -133,137 +131,189 @@ export default function MakeExam({ exam }: MakeExamProps) {
                         </div>
                     </>
                 )}
-                {page > 0 && page < pages.length && (
-                    <div
-                        className={`flex w-full ${page !== 1 ? 'justify-between' : 'justify-end'}`}
-                    >
-                        {page !== 1 && (
-                            <Button onClick={handlePrevPage}>
-                                Vorige <ArrowLeft />
-                            </Button>
-                        )}
-                        <Button onClick={handleNextPage}>
-                            Volgende <ArrowRight />
-                        </Button>
-                    </div>
-                )}
-                {page > 0 && page === pages.length && (
-                    <div className="flex justify-between">
-                        {page > 1 &&
-                        <Button onClick={handlePrevPage}>
-                            Vorige <ArrowLeft />
-                        </Button>
-                        }
-                        <Button
-                            className="bg-green-600"
-                            onClick={handleSubmitExam}
-                        >
-                            Inleveren
-                        </Button>
-                    </div>
-                )}
 
                 {page > 0 &&
-                    pages[page - 1].sections?.map((section) => (
-                        <div key={section.id} className="mb-8">
-                            <Label className="mb-4 text-xl">
+                    pages[page - 1]?.sections?.map((section) => (
+                        <div key={section.id} className="mb-16">
+                            <Label className="mb-8 text-3xl font-bold">
                                 {section.name}
                             </Label>
 
                             {section?.questions?.map((question) => (
-                                <div key={question.id} className="mb-6">
-                                    <Label>
-                                        {question.title}: {question.text}
-                                    </Label>
-
-                                    {question.type === 'single_choice' &&
-                                            <div
-                                                className="mt-1 flex items-center gap-2"
-                                            >
-                                                <RadioGroup
-                                                    value={answers[question.id]}
-                                                    onValueChange={(value) =>
-                                                        handleAnswerChange(question.id, value)
-                                                    }
+                                <>
+                                    <div
+                                        key={question.id}
+                                        id={`question-${question.id}`}
+                                        className="mb-2 mt-6"
+                                    >
+                                        {question.type === 'single_choice' && (
+                                            <>
+                                                <Card
+                                                    className={`mt-1 p-4 ${missing.includes(question.id)
+                                                        ? 'border-2 border-red-500'
+                                                        : ''
+                                                        }`}
                                                 >
-                                                    {question.answers?.map((ans) => (
-                                                        <div key={ans.id} className="flex items-center gap-2">
-                                                            <RadioGroupItem value={(ans.id).toString()} id={(ans.id).toString()} />
-                                                            <Label htmlFor={(ans.id).toString()}>{ans.answer_option}</Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
-                                            </div>
-                                        }
-
-                                    {question.type === 'multiple_choice' &&
-                                        question?.answers?.map((ans) => (
-                                            <div
-                                                key={ans.id}
-                                                className="mt-1 flex items-center gap-2"
-                                            >
-                                                <Label className="flex items-center gap-2 cursor-pointer">
-                                                    <Checkbox 
-                                                            value={ans.id}
-                                                            checked={
-                                                                answers[question.id]?.includes(ans.id) || false
-                                                            }
-                                                            onCheckedChange={() => {
-                                                                handleAnswerChange(question.id, ans.id, true);
-                                                            }}
-                                                            id={(ans.id).toString()}
+                                                    <Label className='text-lg'>
+                                                        {question.title}: {question.text}
+                                                    </Label>
+                                                    <RadioGroup
+                                                        value={answers[question.id]}
+                                                        onValueChange={(value) =>
+                                                            handleAnswerChange(
+                                                                question.id,
+                                                                value,
+                                                            )
+                                                        }
                                                     >
-                                                    </Checkbox>
-                                                    {ans.answer_option}
-                                                </Label>
-                                            </div>
-                                        ))}
+                                                        {question.answers?.map(
+                                                            (ans) => (
+                                                                <div
+                                                                    key={ans.id}
+                                                                    className="flex items-center cursor-pointer gap-2"
+                                                                >
+                                                                    <RadioGroupItem
+                                                                        value={ans.id.toString()}
+                                                                        id={ans.id.toString()}
+                                                                        className='cursor-pointer'
+                                                                    />
+                                                                    <Label
+                                                                        htmlFor={ans.id.toString()}
+                                                                        className='cursor-pointer'
+                                                                    >
+                                                                        {
+                                                                            ans.answer_option
+                                                                        }
+                                                                    </Label>
+                                                                </div>
+                                                            ),
+                                                        )}
+                                                    </RadioGroup>
+                                                </Card>
+                                            </>
+                                        )}
 
-                                    {question.type === 'text' && (
-                                        <Textarea
-                                            className='mt-1'
-                                            value={answers[question.id] || ''}
-                                            onChange={(e) =>
-                                                handleAnswerChange(
-                                                    question.id,
-                                                    e.target.value,
-                                                    false,
-                                                    true,
-                                                )
-                                            }
-                                        />
+                                        {question.type === 'multiple_choice' &&
+                                            <Card
+                                                className={`mt-1 p-4 ${missing.includes(question.id)
+                                                    ? 'border-2 border-red-500'
+                                                    : ''
+                                                    }`}
+                                            >
+                                                <Label>
+                                                    {question.title}: {question.text}
+                                                </Label>
+                                                {question?.answers?.map((ans) => (
+                                                    <div
+                                                        key={ans.id}
+                                                        className="mt-1 flex items-center gap-2"
+                                                    >
+                                                        <Label className="flex cursor-pointer items-center gap-2">
+                                                            <Checkbox
+                                                                value={ans.id}
+                                                                checked={
+                                                                    answers[
+                                                                        question.id
+                                                                    ]?.includes(
+                                                                        ans.id,
+                                                                    ) || false
+                                                                }
+                                                                onCheckedChange={() => {
+                                                                    handleAnswerChange(
+                                                                        question.id,
+                                                                        ans.id,
+                                                                        true,
+                                                                    );
+                                                                }}
+                                                                id={ans.id.toString()}
+                                                            ></Checkbox>
+                                                            {ans.answer_option}
+                                                        </Label>
+                                                    </div>
+
+
+                                                ))}
+                                            </Card>}
+
+                                        {question.type === 'text' && (
+                                            <Card
+                                                className={`mt-1 p-4 ${missing.includes(question.id)
+                                                    ? 'border-2 border-red-500'
+                                                    : ''
+                                                    }`}
+                                            >
+                                                <Label>
+                                                    {question.title}: {question.text}
+                                                </Label>
+                                                <Textarea
+                                                    className="mt-1 max-h-75"
+                                                    value={answers[question.id] || ''}
+                                                    placeholder='Vul hier je antwoord in'
+                                                    onChange={(e) =>
+                                                        handleAnswerChange(
+                                                            question.id,
+                                                            e.target.value,
+                                                            false,
+                                                            true,
+                                                        )
+                                                    }
+                                                />
+                                            </Card>
+
+                                        )}
+                                    </div>
+                                    {missing.includes(question.id) && (
+                                        <div className="text-sm text-red-500">
+                                            Deze vraag is nog niet beantwoord
+                                        </div>
                                     )}
-                                </div>
+                                </>
                             ))}
                         </div>
                     ))}
-                {page > 0 && page < pages.length && (
-                    <div
-                        className={`flex w-full ${page !== 1 ? 'justify-between' : 'justify-end'}`}
-                    >
-                        {page !== 1 && (
-                            <Button onClick={handlePrevPage}>
-                                Vorige <ArrowLeft />
-                            </Button>
-                        )}
-                        <Button onClick={handleNextPage}>
-                            Volgende <ArrowRight />
-                        </Button>
-                    </div>
-                )}
-                {page > 0 && page === pages.length && (
-                    <div className="flex justify-between">
-                        {page > 1 &&
-                        <Button onClick={handlePrevPage}>
-                            Vorige <ArrowLeft />
-                        </Button>
-                        }
-                        <Button
-                            className="bg-green-600"
-                            onClick={handleSubmitExam}
+                <div className='bg-gray-50 border-t fixed bottom-0 left-0 right-0 p-4'>
+                    {page > 0 && page <= pages.length && (
+                        <div
+                            className="flex items-center mx-auto max-w-7xl justify-between"
                         >
-                            Inleveren
-                        </Button>
+                            <div>{exam.name}</div>
+                            <div>
+                                {page !== 1 && (
+                                    <Button className='mr-3' onClick={handlePrevPage}>
+                                        Vorige <ArrowLeft />
+                                    </Button>
+                                )}
+                                <Button onClick={handleNextPage}>
+                                    Volgende <ArrowRight />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                    {page > 0 && page === pages.length + 1 && (
+                        <div
+                            className="flex items-center mx-auto max-w-7xl justify-between"
+                        >
+                            <div>{exam.name}</div>
+                            <div>
+                                {page > 1 && (
+                                    <Button className="mr-3" onClick={handlePrevPage}>
+                                        Vorige <ArrowLeft />
+                                    </Button>
+                                )}
+                                <Button
+                                    className="bg-green-600 hover:bg-green-700"
+                                    onClick={handleSubmitExam}
+                                >
+                                    Inleveren
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+                {page === pages.length + 1 && (
+                    <div>
+                        <Label className="text-2xl">{exam.name}</Label>
+                        <div>Je bent aan het einde van de toets aangekomen! Als je klaar bent en alles hebt ingevuld, kun je de toets inleveren.</div>
                     </div>
                 )}
             </div>

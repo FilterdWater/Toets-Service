@@ -1,6 +1,6 @@
 import type { Group } from './group';
 import type { Section } from './section';
-import { Submission } from './submission';
+import type { Submission } from './submission';
 
 export type Exam = {
     id: number;

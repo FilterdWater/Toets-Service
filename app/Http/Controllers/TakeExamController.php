@@ -60,8 +60,9 @@ class TakeExamController extends Controller
             'sections.questions.answers',
             'submissions' => function ($query) {
                 $query->where('user_id', Auth::id());
-            }
+            },
         ])->where('id', $id)->firstOrFail();
+
         return Inertia::render('student/make-exam', [
             'exam' => $exam,
         ]);
@@ -73,10 +74,8 @@ class TakeExamController extends Controller
             'user_id' => Auth::id(),
             'exam_id' => $id,
             'started_at' => now(),
-            'submitted_at' => null
+            'submitted_at' => null,
         ]);
-
-        return;
     }
 
     /**
@@ -85,13 +84,6 @@ class TakeExamController extends Controller
     public function store(Request $request, string $id)
     {
         try {
-            $validated = $request->validate(
-                [
-                    'answers' => 'required|array',
-                ],
-                ['answers.required' => 'Er missen antwoorden, check of je alles hebt ingevuld.']
-            );
-
             $exam = Exam::findOrFail($id);
 
             $now = Carbon::now();
@@ -110,7 +102,7 @@ class TakeExamController extends Controller
                 return back()->with('error', 'Examen is al ingeleverd');
             }
 
-            //Get all question IDs from the exam
+            // Get all question IDs from the exam
             $questionIds = $exam->sections()
                 ->with('questions')
                 ->get()
@@ -118,17 +110,21 @@ class TakeExamController extends Controller
                 ->toArray();
 
             // Check which questions are unanswered
-            $answeredQuestionIds = array_keys($validated['answers']);
+            $answeredQuestionIds = array_keys($request['answers']);
             $missing = array_diff($questionIds, $answeredQuestionIds);
+
             if (!empty($missing)) {
-                return back()->with('error', 'Beantwoord eerst alle vragen voor het inleveren van de toets. ' . count($missing) . ' vragen over.');
+                return back()->with([
+                    'error' => "Beantwoord eerst alle vragen.",
+                    'missing' => array_values($missing),
+                ]);
             }
 
             // mark submitted
             $submission->update(['submitted_at' => now()]);
 
             // save answers
-            foreach ($validated['answers'] as $questionId => $answer) {
+            foreach ($request['answers'] as $questionId => $answer) {
                 if (is_array($answer)) {
                     foreach ($answer as $ansId) {
                         $submission->userAnswers()->create([
@@ -137,13 +133,13 @@ class TakeExamController extends Controller
                             'text_answer' => null,
                         ]);
                     }
-                } else if (is_int($answer)) {
+                } elseif (is_int($answer)) {
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
                         'selected_answer' => $answer, // single choice
                         'text_answer' => null,
                     ]);
-                } else if (is_string($answer)) {
+                } elseif (is_string($answer)) {
                     // text answer
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
@@ -153,7 +149,7 @@ class TakeExamController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', "Er is iets misgegaan");
         }
 
         return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');

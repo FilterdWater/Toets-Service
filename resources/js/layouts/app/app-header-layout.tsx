@@ -1,10 +1,10 @@
+import { usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { toast, Toaster } from 'sonner';
 import { AppContent } from '@/components/app-content';
 import { AppHeader } from '@/components/app-header';
 import { AppShell } from '@/components/app-shell';
 import type { AppLayoutProps, SharedData } from '@/types';
-import { usePage } from '@inertiajs/react';
-import { useEffect } from 'react';
-import { toast, Toaster } from 'sonner';
 
 export default function AppHeaderLayout({
     children,

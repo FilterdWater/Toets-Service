@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\ApplicationStatisticsController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\TakeExamController;
@@ -10,8 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login')->name('root');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-
+Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     Route::get('dashboard', function () {
         $role = Auth::user()->role;
 
@@ -69,12 +69,20 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['role:admin'])->group(function () {
         Route::inertia('beheerder', 'admin/admin')->name('admin');
         Route::get('accounts', [UserController::class, 'index'])->name('accounts');
-        Route::get('accounts/create', [UserController::class, 'showCreate'])->name('accountCreate');
-        Route::post('accounts/create', [UserController::class, 'store'])->name('accountStore');
-        Route::post('accounts/import', [UserController::class, 'import'])->name('accountImport');
-        Route::get('accounts/{id}/edit', [UserController::class, 'showEdit'])->name('accountEdit');
-        Route::put('accounts/{id}/update', [UserController::class, 'update'])->name('accountUpdate');
-        Route::put('accounts/{id}/reset-password', [UserController::class, 'resetPassword'])->name('accountResetPassword');
+        Route::get('accounts/aanmaken', [UserController::class, 'showCreate'])->name('accountCreate');
+        Route::post('accounts/opslaan', [UserController::class, 'store'])->name('accountStore');
+        Route::post('accounts/importeren', [UserController::class, 'import'])->name('accountImport');
+        Route::get('accounts/{id}/bewerken', [UserController::class, 'showEdit'])->name('accountEdit');
+        Route::put('accounts/{id}/bijwerken', [UserController::class, 'update'])->name('accountUpdate');
+        Route::put('accounts/{id}/wachtwoord-resetten', [UserController::class, 'resetPassword'])->name('accountResetPassword');
+
+        /*
+        * Application statistics
+        */
+        Route::prefix('applicatie-statistieken')->group(function () {
+            Route::get('/', [ApplicationStatisticsController::class, 'index'])->name('applicationStatistics');
+        });
+        Route::put('accounts/{id}/actief-aanpassen', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
     });
 });
 
