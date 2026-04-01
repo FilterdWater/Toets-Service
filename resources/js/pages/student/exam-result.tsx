@@ -1,23 +1,23 @@
 import { Head, router } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import ResultStatCard from '@/pages/student/components/result-stat-card';
-import { student } from '@/routes';
-import type { Exam } from '@/types';
 import { ArrowLeft } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { dateToReadableString, formatDuration } from '@/lib/utils';
 import { Pie, PieChart } from 'recharts';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    type ChartConfig,
     ChartContainer,
     ChartLegend,
     ChartLegendContent,
     ChartTooltip,
     ChartTooltipContent,
 } from '@/components/ui/chart';
+import type { ChartConfig } from '@/components/ui/chart';
+import { Label } from '@/components/ui/label';
+import AppHeaderLayout from '@/layouts/app/app-header-layout';
+import { dateToReadableString, formatDuration } from '@/lib/utils';
+import ResultStatCard from '@/pages/student/components/result-stat-card';
+import { student } from '@/routes';
+import type { Exam } from '@/types';
 
 type ExamResultProps = {
     exam: Exam;

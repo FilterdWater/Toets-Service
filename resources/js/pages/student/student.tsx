@@ -1,10 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
+import { Head } from '@inertiajs/react';
+import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import FinishedExamCard from '@/pages/student/components/finished-exam-card';
 import AvailableExamCard from '@/pages/student/components/available-exam-card';
+import FinishedExamCard from '@/pages/student/components/finished-exam-card';
 import type { Exam } from '@/types';
 
 type StudentPageProps = {

@@ -6,7 +6,6 @@ import {
     CardFooter,
     CardTitle,
 } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { dateToReadableString } from '@/lib/utils';
 import { showExam } from '@/routes';
 import type { Exam } from '@/types';
@@ -27,7 +26,7 @@ export default function AvailableExamCard({ exam }: AvailableExamCardProps) {
                 </div>
                 <CardDescription>{exam.description}</CardDescription>
             </CardContent>
-            <CardFooter className="text-muted-foreground text-sm">
+            <CardFooter className="text-sm text-muted-foreground">
                 Van: {dateToReadableString(exam.active_from)}
                 <br />
                 Tot: {dateToReadableString(exam.active_until)}
