@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Models\Submission;
 use Carbon\Carbon;
@@ -9,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class TakeExamController extends Controller
 {
@@ -46,7 +48,21 @@ class TakeExamController extends Controller
                 $q->where('user_id', $userId)
                     ->whereNotNull('submitted_at');
             })
-            ->get();
+            ->where('active_from', '<=', $now)
+            ->where('active_until', '>=', $now)
+            ->whereHas('submissions', fn ($q) => $q->where('user_id', Auth::id()))
+            ->get()
+            ->map(function (Exam $exam) {
+                $submission = $exam->submissions()
+                    ->where('user_id', Auth::id())
+                    ->whereNotNull('submitted_at')
+                    ->latest('submitted_at')
+                    ->first();
+
+                $exam->setAttribute('submitted_at', $submission?->submitted_at);
+
+                return $exam;
+            });
 
         return Inertia::render('student/student', [
             'availableExams' => $availableExams,
@@ -160,5 +176,44 @@ class TakeExamController extends Controller
         }
 
         return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
+    }
+
+    public function showResult(Request $request, $examId): Response
+    {
+        $exam = Exam::with('sections')->findOrFail($examId);
+
+        $submission = Submission::where('exam_id', $exam->id)
+            ->where('user_id', $request->user()->id)
+            ->whereNotNull('submitted_at')
+            ->where('outdated', false)
+            ->latest('submitted_at')
+            ->with('userAnswers.selectedAnswer')
+            ->first();
+
+        $totalQuestions = 0;
+        $correctAnswers = 0;
+
+        if ($submission) {
+            $totalQuestions = $submission->userAnswers->count();
+            $correctAnswers = $submission->userAnswers
+                ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
+                ->count();
+        }
+
+        $durationInSeconds = null;
+        if ($submission?->started_at && $submission?->submitted_at) {
+            $durationInSeconds = $submission->started_at->diffInSeconds($submission->submitted_at);
+        }
+
+        return Inertia::render('student/exam-result', [
+            'exam' => new ExamResource($exam),
+            'result' => [
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'submitted_at' => $submission?->submitted_at,
+                'duration_in_seconds' => $durationInSeconds,
+                'has_submission' => $submission !== null,
+            ],
+        ]);
     }
 }
