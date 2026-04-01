@@ -1,31 +1,22 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import { makeExam, student } from '@/routes';
-import type { BreadcrumbItem, Exam } from '@/types';
+import { showExam } from '@/routes';
+import type { Exam } from '@/types';
 
 type StudentPageProps = {
     availableExams: Exam[];
     finishedExams: Exam[];
 };
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Student',
-        href: student.url(),
-    },
-];
-
 export default function Student({
     availableExams,
     finishedExams,
 }: StudentPageProps) {
-    console.log('availableExams: ', availableExams);
-    console.log('finishedExams: ', finishedExams);
     return (
-        <AppHeaderLayout breadcrumbs={breadcrumbs}>
+        <AppHeaderLayout>
             <Head title="Student" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <Label className="text-lg">Beschikbare toetsen</Label>
@@ -40,14 +31,10 @@ export default function Student({
                                     <CardTitle>{e.name}</CardTitle>
                                 </CardContent>
                                 <CardFooter className="mt-auto flex justify-end">
-                                    <Button
-                                        onClick={() =>
-                                            router.visit(
-                                                makeExam.url({ id: e.id }),
-                                            )
-                                        }
-                                    >
-                                        Start toets
+                                    <Button asChild>
+                                        <Link href={showExam.url({ id: e.id })}>
+                                            Start toets
+                                        </Link>
                                     </Button>
                                 </CardFooter>
                             </Card>

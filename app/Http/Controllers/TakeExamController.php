@@ -54,7 +54,7 @@ class TakeExamController extends Controller
         ]);
     }
 
-    public function makeExam(string $id)
+    public function showExam(string $id)
     {
         $exam = Exam::with([
             'sections.questions.answers',

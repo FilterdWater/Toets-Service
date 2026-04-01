@@ -9,7 +9,7 @@ class UserAnswer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['submission_id', 'question_id', 'selected_answer', 'text_answer', 'created_at', 'updated_at'];
+    protected $fillable = ['submission_id', 'question_id', 'selected_answer', 'text_answer'];
 
     protected $casts = [
         'selected_answer' => 'array',

@@ -13,7 +13,5 @@ class Answer extends Model
         'answer_option',
         'is_correct',
         'question_id',
-        'created_at',
-        'updated_at',
     ];
 }

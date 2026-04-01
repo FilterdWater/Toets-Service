@@ -8,8 +8,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
-import { makeExam, startExam, student, submitExam } from '@/routes';
-import type { BreadcrumbItem, Exam } from '@/types';
+import { startExam, student, submitExam } from '@/routes';
+import type { Exam } from '@/types';
 
 type MakeExamProps = {
     exam: Exam;
@@ -17,16 +17,6 @@ type MakeExamProps = {
 
 export default function MakeExam({ exam }: MakeExamProps) {
     const missingQuestions = (usePage().props as any).missingQuestions || [];
-    const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Student',
-            href: student.url(),
-        },
-        {
-            title: exam.name,
-            href: makeExam.url({ id: exam.id }),
-        },
-    ];
 
     const pages: { sections: Exam['sections'] }[] = [];
     let currentPageSections: Exam['sections'] = [];
@@ -105,11 +95,19 @@ export default function MakeExam({ exam }: MakeExamProps) {
     };
 
     return (
-        <AppHeaderLayout breadcrumbs={page === 0 ? breadcrumbs : undefined}>
+        <AppHeaderLayout>
             <Head title={`Examen - ${exam.name}`} />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 {page === 0 && (
                     <>
+                        <Button
+                            className="self-start"
+                            variant="outline"
+                            onClick={() => router.visit(student.url())}
+                        >
+                            <ArrowLeft />
+                            Terug naar toetsenlijst
+                        </Button>
                         <Label className="text-2xl">{exam.name}</Label>
                         <div
                             className="whitespace-pre-wrap"

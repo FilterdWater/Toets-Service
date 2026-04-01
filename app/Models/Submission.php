@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Submission extends Model
 {
-    protected $table = 'submissions';
-
     protected $fillable = [
         'user_id',
         'exam_id',

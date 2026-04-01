@@ -30,7 +30,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     Route::middleware(['role:student,teacher,admin'])->group(function () {
         Route::prefix('student')->group(function () {
             Route::get('/', [TakeExamController::class, 'index'])->name('student');
-            Route::get('/toets/{id}', [TakeExamController::class, 'makeExam'])->name('makeExam');
+            Route::get('/toets/{id}', [TakeExamController::class, 'showExam'])->name('showExam');
             Route::post('/toets/{id}/start', [TakeExamController::class, 'startExam'])->name('startExam');
             Route::post('/toets/{id}/submit', [TakeExamController::class, 'store'])->name('submitExam');
         });

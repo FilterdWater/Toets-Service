@@ -15,8 +15,6 @@ class Question extends Model
         'type',
         'sequence_nr',
         'section_id',
-        'created_at',
-        'updated_at',
     ];
 
     public function section()

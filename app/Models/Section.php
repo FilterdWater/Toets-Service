@@ -14,8 +14,6 @@ class Section extends Model
         'new_page',
         'sequence_nr',
         'exam_id',
-        'created_at',
-        'updated_at',
     ];
 
     public function exam()

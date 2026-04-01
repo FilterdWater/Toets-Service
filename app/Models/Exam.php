@@ -17,8 +17,6 @@ class Exam extends Model
         'active_until',
         'globally_available',
         'max_mistakes',
-        'created_at',
-        'updated_at',
     ];
 
     protected $casts = [
