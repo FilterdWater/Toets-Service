@@ -33,6 +33,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
             Route::get('/toets/{id}', [TakeExamController::class, 'showExam'])->name('showExam');
             Route::post('/toets/{id}/start', [TakeExamController::class, 'startExam'])->name('startExam');
             Route::post('/toets/{id}/submit', [TakeExamController::class, 'store'])->name('submitExam');
+            Route::get('/toets/{id}/resultaat', [TakeExamController::class, 'showResult'])->name('showResult');
         });
     });
 
