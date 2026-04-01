@@ -3,7 +3,13 @@ import { ArrowLeft } from 'lucide-react';
 import { Pie, PieChart } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     ChartContainer,
     ChartLegend,
@@ -47,12 +53,12 @@ export default function ExamResult({ exam, result }: ExamResultProps) {
         {
             name: 'correct',
             value: result.correct_answers,
-            fill: '#16a34a',
+            fill: 'var(--color-green-500)',
         },
         {
             name: 'incorrect',
             value: result.total_questions - result.correct_answers,
-            fill: '#dc2626',
+            fill: 'var(--color-red-500)',
         },
     ];
 
@@ -115,7 +121,7 @@ export default function ExamResult({ exam, result }: ExamResultProps) {
                             <div className="w-full md:flex-1">
                                 <ChartContainer
                                     config={chartConfig}
-                                    className="mx-auto aspect-square max-h-64 w-full"
+                                    className="mx-auto aspect-square max-h-75 w-full"
                                 >
                                     <PieChart>
                                         <ChartTooltip
