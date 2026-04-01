@@ -23,8 +23,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn($q) => $q->whereKey($userId))
-                    ->orWhereHas('users', fn($q) => $q->whereKey($userId));
+                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
+                    ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now);
@@ -106,17 +106,24 @@ class TakeExamController extends Controller
             $questionIds = $exam->sections()
                 ->with('questions')
                 ->get()
-                ->flatMap(fn($s) => $s->questions->pluck('id'))
+                ->flatMap(fn ($s) => $s->questions->pluck('id'))
                 ->toArray();
 
             // Check which questions are unanswered
-            $answeredQuestionIds = array_keys($request['answers']);
+            $answeredQuestionIds = array_keys(array_filter($request['answers'], function ($answer) {
+                if (is_array($answer)) {
+                    return ! empty($answer);
+                }
+
+                return $answer !== '';
+            }));
+
             $missing = array_diff($questionIds, $answeredQuestionIds);
 
-            if (!empty($missing)) {
+            if (! empty($missing)) {
                 return back()->with([
-                    'error' => "Beantwoord eerst alle vragen.",
-                    'missing' => array_values($missing),
+                    'error' => 'Beantwoord eerst alle vragen.',
+                    'missingQuestions' => array_values($missing),
                 ]);
             }
 
@@ -149,7 +156,7 @@ class TakeExamController extends Controller
                 }
             }
         } catch (Exception $e) {
-            return back()->with('error', "Er is iets misgegaan");
+            return back()->with('error', 'Er is iets misgegaan');
         }
 
         return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');

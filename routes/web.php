@@ -36,7 +36,6 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
         });
     });
 
-
     Route::middleware(['role:teacher,admin'])->group(function () {
         Route::prefix('docent')->group(function () {
             /*
@@ -86,4 +85,4 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     });
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';
