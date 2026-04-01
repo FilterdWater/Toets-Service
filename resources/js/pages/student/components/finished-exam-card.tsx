@@ -18,7 +18,7 @@ export default function FinishedExamCard({ exam }: FinishedExamCardProps) {
     return (
         <Card
             onClick={() => router.visit(showResult.url({ id: exam.id }))}
-            className="flex max-w-72 min-w-72 cursor-pointer flex-col transition-all hover:shadow-lg hover:ring-1 hover:shadow-black/5 hover:ring-border dark:hover:shadow-white/10"
+            className="flex max-w-72 min-w-72 cursor-pointer flex-col transition-all hover:shadow-lg hover:ring-1 hover:shadow-primary/10 hover:ring-border dark:hover:shadow-primary/10"
         >
             <CardContent className="flex-1">
                 <div className="flex items-center justify-between">
