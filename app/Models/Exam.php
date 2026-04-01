@@ -41,13 +41,13 @@ class Exam extends Model
         return $this->belongsToMany(Group::class, 'groups_has_exams');
     }
 
-    public function sections(): HasMany
-    {
-        return $this->hasMany(Section::class);
-    }
-
     public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
+    }
+
+    public function sections(): HasMany
+    {
+        return $this->hasMany(Section::class)->orderBy('sequence_nr');
     }
 }

@@ -16,8 +16,6 @@ class Section extends Model
         'new_page',
         'sequence_nr',
         'exam_id',
-        'created_at',
-        'updated_at',
     ];
 
     public function exam(): BelongsTo
@@ -27,6 +25,6 @@ class Section extends Model
 
     public function questions(): HasMany
     {
-        return $this->hasMany(Question::class);
+        return $this->hasMany(Question::class)->orderBy('sequence_nr');
     }
 }

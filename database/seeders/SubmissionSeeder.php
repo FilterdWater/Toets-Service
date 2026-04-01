@@ -19,7 +19,7 @@ class SubmissionSeeder extends Seeder
                 $startedAt = now()->subDays(rand(1, 60));
                 $isCompleted = rand(0, 1);
 
-                DB::table('submission')->insert([
+                DB::table('submissions')->insert([
                     'user_id' => $studentId,
                     'exam_id' => $examId,
                     'started_at' => $startedAt,
