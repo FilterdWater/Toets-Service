@@ -293,7 +293,7 @@ export default function MakeExam({ exam }: MakeExamProps) {
                             ))}
                         </div>
                     ))}
-                <div className="fixed right-0 bottom-0 left-0 border-t bg-gray-50 p-4">
+                <div className="fixed right-0 bottom-0 left-0 border-t bg-accent px-4 py-3">
                     {page > 0 && page <= pages.length && (
                         <div className="mx-auto flex max-w-7xl items-center justify-between">
                             <div>{exam.name}</div>
