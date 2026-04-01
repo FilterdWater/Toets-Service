@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, Link, usePage } from '@inertiajs/react';
 import { ImportIcon, UserRoundPlus, UserRoundPen } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
@@ -106,10 +106,10 @@ export default function Account() {
                         <Button onClick={() => setIsImportOpen(true)}>
                             <ImportIcon /> Importeer account(s)
                         </Button>
-                        <Button
-                            onClick={() => router.visit(accountCreate.url())}
-                        >
-                            <UserRoundPlus /> Creëer account
+                        <Button asChild>
+                            <Link href={accountCreate.url()}>
+                                <UserRoundPlus /> Creëer account
+                            </Link>
                         </Button>
                     </div>
                     <div className="block md:hidden">
@@ -133,14 +133,10 @@ export default function Account() {
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem asChild>
-                                        <Button
-                                            onClick={() =>
-                                                router.visit(
-                                                    accountCreate.url(),
-                                                )
-                                            }
-                                        >
-                                            <UserRoundPlus /> Creëer account
+                                        <Button asChild>
+                                            <Link href={accountCreate.url()}>
+                                                <UserRoundPlus /> Creëer account
+                                            </Link>
                                         </Button>
                                     </DropdownMenuItem>
                                 </DropdownMenuGroup>
@@ -202,14 +198,10 @@ export default function Account() {
                                     {dateToReadableString(user.updated_at)}
                                 </TableCell>
                                 <TableCell className="flex gap-2">
-                                    <Button
-                                        onClick={() =>
-                                            router.visit(
-                                                accountEdit.url(user.id),
-                                            )
-                                        }
-                                    >
-                                        <UserRoundPen /> Wijzig
+                                    <Button asChild>
+                                        <Link href={accountEdit.url(user.id)}>
+                                            <UserRoundPen /> Wijzig
+                                        </Link>
                                     </Button>
                                 </TableCell>
                             </TableRow>

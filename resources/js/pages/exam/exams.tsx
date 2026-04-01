@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import {
     flexRender,
@@ -132,8 +132,10 @@ export default function Exams() {
         <AppLayout
             rightContent={
                 <>
-                    <Button onClick={() => router.visit(createExam.url())}>
-                        <BookPlus /> Nieuwe toets toevoegen
+                    <Button asChild>
+                        <Link href={createExam.url()}>
+                            <BookPlus /> Nieuwe toets toevoegen
+                        </Link>
                     </Button>
                 </>
             }
