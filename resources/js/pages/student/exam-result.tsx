@@ -69,7 +69,99 @@ export default function ExamResult({ exam, result }: ExamResultProps) {
                     Terug naar toetsenlijst
                 </Button>
 
-                <div className="flex flex-col gap-2 md:flex-row">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {/* exam details */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">
+                                {exam.name}
+                            </CardTitle>
+                        </CardHeader>
+
+                        <CardContent className="flex flex-col gap-4 md:flex-row">
+                            <div className="flex flex-1 flex-col gap-2 pl-2">
+                                <p>{exam.description}</p>
+                                <p>
+                                    Gemaakt op:{' '}
+                                    {dateToReadableString(result.submitted_at)}
+                                </p>
+                                {exam.sections && exam.sections.length > 0 && (
+                                    <>
+                                        <Label className="text-lg">
+                                            Secties
+                                        </Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {exam.sections.map((section) => (
+                                                <Badge
+                                                    key={section.id}
+                                                    variant="secondary"
+                                                >
+                                                    {section.name}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="text-lg">Resultaat</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {/* result chart */}
+                            <div className="w-full md:flex-1">
+                                <ChartContainer
+                                    config={chartConfig}
+                                    className="mx-auto aspect-square max-h-64 w-full"
+                                >
+                                    <PieChart>
+                                        <ChartTooltip
+                                            content={
+                                                <ChartTooltipContent
+                                                    hideLabel
+                                                />
+                                            }
+                                        />
+                                        <Pie
+                                            data={scoreData}
+                                            dataKey="value"
+                                            nameKey="name"
+                                            labelLine={false}
+                                            label={({ payload, ...props }) => (
+                                                <text
+                                                    cx={props.cx}
+                                                    cy={props.cy}
+                                                    x={props.x}
+                                                    y={props.y}
+                                                    textAnchor={
+                                                        props.textAnchor
+                                                    }
+                                                    dominantBaseline={
+                                                        props.dominantBaseline
+                                                    }
+                                                    className="fill-primary"
+                                                >
+                                                    {payload.value}
+                                                </text>
+                                            )}
+                                        />
+                                        <ChartLegend
+                                            content={
+                                                <ChartLegendContent nameKey="name" />
+                                            }
+                                            className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
+                                        />
+                                    </PieChart>
+                                </ChartContainer>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                     <ResultStatCard title="Score">
                         {result.total_questions > 0
                             ? (
@@ -88,82 +180,6 @@ export default function ExamResult({ exam, result }: ExamResultProps) {
                         {formatDuration(result.duration_in_seconds)}
                     </ResultStatCard>
                 </div>
-
-                {/* exam details */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">{exam.name}</CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="flex flex-col gap-4 md:flex-row">
-                        <div className="flex flex-1 flex-col gap-2 pl-2">
-                            <p>{exam.description}</p>
-                            <p>
-                                Gemaakt op:{' '}
-                                {dateToReadableString(result.submitted_at)}
-                            </p>
-                            {exam.sections && exam.sections.length > 0 && (
-                                <>
-                                    <Label className="text-lg">Secties</Label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {exam.sections.map((section) => (
-                                            <Badge
-                                                key={section.id}
-                                                variant="secondary"
-                                            >
-                                                {section.name}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        {/* result chart */}
-                        <div className="w-full md:flex-1">
-                            <Label>Resultaat</Label>
-                            <ChartContainer
-                                config={chartConfig}
-                                className="mx-auto aspect-square max-h-64 w-full"
-                            >
-                                <PieChart>
-                                    <ChartTooltip
-                                        content={
-                                            <ChartTooltipContent hideLabel />
-                                        }
-                                    />
-                                    <Pie
-                                        data={scoreData}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        labelLine={false}
-                                        label={({ payload, ...props }) => (
-                                            <text
-                                                cx={props.cx}
-                                                cy={props.cy}
-                                                x={props.x}
-                                                y={props.y}
-                                                textAnchor={props.textAnchor}
-                                                dominantBaseline={
-                                                    props.dominantBaseline
-                                                }
-                                                className="fill-primary"
-                                            >
-                                                {payload.value}
-                                            </text>
-                                        )}
-                                    />
-                                    <ChartLegend
-                                        content={
-                                            <ChartLegendContent nameKey="name" />
-                                        }
-                                        className="-translate-y-2 flex-wrap gap-2 *:basis-1/4 *:justify-center"
-                                    />
-                                </PieChart>
-                            </ChartContainer>
-                        </div>
-                    </CardContent>
-                </Card>
             </div>
         </AppHeaderLayout>
     );
