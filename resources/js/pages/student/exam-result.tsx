@@ -39,16 +39,15 @@ type ExamResultProps = {
 const chartConfig = {
     correct: {
         label: 'Goed',
-        color: '#16a34a',
+        color: 'var(--color-green-500)',
     },
     incorrect: {
         label: 'Fout',
-        color: '#dc2626',
+        color: 'var(--color-red-500)',
     },
 } satisfies ChartConfig;
 
 export default function ExamResult({ exam, result }: ExamResultProps) {
-    console.log('result: ', result);
     const scoreData = [
         {
             name: 'correct',
