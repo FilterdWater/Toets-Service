@@ -38,7 +38,7 @@ import type { Section } from '@/types/section';
 
 type examProps = {
     exam?: Exam | null;
-    backUrl?: string;
+    backUrl?: string | null;
 };
 
 // als het exam leeg is dan wordt het automatisch een creation page

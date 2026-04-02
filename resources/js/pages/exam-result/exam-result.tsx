@@ -48,7 +48,7 @@ type ExamResultProps = {
         passed_count: number;
         failed_count: number;
     };
-    backUrl?: string;
+    backUrl?: string | null;
 };
 
 const chartConfig = {

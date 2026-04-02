@@ -51,28 +51,65 @@ test('accounts index can navigate to page 2', function (): void {
     );
 });
 
-test('show edit passes back url', function (): void {
+test('show edit passes back url when referer is a different page', function (): void {
     $user = User::factory()->create();
+    $fromUrl = route('accounts', ['page' => 2]);
 
-    $response = $this->from(route('accounts', ['page' => 2]))
+    $response = $this->withHeader('Referer', $fromUrl)
         ->get(route('accountEdit', $user->id));
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('admin/account-edit')
-        ->has('backUrl')
+        ->where('backUrl', url($fromUrl))
     );
 });
 
-test('show create passes back url (pagination)', function (): void {
-    $fromUrl = route('accounts', ['page' => 2]);
-    $expectedBackUrl = url($fromUrl);
+test('show edit back url is null when there is no referer (direct load)', function (): void {
+    $user = User::factory()->create();
 
-    $response = $this->from($fromUrl)->get(route('accountCreate'));
+    $response = $this->get(route('accountEdit', $user->id));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('admin/account-edit')
+        ->where('backUrl', null)
+    );
+});
+
+test('show edit back url is null when referer is the same page (refresh)', function (): void {
+    $user = User::factory()->create();
+    $editUrl = route('accountEdit', $user->id);
+
+    $response = $this->withHeader('Referer', $editUrl)
+        ->get($editUrl);
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('admin/account-edit')
+        ->where('backUrl', null)
+    );
+});
+
+test('show create passes back url when referer is a different page', function (): void {
+    $fromUrl = route('accounts', ['page' => 2]);
+
+    $response = $this->withHeader('Referer', $fromUrl)
+        ->get(route('accountCreate'));
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('admin/account-create')
-        ->where('backUrl', $expectedBackUrl)
+        ->where('backUrl', url($fromUrl))
+    );
+});
+
+test('show create back url is null when there is no referer (direct load)', function (): void {
+    $response = $this->get(route('accountCreate'));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('admin/account-create')
+        ->where('backUrl', null)
     );
 });

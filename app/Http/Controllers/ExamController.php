@@ -31,15 +31,15 @@ class ExamController extends Controller
 
         return Inertia::render('exam/exam', [
             'exam' => new ExamResource($exam),
-            'backUrl' => url()->previous(),
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 
     // this is used to show the page for creating a new exam
-    public function showCreate(): Response
+    public function showCreate(Request $request): Response
     {
         return Inertia::render('exam/exam', [
-            'backUrl' => url()->previous(),
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 
@@ -76,7 +76,7 @@ class ExamController extends Controller
         return back()->with('success', 'Exam succesvol gewijzigd.');
     }
 
-    public function showResults(Exam $exam): Response
+    public function showResults(Request $request, Exam $exam): Response
     {
         $exam->load('sections');
 
@@ -130,7 +130,7 @@ class ExamController extends Controller
                 'passed_count' => $passedCount,
                 'failed_count' => $totalSubmissions - $passedCount,
             ],
-            'backUrl' => url()->previous(),
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 

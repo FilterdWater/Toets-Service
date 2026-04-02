@@ -28,10 +28,10 @@ class UserController extends Controller
         ]);
     }
 
-    public function showCreate()
+    public function showCreate(Request $request): Response
     {
         return Inertia::render('admin/account-create', [
-            'backUrl' => url()->previous(),
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 
@@ -260,11 +260,11 @@ class UserController extends Controller
         );
     }
 
-    public function showEdit(string $id): Response
+    public function showEdit(Request $request, string $id): Response
     {
         return Inertia::render('admin/account-edit', [
             'user' => User::findOrFail($id),
-            'backUrl' => url()->previous(),
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 

@@ -33,7 +33,7 @@ import type { BreadcrumbItem, User } from '@/types';
 
 type AccountEditProps = {
     user: User;
-    backUrl?: string;
+    backUrl?: string | null;
 };
 
 export default function AccountEdit({ user, backUrl }: AccountEditProps) {
