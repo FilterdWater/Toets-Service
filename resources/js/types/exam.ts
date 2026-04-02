@@ -12,6 +12,7 @@ export type Exam = {
     max_mistakes: number;
     created_at: string;
     updated_at: string;
+    submitted_at?: string | null;
     sections?: Section[];
     groups?: Group[];
     submissions?: Submission[];

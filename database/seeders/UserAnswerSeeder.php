@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Submission;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -9,64 +10,92 @@ class UserAnswerSeeder extends Seeder
 {
     public function run(): void
     {
-        $submissions = DB::table('submissions')->whereNotNull('submitted_at')->get();
+        Submission::whereNotNull('submitted_at')
+            ->with('exam.sections.questions.answers')
+            ->lazy(50)
+            ->each(function (Submission $submission) {
+                $this->createAnswersForSubmission($submission);
+            });
+    }
 
-        foreach ($submissions as $submission) {
-            $exam = DB::table('exams')->where('id', $submission->exam_id)->first();
-            $sections = DB::table('sections')->where('exam_id', $exam->id)->pluck('id');
-            $questions = DB::table('questions')->whereIn('section_id', $sections)->get();
+    private function createAnswersForSubmission(Submission $submission): void
+    {
+        $questions = $submission->exam->sections->flatMap->questions;
+        $now = now();
+        $inserts = [];
 
-            foreach ($questions as $question) {
-                if ($question->type === 'text') {
-                    $textAnswers = [
-                        'Fotosynthese is het proces waarbij planten zonlicht omzetten in energie.',
-                        'Celdeling is het proces waarbij een cel zich splitst in twee identieke cellen.',
-                        'Een atoom is een enkel deeltje, een molecuul is een combinatie van atomen.',
-                        'De lucht lijkt blauw door Rayleigh-verstrooiing van zonlicht.',
-                    ];
+        foreach ($questions as $question) {
+            $inserts[] = $this->createInsertData($submission, $question, $now);
+        }
 
-                    DB::table('user_answers')->insert([
-                        'submission_id' => $submission->id,
-                        'question_id' => $question->id,
-                        'selected_answer' => null,
-                        'text_answer' => collect($textAnswers)->random(),
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                } else {
-                    $answers = DB::table('answers')->where('question_id', $question->id)->get();
+        if (! empty($inserts)) {
+            DB::table('user_answers')->insert($inserts);
+        }
+    }
 
-                    if ($question->type === 'single_choice') {
-                        $selectedAnswer = $answers->random();
-                        DB::table('user_answers')->insert([
-                            'submission_id' => $submission->id,
-                            'question_id' => $question->id,
-                            'selected_answer' => $selectedAnswer->id,
-                            'text_answer' => null,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    } else {
-                        $correctAnswers = $answers->where('is_correct', true);
-                        $wrongAnswers = $answers->where('is_correct', false);
+    private function createInsertData(Submission $submission, $question, $now): array
+    {
+        if ($question->type === 'text') {
+            return [
+                'submission_id' => $submission->id,
+                'question_id' => $question->id,
+                'selected_answer' => null,
+                'text_answer' => $this->randomTextAnswer(),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
 
-                        if ($correctAnswers->isNotEmpty() && rand(0, 1)) {
-                            $selectedAnswer = $correctAnswers->random();
-                        } else {
-                            $selectedAnswer = $wrongAnswers->random();
-                        }
+        $answers = $question->answers;
 
-                        DB::table('user_answers')->insert([
-                            'submission_id' => $submission->id,
-                            'question_id' => $question->id,
-                            'selected_answer' => $selectedAnswer->id,
-                            'text_answer' => null,
-                            'created_at' => now(),
-                            'updated_at' => now(),
-                        ]);
-                    }
-                }
+        if ($answers->isEmpty()) {
+            return [
+                'submission_id' => $submission->id,
+                'question_id' => $question->id,
+                'selected_answer' => null,
+                'text_answer' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        if ($question->type === 'single_choice') {
+            $selectedAnswer = $answers->random();
+        } else {
+            $correctAnswers = $answers->filter(fn ($a) => $a->is_correct);
+            $incorrectAnswers = $answers->filter(fn ($a) => ! $a->is_correct);
+
+            if ($correctAnswers->isNotEmpty() && rand(0, 1)) {
+                $selectedAnswer = $correctAnswers->random();
+            } else {
+                $selectedAnswer = $incorrectAnswers->isNotEmpty()
+                    ? $incorrectAnswers->random()
+                    : $answers->random();
             }
         }
+
+        return [
+            'submission_id' => $submission->id,
+            'question_id' => $question->id,
+            'selected_answer' => $selectedAnswer->id,
+            'text_answer' => null,
+            'created_at' => $now,
+            'updated_at' => $now,
+        ];
+    }
+
+    private function randomTextAnswer(): string
+    {
+        $answers = [
+            'Fotosynthese is het proces waarbij planten zonlicht omzetten in energie.',
+            'Celdeling is het proces waarbij een cel zich splitst in twee identieke cellen.',
+            'Een atoom is een enkel deeltje, een molecuul is een combinatie van atomen.',
+            'De lucht lijkt blauw door Rayleigh-verstrooiing van zonlicht.',
+            'De hartslag wordt veroorzaakt door de sinusknoop die elektrische signalen afgeeft.',
+            'DNA bevat de genetische informatie van een organisme.',
+            'Metalen geleiden warmte en elektriciteit goed.',
+        ];
+
+        return $answers[array_rand($answers)];
     }
 }

@@ -37,3 +37,18 @@ export function dateToReadableString(date: string | null | undefined): string {
         minute: '2-digit',
     });
 }
+
+export function formatDuration(seconds: number | null): string {
+    if (seconds === null || seconds <= 0) {
+        return '-';
+    }
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.ceil((seconds % 3600) / 60);
+
+    if (hours > 0) {
+        return `${hours}u ${minutes}m`;
+    }
+
+    return `${minutes}m`;
+}

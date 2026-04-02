@@ -1,5 +1,5 @@
 import { Head, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -293,47 +293,49 @@ export default function MakeExam({ exam }: MakeExamProps) {
                             ))}
                         </div>
                     ))}
-                <div className="fixed right-0 bottom-0 left-0 border-t bg-accent px-4 py-3">
-                    {page > 0 && page <= pages.length && (
-                        <div className="mx-auto flex max-w-7xl items-center justify-between">
-                            <div>{exam.name}</div>
-                            <div>
-                                {page !== 1 && (
-                                    <Button
-                                        className="mr-3"
-                                        onClick={handlePrevPage}
-                                    >
-                                        Vorige <ArrowLeft />
+                {page > 0 && page <= pages.length + 1 && (
+                    <div className="fixed right-0 bottom-0 left-0 border-t bg-accent px-4 py-3">
+                        {page > 0 && page <= pages.length && (
+                            <div className="mx-auto flex max-w-7xl items-center justify-between">
+                                <div>{exam.name}</div>
+                                <div>
+                                    {page !== 1 && (
+                                        <Button
+                                            className="mr-3"
+                                            onClick={handlePrevPage}
+                                        >
+                                            Vorige <ArrowLeft />
+                                        </Button>
+                                    )}
+                                    <Button onClick={handleNextPage}>
+                                        Volgende <ArrowRight />
                                     </Button>
-                                )}
-                                <Button onClick={handleNextPage}>
-                                    Volgende <ArrowRight />
-                                </Button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                    {page > 0 && page === pages.length + 1 && (
-                        <div className="mx-auto flex max-w-7xl items-center justify-between">
-                            <div>{exam.name}</div>
-                            <div>
-                                {page > 1 && (
+                        )}
+                        {page > 0 && page === pages.length + 1 && (
+                            <div className="mx-auto flex max-w-7xl items-center justify-between">
+                                <div>{exam.name}</div>
+                                <div>
+                                    {page > 1 && (
+                                        <Button
+                                            className="mr-3"
+                                            onClick={handlePrevPage}
+                                        >
+                                            Vorige <ArrowLeft />
+                                        </Button>
+                                    )}
                                     <Button
-                                        className="mr-3"
-                                        onClick={handlePrevPage}
+                                        className="bg-green-600 hover:bg-green-700"
+                                        onClick={handleSubmitExam}
                                     >
-                                        Vorige <ArrowLeft />
+                                        Examen Indienen <Check />
                                     </Button>
-                                )}
-                                <Button
-                                    className="bg-green-600 hover:bg-green-700"
-                                    onClick={handleSubmitExam}
-                                >
-                                    Inleveren
-                                </Button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
                 {page === pages.length + 1 && (
                     <div>
                         <Label className="text-2xl">{exam.name}</Label>

@@ -27,7 +27,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => fake()->unique()->userName().'@roca12.nl',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'role' => Role::Student,
@@ -58,6 +58,29 @@ class UserFactory extends Factory
             'two_factor_secret' => encrypt('secret'),
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
+        ]);
+    }
+
+    public function docent(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => Role::Docent,
+            'name' => 'Docent '.fake()->firstName(),
+        ]);
+    }
+
+    public function beheerder(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => Role::Beheerder,
+            'name' => 'Beheerder '.fake()->firstName(),
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
         ]);
     }
 }

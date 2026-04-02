@@ -104,15 +104,17 @@ Some services are accessible in your browser via `localhost:{port}`. To see whic
 
 #### Merging code
 
-Before creating a pull request on your Git platform of choice, make sure your code passes formatting and linting checks. Run the following commands:
+Before creating a pull request on your Git platform of choice, make sure your code passes all the checks and commands. Run the following stuff in your terminal:
 
 ```bash
 ./vendor/bin/sail npm run format && npm run lint
 ./vendor/bin/sail pint
 ./vendor/bin/sail artisan test
+./vendor/bin/sail npm run build
 ```
 
-Or run `npm run pre-commit`
+You can also run `./vendor/bin/sail npm run pre-commit`
+Or `npm run pre-commit-sail` if you have Node.js installed locally and Sail is running
 
 #### Best Practices
 
@@ -166,6 +168,7 @@ This Starterkit uses [Pest](https://pestphp.com/) for testing.
 
 nice debugging application for php and js. More documentation can be found here [laradumps](https://laradumps.dev/)
 if laradumps doesnt work open te port 9191 in your firewall
+
 - linux firewall: `sudo ufw allow 9191`
 
 on arch linux dont use the snap package of laradumps but the appimage instead
