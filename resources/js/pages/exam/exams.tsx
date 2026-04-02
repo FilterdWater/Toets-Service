@@ -1,9 +1,8 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import {
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
@@ -34,6 +33,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Exams() {
     const { exams } = usePage<{ exams: PaginatedExams }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
+
+    function navigateToPage(url: string | null): void {
+        if (url) {
+            router.get(url, {}, { preserveState: true });
+        }
+    }
     const columns = useMemo<ColumnDef<Exam>[]>(
         () => [
             {
@@ -136,7 +141,6 @@ export default function Exams() {
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
     return (
@@ -204,25 +208,36 @@ export default function Exams() {
                         </TableBody>
                     </Table>
                 </div>
-                {/* Pagination */}
-                <div className="flex flex-row justify-start gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Vorige pagina
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Volgende pagina
-                    </Button>
-                </div>
+                {exams.last_page > 1 && (
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            {exams.total} toets(en) — pagina{' '}
+                            {exams.current_page} van {exams.last_page}
+                        </p>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!exams.prev_page_url}
+                                onClick={() =>
+                                    navigateToPage(exams.prev_page_url)
+                                }
+                            >
+                                Vorige
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!exams.next_page_url}
+                                onClick={() =>
+                                    navigateToPage(exams.next_page_url)
+                                }
+                            >
+                                Volgende
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
