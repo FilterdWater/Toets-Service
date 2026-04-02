@@ -134,22 +134,21 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     </div>
 
                     <div className="ml-auto flex items-center space-x-2">
-                        <div className="hidden text-right md:block">
-                            <p className="text-sm leading-none font-medium">
-                                {auth.user.name}
-                            </p>
-                            <p className="mt-1 max-w-56 truncate text-xs text-neutral-500">
-                                {auth.user.email}
-                            </p>
-                        </div>
-
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button
                                     variant="ghost"
-                                    className="size-10 rounded-full p-1"
+                                    className="group/trigger flex h-auto items-center gap-2 rounded-lg p-1 hover:bg-transparent"
                                 >
-                                    <Avatar className="size-8 overflow-hidden rounded-full">
+                                    <div className="hidden text-right md:block">
+                                        <p className="text-sm leading-none font-medium">
+                                            {auth.user.name}
+                                        </p>
+                                        <p className="mt-1 max-w-56 truncate text-xs text-neutral-500">
+                                            {auth.user.email}
+                                        </p>
+                                    </div>
+                                    <Avatar className="size-8 overflow-hidden rounded-full ring-2 ring-transparent transition-all group-hover/trigger:ring-neutral-300 dark:group-hover/trigger:ring-neutral-600">
                                         <AvatarImage
                                             src={auth.user.avatar}
                                             alt={auth.user.name}
