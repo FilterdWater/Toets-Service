@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Question;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -9,36 +10,52 @@ class AnswerSeeder extends Seeder
 {
     public function run(): void
     {
-        $questions = DB::table('questions')->get();
+        $now = now();
 
-        $answerOptions = [
-            'A' => ['Antwoord A', 'Optie 1', 'Keuze A', 'Mogelijkheid 1'],
-            'B' => ['Antwoord B', 'Optie 2', 'Keuze B', 'Mogelijkheid 2'],
-            'C' => ['Antwoord C', 'Optie 3', 'Keuze C', 'Mogelijkheid 3'],
-            'D' => ['Antwoord D', 'Optie 4', 'Keuze D', 'Mogelijkheid 4'],
+        Question::whereIn('type', ['single_choice', 'multiple_choice'])
+            ->select(['id', 'type'])
+            ->chunkById(100, function ($questions) use ($now) {
+                $inserts = [];
+
+                foreach ($questions as $question) {
+                    $inserts = array_merge(
+                        $inserts,
+                        $this->createAnswersForQuestion($question, $now)
+                    );
+                }
+
+                DB::table('answers')->insert($inserts);
+            });
+    }
+
+    private function createAnswersForQuestion(Question $question, $now): array
+    {
+        $correctCount = $question->type === 'single_choice' ? 1 : rand(1, 3);
+
+        $options = [
+            ['Antwoord A', 'Optie 1', 'Keuze A', 'Mogelijkheid 1'],
+            ['Antwoord B', 'Optie 2', 'Keuze B', 'Mogelijkheid 2'],
+            ['Antwoord C', 'Optie 3', 'Keuze C', 'Mogelijkheid 3'],
+            ['Antwoord D', 'Optie 4', 'Keuze D', 'Mogelijkheid 4'],
         ];
 
-        foreach ($questions as $question) {
-            if ($question->type === 'text') {
-                continue;
-            }
-
-            $correctCount = $question->type === 'single_choice' ? 1 : rand(1, 3);
-            $correctIndices = collect(range(0, 3))->random($correctCount)->toArray();
-
-            for ($i = 0; $i < 4; $i++) {
-                $isCorrect = in_array($i, $correctIndices);
-                $optionKey = array_keys($answerOptions)[$i];
-                $answerText = collect($answerOptions[$optionKey])->random();
-
-                DB::table('answers')->insert([
-                    'answer_option' => $answerText,
-                    'is_correct' => $isCorrect,
-                    'question_id' => $question->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+        $correctIndices = array_rand($options, $correctCount);
+        if (! is_array($correctIndices)) {
+            $correctIndices = [$correctIndices];
         }
+
+        $inserts = [];
+
+        foreach ($options as $index => $textOptions) {
+            $inserts[] = [
+                'answer_option' => $textOptions[array_rand($textOptions)],
+                'is_correct' => in_array($index, $correctIndices),
+                'question_id' => $question->id,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+
+        return $inserts;
     }
 }

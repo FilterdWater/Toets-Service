@@ -22,19 +22,25 @@ export default function Student({
                 <Label className="text-lg">Beschikbare toetsen</Label>
                 <Card className="w-full overflow-x-auto p-4">
                     <div className="flex flex-row space-x-4 pb-4">
-                        {availableExams.map((exam) => (
+                    {availableExams.length === 0 ? (
+                        <div className='items-center font-bold'>Geen beschikbare examens gevonden</div>
+                    ) : (
+                        availableExams.map((exam) => (
                             <AvailableExamCard key={exam.id} exam={exam} />
-                        ))}
+                        ))
+                    )}
                     </div>
                 </Card>
                 <Label className="text-lg">Toetsen afgerond</Label>
-                <Card className="w-full cursor-pointer overflow-x-auto p-4">
+                <Card className={`w-full ${finishedExams.length > 0 ? 'cursor-pointer' : ''} overflow-x-auto p-4`}>
                     <div className="flex flex-row space-x-4 pb-4">
-                        {finishedExams.map((exam) => (
-                            <FinishedExamCard key={exam.id} exam={exam} />
-                        ))}
-                        {finishedExams.length === 0 &&
-                            'Geen gemaakte examens gevonden'}
+                        {finishedExams.length === 0 ? (
+                            <div className='items-center font-bold'>Geen gemaakte examens gevonden</div>
+                        ) : (
+                            finishedExams.map((exam) => (
+                                <FinishedExamCard key={exam.id} exam={exam} />
+                            ))
+                        )}
                     </div>
                 </Card>
             </div>

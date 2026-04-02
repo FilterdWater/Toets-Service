@@ -2,14 +2,25 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Role;
+use App\Models\Group;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class GroupSeeder extends Seeder
 {
     public function run(): void
     {
-        $groupNames = [
+        $this->createDefaultGroups();
+
+        $this->createRandomGroups(10);
+
+        $this->attachStudentsToGroups();
+    }
+
+    private function createDefaultGroups(): void
+    {
+        $defaultGroups = [
             'Klas 1A',
             'Klas 1B',
             'Klas 2A',
@@ -19,25 +30,24 @@ class GroupSeeder extends Seeder
             'Examen Groep 5',
         ];
 
-        foreach ($groupNames as $name) {
-            $groupId = DB::table('groups')->insertGetId([
-                'name' => $name,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        foreach ($defaultGroups as $name) {
+            Group::factory()->create(['name' => $name]);
         }
+    }
 
-        $student = DB::table('users')->where('role', 'student')->first();
-        if ($student) {
-            $groups = DB::table('groups')->pluck('id')->toArray();
-            foreach (array_slice($groups, 0, 3) as $groupId) {
-                DB::table('groups_has_users')->insert([
-                    'group_id' => $groupId,
-                    'user_id' => $student->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+    private function createRandomGroups(int $count): void
+    {
+        Group::factory()->count($count)->create();
+    }
+
+    private function attachStudentsToGroups(): void
+    {
+        $students = User::where('role', Role::Student)->get();
+        $groups = Group::all();
+
+        foreach ($students as $student) {
+            $randomGroups = $groups->random(rand(1, 4));
+            $student->groups()->attach($randomGroups->pluck('id'));
         }
     }
 }

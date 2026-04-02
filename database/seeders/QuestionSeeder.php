@@ -2,83 +2,58 @@
 
 namespace Database\Seeders;
 
+use App\Models\Question;
+use App\Models\Section;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class QuestionSeeder extends Seeder
 {
     public function run(): void
     {
-        $typeWeights = [
+        $sections = Section::with('questions')->get();
+
+        foreach ($sections as $section) {
+            $this->createQuestionsForSection($section);
+        }
+    }
+
+    private function createQuestionsForSection(Section $section): void
+    {
+        $questionCount = rand(5, 10);
+        $typeDistribution = $this->getTypeDistribution();
+
+        for ($i = 1; $i <= $questionCount; $i++) {
+            $type = $this->chooseType($typeDistribution);
+
+            Question::factory()->create([
+                'section_id' => $section->id,
+                'sequence_nr' => $i,
+                'type' => $type,
+            ]);
+        }
+    }
+
+    private function getTypeDistribution(): array
+    {
+        return [
             'single_choice' => 60,
             'multiple_choice' => 30,
             'text' => 10,
         ];
-
-        $sections = DB::table('sections')->get();
-
-        foreach ($sections as $section) {
-            $questionCount = rand(5, 8);
-
-            for ($i = 1; $i <= $questionCount; $i++) {
-                $type = $this->getWeightedRandomType($typeWeights);
-                $title = "Vraag {$i}";
-                $text = $this->generateQuestionText($type);
-
-                DB::table('questions')->insert([
-                    'title' => $title,
-                    'text' => $text,
-                    'type' => $type,
-                    'sequence_nr' => $i,
-                    'section_id' => $section->id,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
-        }
     }
 
-    private function getWeightedRandomType(array $weights): string
+    private function chooseType(array $distribution): string
     {
         $random = rand(1, 100);
         $cumulative = 0;
 
-        foreach ($weights as $type => $weight) {
-            $cumulative += $weight;
+        foreach ($distribution as $type => $percentage) {
+            $cumulative += $percentage;
             if ($random <= $cumulative) {
                 return $type;
             }
         }
 
         return 'single_choice';
-    }
-
-    private function generateQuestionText(string $type): string
-    {
-        $texts = [
-            'single_choice' => [
-                'Wat is de uitkomst van 5 + 3?',
-                'Welke kleur krijg je bij het mengen van blauw en geel?',
-                'Wat is de hoofdstad van Nederland?',
-                'Hoeveel planeten telt ons zonnestelsel?',
-                'Wat is de grootste oceaan ter wereld?',
-                'Welk metaal is vloeibaar bij kamertemperatuur?',
-            ],
-            'multiple_choice' => [
-                'Welke van de volgende zijn zoogdieren?',
-                'Selecteer alle landen die in Europa liggen.',
-                'Wat zijn kenmerken van een plantaardige cel?',
-                'Welke stoffen zijn metalen?',
-                'Noem alle planeten in ons zonnestelsel.',
-            ],
-            'text' => [
-                'Leg uit wat fotosynthese inhoudt.',
-                'Beschrijf in eigen woorden het proces van celdeling.',
-                'Wat is het verschil tussen een atoom en een molecuul?',
-                'Verklaar waarom de lucht blauw lijkt.',
-            ],
-        ];
-
-        return collect($texts[$type])->random();
     }
 }

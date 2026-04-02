@@ -2,39 +2,42 @@
 
 namespace Database\Seeders;
 
+use App\Models\Exam;
+use App\Models\Section;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class SectionSeeder extends Seeder
 {
     public function run(): void
     {
-        $sectionTemplates = [
-            ['name' => 'Inleiding', 'new_page' => true],
-            ['name' => 'Hoofdstuk 1', 'new_page' => false],
-            ['name' => 'Hoofdstuk 2', 'new_page' => false],
-            ['name' => 'Deel A', 'new_page' => true],
-            ['name' => 'Deel B', 'new_page' => true],
-            ['name' => 'Basisvragen', 'new_page' => false],
-            ['name' => 'Verdiepingsvragen', 'new_page' => false],
-            ['name' => 'Eindopdracht', 'new_page' => true],
-        ];
+        $exams = Exam::with('sections')->get();
 
-        $exams = DB::table('exams')->pluck('id');
-
-        foreach ($exams as $examId) {
-            $selectedSections = collect($sectionTemplates)->random(3);
-
-            foreach ($selectedSections as $index => $section) {
-                DB::table('sections')->insert([
-                    'name' => $section['name'],
-                    'new_page' => $section['new_page'],
-                    'sequence_nr' => $index + 1,
-                    'exam_id' => $examId,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+        foreach ($exams as $exam) {
+            $this->createSectionsForExam($exam);
         }
+    }
+
+    private function createSectionsForExam($exam): void
+    {
+        $sectionCount = rand(3, 6);
+
+        Section::factory()->inleiding()->create([
+            'exam_id' => $exam->id,
+            'sequence_nr' => 1,
+        ]);
+
+        $sequenceNr = 2;
+
+        for ($i = 0; $i < $sectionCount - 2; $i++) {
+            Section::factory()->hoofdstuk((string) ($i + 1))->create([
+                'exam_id' => $exam->id,
+                'sequence_nr' => $sequenceNr++,
+            ]);
+        }
+
+        Section::factory()->eindopdracht()->create([
+            'exam_id' => $exam->id,
+            'sequence_nr' => $sequenceNr,
+        ]);
     }
 }
