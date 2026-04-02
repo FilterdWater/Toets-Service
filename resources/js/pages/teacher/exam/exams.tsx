@@ -141,7 +141,7 @@ export default function Exams() {
                 ),
             },
             {
-                accessorKey: 'max_mistakes',
+                id: 'actions',
                 header: 'acties',
                 cell: ({ row }) => <ExamTableRowActions exam={row.original} />,
             },

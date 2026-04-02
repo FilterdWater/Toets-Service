@@ -22,7 +22,7 @@ class ExamController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('exam/exams', [
+        return Inertia::render('teacher/exam/exams', [
             'exams' => $exams,
         ]);
     }
@@ -32,7 +32,7 @@ class ExamController extends Controller
     {
         $exam = Exam::where('id', $examId)->firstOrFail();
 
-        return Inertia::render('exam/exam', [
+        return Inertia::render('teacher/exam/exam', [
             'exam' => new ExamResource($exam),
         ]);
     }
@@ -40,7 +40,7 @@ class ExamController extends Controller
     // this is used to show the page for creating a new exam
     public function showCreate(): Response
     {
-        return Inertia::render('exam/exam');
+        return Inertia::render('teacher/exam/exam');
     }
 
     // this is used to store the exam in the database
@@ -122,7 +122,7 @@ class ExamController extends Controller
             : 0;
         $passedCount = $currentResults->where('score', '>=', 5.5)->count();
 
-        return Inertia::render('exam-result/exam-result', [
+        return Inertia::render('teacher/exam/exam-result', [
             'exam' => new ExamResource($exam),
             'results' => $results->values(),
             'summary' => [
@@ -167,7 +167,7 @@ class ExamController extends Controller
             $durationInSeconds = $submission->started_at->diffInSeconds($submission->submitted_at);
         }
 
-        return Inertia::render('exam-result/exam-submission-detail', [
+        return Inertia::render('teacher/exam/exam-submission-detail', [
             'exam' => [
                 'id' => $exam->id,
                 'name' => $exam->name,

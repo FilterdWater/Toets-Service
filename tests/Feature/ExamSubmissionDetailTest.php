@@ -38,7 +38,7 @@ test('teacher can view submission detail with questions', function (): void {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('exam-result/exam-submission-detail')
+        ->component('teacher/exam/exam-submission-detail')
         ->has('questions', 1)
         ->where('questions.0.is_correct', true)
         ->where('submission.user.name', $student->name)
