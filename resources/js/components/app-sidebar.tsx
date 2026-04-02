@@ -25,31 +25,38 @@ import {
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
-    //TODO: Add rol specific items
+    const { auth } = usePage().props;
+    const role = auth.user?.role as string | undefined;
     const mainNavItems: NavItem[] = [
         {
             title: 'Accounts',
             href: accounts(),
             icon: User,
+            isVisible: auth.user.role === Role.Admin,
         },
         {
             title: 'Applicatie Statistieken',
             href: applicationStatistics(),
             icon: PieChart,
+            isVisible: auth.user.role === Role.Admin,
         },
         {
             title: 'Groepen',
             href: groups.url(),
             icon: Users,
+            isVisible:
+                auth.user.role === Role.Teacher ||
+                auth.user.role === Role.Admin,
         },
         {
             title: 'Toetsen',
             href: exams(),
             icon: LibraryBig,
+            isVisible:
+                auth.user.role === Role.Teacher ||
+                auth.user.role === Role.Admin,
         },
     ];
-    const { auth } = usePage().props;
-    const role = auth.user?.role as string | undefined;
 
     const homeHref =
         role === Role.Student
