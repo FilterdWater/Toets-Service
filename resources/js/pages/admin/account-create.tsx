@@ -15,7 +15,7 @@ import { accountStore } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
 type AccountCreateProps = {
-    backUrl?: string;
+    backUrl?: string | null;
 };
 
 export default function AccountCreate({ backUrl }: AccountCreateProps) {

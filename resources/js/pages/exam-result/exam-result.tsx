@@ -48,6 +48,7 @@ type ExamResultProps = {
         passed_count: number;
         failed_count: number;
     };
+    backUrl?: string | null;
 };
 
 const chartConfig = {
@@ -65,9 +66,10 @@ export default function ExamResult({
     exam,
     results,
     summary,
+    backUrl,
 }: ExamResultProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Toetsen', href: exams() },
+        { title: 'Toetsen', href: backUrl ?? exams() },
         {
             title: exam.name,
             href: examResults.url({ exam: exam.id }),

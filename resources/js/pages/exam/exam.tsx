@@ -23,7 +23,14 @@ import {
     TooltipContent,
 } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
-import { getExam, storeExam, updateExam, deleteExam } from '@/routes';
+import {
+    createExam,
+    exams,
+    getExam,
+    storeExam,
+    updateExam,
+    deleteExam,
+} from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
 import type { Question } from '@/types/question';
@@ -31,11 +38,12 @@ import type { Section } from '@/types/section';
 
 type examProps = {
     exam?: Exam | null;
+    backUrl?: string | null;
 };
 
 // als het exam leeg is dan wordt het automatisch een creation page
 //TODO de create pagina scheiden van de edit pagina dit moet gebeuren als er aan us-12-15 wordt gewerkt
-export default function Exam({ exam }: examProps) {
+export default function Exam({ exam, backUrl }: examProps) {
     const mode = exam ? 'edit' : 'create';
     const { errors } = usePage().props;
     //creates temp ID's for the sections and questions'
@@ -132,8 +140,12 @@ export default function Exam({ exam }: examProps) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: 'Exam',
-            href: exam ? getExam(exam.id).url : '',
+            title: 'Toetsen',
+            href: backUrl ?? exams(),
+        },
+        {
+            title: exam ? exam.name : 'Nieuwe toets',
+            href: exam ? getExam(exam.id) : createExam(),
         },
     ];
 

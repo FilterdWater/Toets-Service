@@ -16,7 +16,8 @@ class ExamController extends Controller
     {
         $exams = Exam::with('groups')
             ->orderBy('created_at', 'desc')
-            ->paginate(25);
+            ->paginate(10)
+            ->withQueryString();
 
         return Inertia::render('exam/exams', [
             'exams' => $exams,
@@ -30,13 +31,16 @@ class ExamController extends Controller
 
         return Inertia::render('exam/exam', [
             'exam' => new ExamResource($exam),
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 
     // this is used to show the page for creating a new exam
-    public function showCreate(): Response
+    public function showCreate(Request $request): Response
     {
-        return Inertia::render('exam/exam');
+        return Inertia::render('exam/exam', [
+            'backUrl' => $this->resolveBackUrl($request),
+        ]);
     }
 
     // this is used to store the exam in the database
@@ -72,7 +76,7 @@ class ExamController extends Controller
         return back()->with('success', 'Exam succesvol gewijzigd.');
     }
 
-    public function showResults(Exam $exam): Response
+    public function showResults(Request $request, Exam $exam): Response
     {
         $exam->load('sections');
 
@@ -126,6 +130,7 @@ class ExamController extends Controller
                 'passed_count' => $passedCount,
                 'failed_count' => $totalSubmissions - $passedCount,
             ],
+            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 
