@@ -150,117 +150,124 @@ export default function ExamResult({
                             ) : (
                                 <div className="overflow-x-auto rounded-md border">
                                     <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Student</TableHead>
-                                            <TableHead>Score</TableHead>
-                                            <TableHead>Goed / Totaal</TableHead>
-                                            <TableHead>Tijdsduur</TableHead>
-                                            <TableHead>Ingeleverd</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="w-[140px]">
-                                                Herkansen
-                                            </TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {results.map((r) => (
-                                            <TableRow
-                                                key={r.id}
-                                                className="cursor-pointer hover:bg-muted/60"
-                                                onClick={() => {
-                                                    router.get(
-                                                        examSubmissionDetail.url(
-                                                            {
-                                                                exam: exam.id,
-                                                                submission:
-                                                                    r.id,
-                                                            },
-                                                        ),
-                                                    );
-                                                }}
-                                            >
-                                                <TableCell>
-                                                    <div>
-                                                        <p className="font-medium">
-                                                            {r.user.name}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground">
-                                                            {r.user.email}
-                                                        </p>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="font-semibold">
-                                                    {r.score}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {r.correct_answers} /{' '}
-                                                    {r.total_questions}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {formatDuration(
-                                                        r.duration_in_seconds,
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {dateToReadableString(
-                                                        r.submitted_at,
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {r.outdated ? (
-                                                        <Badge variant="secondary">
-                                                            Herkansen
-                                                        </Badge>
-                                                    ) : r.score >= 5.5 ? (
-                                                        <Badge variant="student">
-                                                            Voldoende
-                                                        </Badge>
-                                                    ) : (
-                                                        <Badge variant="destructive">
-                                                            Onvoldoende
-                                                        </Badge>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {r.outdated ? (
-                                                        <span className="text-sm text-muted-foreground">
-                                                            Toegestaan
-                                                        </span>
-                                                    ) : r.score >= 5.5 ? (
-                                                        <span className="text-sm text-muted-foreground">
-                                                            —
-                                                        </span>
-                                                    ) : (
-                                                        <Button
-                                                            type="button"
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                router.post(
-                                                                    submissionAllowRetake.url(
-                                                                        {
-                                                                            exam: exam.id,
-                                                                            submission:
-                                                                                r.id,
-                                                                        },
-                                                                    ),
-                                                                    {},
-                                                                    {
-                                                                        preserveScroll: true,
-                                                                    },
-                                                                );
-                                                            }}
-                                                        >
-                                                            Herkansen toestaan
-                                                        </Button>
-                                                    )}
-                                                </TableCell>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Student</TableHead>
+                                                <TableHead>Score</TableHead>
+                                                <TableHead>
+                                                    Goed / Totaal
+                                                </TableHead>
+                                                <TableHead>Tijdsduur</TableHead>
+                                                <TableHead>
+                                                    Ingeleverd
+                                                </TableHead>
+                                                <TableHead>Status</TableHead>
+                                                <TableHead className="w-[140px]">
+                                                    Herkansen
+                                                </TableHead>
                                             </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {results.map((r) => (
+                                                <TableRow
+                                                    key={r.id}
+                                                    className="cursor-pointer hover:bg-muted/60"
+                                                    onClick={() => {
+                                                        router.get(
+                                                            examSubmissionDetail.url(
+                                                                {
+                                                                    exam: exam.id,
+                                                                    submission:
+                                                                        r.id,
+                                                                },
+                                                            ),
+                                                        );
+                                                    }}
+                                                >
+                                                    <TableCell>
+                                                        <div>
+                                                            <p className="font-medium">
+                                                                {r.user.name}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                {r.user.email}
+                                                            </p>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="font-semibold">
+                                                        {r.score}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {r.correct_answers} /{' '}
+                                                        {r.total_questions}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {formatDuration(
+                                                            r.duration_in_seconds,
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {dateToReadableString(
+                                                            r.submitted_at,
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {r.outdated ? (
+                                                            <Badge variant="secondary">
+                                                                Herkansen
+                                                            </Badge>
+                                                        ) : r.score >= 5.5 ? (
+                                                            <Badge variant="student">
+                                                                Voldoende
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="destructive">
+                                                                Onvoldoende
+                                                            </Badge>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {r.outdated ? (
+                                                            <span className="text-sm text-muted-foreground">
+                                                                Toegestaan
+                                                            </span>
+                                                        ) : r.score >= 5.5 ? (
+                                                            <span className="text-sm text-muted-foreground">
+                                                                —
+                                                            </span>
+                                                        ) : (
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={(
+                                                                    e,
+                                                                ) => {
+                                                                    e.stopPropagation();
+                                                                    router.post(
+                                                                        submissionAllowRetake.url(
+                                                                            {
+                                                                                exam: exam.id,
+                                                                                submission:
+                                                                                    r.id,
+                                                                            },
+                                                                        ),
+                                                                        {},
+                                                                        {
+                                                                            preserveScroll: true,
+                                                                        },
+                                                                    );
+                                                                }}
+                                                            >
+                                                                Herkansen
+                                                                toestaan
+                                                            </Button>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
                                 </div>
                             )}
                         </CardContent>
