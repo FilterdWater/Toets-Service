@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
-import { createExam, exams } from '@/routes';
+import { createExam, exams, examResults } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam, PaginatedExams } from '@/types';
 
@@ -109,6 +109,17 @@ export default function Exams() {
                     >
                         Max fouten
                         <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                ),
+            },
+            {
+                id: 'results',
+                header: 'Resultaten',
+                cell: ({ row }) => (
+                    <Button size="sm" variant="link">
+                        <Link href={examResults.url({ exam: row.original.id })}>
+                            Resultaten
+                        </Link>
                     </Button>
                 ),
             },

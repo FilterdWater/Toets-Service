@@ -19,8 +19,8 @@ import {
     groups,
     exams,
     student,
-    teacher,
     admin,
+    teacher,
 } from '@/routes';
 import type { NavItem } from '@/types';
 
