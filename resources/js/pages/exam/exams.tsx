@@ -7,10 +7,39 @@ import {
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
-import { ArrowUpDown, BookPlus } from 'lucide-react';
+import {
+    ArrowUpDown,
+    BookPlus,
+    Trash2Icon,
+    MoreHorizontal,
+    Pencil,
+} from 'lucide-react';
 import { useState, useMemo } from 'react';
+import {
+    showEdit,
+    destroy,
+} from '@/actions/App/Http/Controllers/ExamController';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogMedia,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
     Table,
     TableHeader,
@@ -111,6 +140,11 @@ export default function Exams() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                     </Button>
                 ),
+            },
+            {
+                accessorKey: 'max_mistakes',
+                header: 'acties',
+                cell: ({ row }) => <ExamTableRowActions exam={row.original} />,
             },
         ],
         [],
@@ -214,5 +248,73 @@ export default function Exams() {
                 </div>
             </div>
         </AppLayout>
+    );
+}
+
+function ExamTableRowActions({ exam }: { exam: Exam }) {
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                    <Pencil />
+                    <Link href={showEdit(exam.id)}>Bewerken</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={(e) => {
+                        e.preventDefault();
+                        setIsDeleteDialogOpen(true);
+                    }}
+                >
+                    <Trash2Icon className="mr-2 h-4 w-4" />
+                    Delete Exam
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+
+            <AlertDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+            >
+                <AlertDialogContent size="sm">
+                    <AlertDialogHeader>
+                        <AlertDialogMedia className="bg-destructive/10 text-destructive">
+                            <Trash2Icon />
+                        </AlertDialogMedia>
+                        <AlertDialogTitle>Delete exam?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure? This will delete {exam.name}.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            variant="destructive"
+                            onClick={() => {
+                                // Add your delete logic here
+                                setIsDeleteDialogOpen(false);
+                            }}
+                        >
+                            <Link
+                                href={destroy(exam.id)}
+                                method="delete"
+                                as="button"
+                            >
+                                Delete
+                            </Link>
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </DropdownMenu>
     );
 }
