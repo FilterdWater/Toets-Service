@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Models\Submission;
 use Carbon\Carbon;
@@ -177,7 +178,7 @@ class TakeExamController extends Controller
         return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
     }
 
-    public function showResult(Request $request, $examId): Response
+    public function showResult(Request $request, $examId)
     {
         $exam = Exam::with('sections')->findOrFail($examId);
 
@@ -188,6 +189,10 @@ class TakeExamController extends Controller
             ->latest('submitted_at')
             ->with('userAnswers.selectedAnswer')
             ->first();
+
+        if($submission == null || $submission->submitted_at == null) {
+            return back()->with('error', "Dit examen heeft geen resultaat of is niet van jou.");
+        }
 
         $totalQuestions = 0;
         $correctAnswers = 0;
