@@ -62,6 +62,10 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
                 Route::get('/aanmaken', [ExamController::class, 'showCreate'])->name('createExam');
                 Route::post('/opslaan', [ExamController::class, 'store'])->name('storeExam');
                 Route::put('/{exam}', [ExamController::class, 'update'])->name('updateExam');
+                Route::post(
+                    '/{exam}/inzendingen/{submission}/herkansen',
+                    [ExamController::class, 'allowSubmissionRetake']
+                )->name('submissionAllowRetake');
                 Route::delete('/{exam}', [ExamController::class, 'destroy'])->name('deleteExam');
             });
         });

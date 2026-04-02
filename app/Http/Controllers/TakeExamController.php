@@ -33,10 +33,11 @@ class TakeExamController extends Controller
         $availableExams = (clone $baseQuery)
             ->where(function ($query) use ($userId) {
                 $query->whereDoesntHave('submissions', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
+                    $q->where('user_id', $userId)->where('outdated', false);
                 })
                     ->orWhereHas('submissions', function ($q) use ($userId) {
                         $q->where('user_id', $userId)
+                            ->where('outdated', false)
                             ->whereNull('submitted_at');
                     });
             })
@@ -45,7 +46,8 @@ class TakeExamController extends Controller
         $finishedExams = (clone $baseQuery)
             ->whereHas('submissions', function ($q) use ($userId) {
                 $q->where('user_id', $userId)
-                    ->whereNotNull('submitted_at');
+                    ->whereNotNull('submitted_at')
+                    ->where('outdated', false);
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now)
@@ -55,6 +57,7 @@ class TakeExamController extends Controller
                 $submission = $exam->submissions()
                     ->where('user_id', Auth::id())
                     ->whereNotNull('submitted_at')
+                    ->where('outdated', false)
                     ->latest('submitted_at')
                     ->first();
 
@@ -74,7 +77,7 @@ class TakeExamController extends Controller
         $exam = Exam::with([
             'sections.questions.answers',
             'submissions' => function ($query) {
-                $query->where('user_id', Auth::id());
+                $query->where('user_id', Auth::id())->where('outdated', false);
             },
         ])->where('id', $id)->firstOrFail();
 
@@ -106,11 +109,18 @@ class TakeExamController extends Controller
                 return back()->with('error', 'Examen is niet actief');
             }
 
-            // get current user's submission
-            $submission = $exam->submissions()->firstOrCreate(
-                ['user_id' => Auth::id()],
-                ['started_at' => now()]
-            );
+            // get current user's active (non-outdated) submission
+            $submission = $exam->submissions()
+                ->where('user_id', Auth::id())
+                ->where('outdated', false)
+                ->first();
+
+            if ($submission === null) {
+                $submission = $exam->submissions()->create([
+                    'user_id' => Auth::id(),
+                    'started_at' => now(),
+                ]);
+            }
 
             // prevent resubmission
             if ($submission->submitted_at) {

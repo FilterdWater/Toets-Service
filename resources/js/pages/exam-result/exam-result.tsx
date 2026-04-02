@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import { Pie, PieChart } from 'recharts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import {
     Table,
     TableBody,
@@ -22,7 +22,7 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString, formatDuration } from '@/lib/utils';
 import ResultStatCard from '@/pages/student/components/result-stat-card';
-import { exams, examResults } from '@/routes';
+import { exams, examResults, submissionAllowRetake } from '@/routes';
 import type { BreadcrumbItem, Exam } from '@/types';
 
 type StudentResult = {
@@ -37,6 +37,7 @@ type StudentResult = {
     score: number;
     submitted_at: string | null;
     duration_in_seconds: number | null;
+    outdated: boolean;
 };
 
 type ExamResultProps = {
@@ -92,11 +93,29 @@ export default function ExamResult({
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Resultaten - ${exam.name}`} />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
-                <h1 className="text-2xl font-bold">{exam.name}</h1>
-                {exam.description && (
-                    <p className="text-muted-foreground">{exam.description}</p>
-                )}
+            <div className="flex h-full flex-1 flex-col gap-6 rounded-xl p-4">
+                <div>
+                    <h1 className="text-2xl font-bold">{exam.name}</h1>
+                    {exam.description && (
+                        <p className="mt-2 text-muted-foreground">
+                            {exam.description}
+                        </p>
+                    )}
+                    {exam.sections && exam.sections.length > 0 && (
+                        <div className="mt-4 rounded-lg border border-border/80 bg-muted/40 p-4">
+                            <p className="mb-2 text-sm font-medium text-foreground">
+                                Secties
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                                {exam.sections.map((section) => (
+                                    <Badge key={section.id} variant="secondary">
+                                        {section.name}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                     <ResultStatCard title="Inzendingen">
@@ -113,18 +132,21 @@ export default function ExamResult({
                     </ResultStatCard>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                    <Card className="lg:col-span-2">
-                        <CardHeader>
-                            <CardTitle>Resultaten per student</CardTitle>
+                <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
+                    <Card className="min-w-0 xl:col-span-3">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">
+                                Resultaten per student
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="pt-0">
                             {results.length === 0 ? (
                                 <p className="text-muted-foreground">
                                     Nog geen inzendingen.
                                 </p>
                             ) : (
-                                <Table>
+                                <div className="overflow-x-auto rounded-md border">
+                                    <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Student</TableHead>
@@ -133,6 +155,9 @@ export default function ExamResult({
                                             <TableHead>Tijdsduur</TableHead>
                                             <TableHead>Ingeleverd</TableHead>
                                             <TableHead>Status</TableHead>
+                                            <TableHead className="w-[140px]">
+                                                Herkansen
+                                            </TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -166,7 +191,11 @@ export default function ExamResult({
                                                     )}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {r.score >= 5.5 ? (
+                                                    {r.outdated ? (
+                                                        <Badge variant="secondary">
+                                                            Herkansen
+                                                        </Badge>
+                                                    ) : r.score >= 5.5 ? (
                                                         <Badge variant="student">
                                                             Voldoende
                                                         </Badge>
@@ -176,17 +205,52 @@ export default function ExamResult({
                                                         </Badge>
                                                     )}
                                                 </TableCell>
+                                                <TableCell>
+                                                    {r.outdated ? (
+                                                        <span className="text-sm text-muted-foreground">
+                                                            Toegestaan
+                                                        </span>
+                                                    ) : r.score >= 5.5 ? (
+                                                        <span className="text-sm text-muted-foreground">
+                                                            —
+                                                        </span>
+                                                    ) : (
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                router.post(
+                                                                    submissionAllowRetake.url(
+                                                                        {
+                                                                            exam: exam.id,
+                                                                            submission:
+                                                                                r.id,
+                                                                        },
+                                                                    ),
+                                                                    {},
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                );
+                                                            }}
+                                                        >
+                                                            Herkansen toestaan
+                                                        </Button>
+                                                    )}
+                                                </TableCell>
                                             </TableRow>
                                         ))}
                                     </TableBody>
                                 </Table>
+                                </div>
                             )}
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Verdeling</CardTitle>
+                    <Card className="xl:col-span-1">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-lg">Verdeling</CardTitle>
                         </CardHeader>
                         <CardContent>
                             {summary.total_submissions === 0 ? (
@@ -259,17 +323,6 @@ export default function ExamResult({
                         </CardContent>
                     </Card>
                 </div>
-
-                {exam.sections && exam.sections.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        <Label>Secties:</Label>
-                        {exam.sections.map((section) => (
-                            <Badge key={section.id} variant="secondary">
-                                {section.name}
-                            </Badge>
-                        ))}
-                    </div>
-                )}
             </div>
         </AppLayout>
     );
