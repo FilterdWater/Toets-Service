@@ -10,7 +10,6 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class TakeExamController extends Controller
 {
@@ -190,8 +189,8 @@ class TakeExamController extends Controller
             ->with('userAnswers.selectedAnswer')
             ->first();
 
-        if($submission == null || $submission->submitted_at == null) {
-            return back()->with('error', "Dit examen heeft geen resultaat of is niet van jou.");
+        if ($submission == null || $submission->submitted_at == null) {
+            return back()->with('error', 'Dit examen heeft geen resultaat of is niet van jou.');
         }
 
         $totalQuestions = 0;
