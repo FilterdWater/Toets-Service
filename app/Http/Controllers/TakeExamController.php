@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Models\Submission;
 use Carbon\Carbon;
