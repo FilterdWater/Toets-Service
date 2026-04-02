@@ -3,13 +3,7 @@ import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogTitle,
@@ -25,13 +19,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import AppLayout from '@/layouts/app-layout';
 import {
     attachExam,
@@ -45,12 +37,6 @@ import {
     detachExam as detachExamRoute,
 } from '@/routes';
 import type { BreadcrumbItem, Exam, User, Group } from '@/types';
-import {
-    Sheet,
-    SheetContent,
-    SheetHeader,
-    SheetTitle,
-} from '@/components/ui/sheet';
 
 type GroupOverviewProps = Group & {
     users: User[];
@@ -189,7 +175,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
             />
             <Head title="Docent" />
             <div className="grid-cols flex h-full flex-1 flex-col gap-4 overflow-auto rounded-xl p-4 md:flex-row">
-                <div className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
                     {groups.map((g) => {
                         return (
                             <Card
@@ -224,8 +210,8 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                 </div>
                 <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                     <SheetContent className="w-[90vw] max-w-250! overflow-auto px-5 pb-6">
-                        <SheetHeader className="flex flex-row items-center -ml-4 justify-between mt-8">
-                            <SheetTitle className='text-2xl'>
+                        <SheetHeader className="mt-8 -ml-4 flex flex-row items-center justify-between">
+                            <SheetTitle className="text-2xl">
                                 {selectedGroup?.name ?? 'Geen groep gekozen'}
                             </SheetTitle>
 
