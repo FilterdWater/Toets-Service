@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Menu } from 'lucide-react';
+import { LogOut, Menu, Settings } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
@@ -29,6 +29,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
 import type { BreadcrumbItem, NavItem } from '@/types';
+import { edit } from '@/routes/profile';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];
@@ -159,7 +160,17 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56" align="end">
+                            <DropdownMenuContent className="w-40" align="end">
+                                <DropdownMenuItem asChild>
+                                    <Link
+                                        className="block w-full cursor-pointer"
+                                        href={edit()}
+                                        prefetch
+                                    >
+                                        <Settings className="mr-2" />
+                                        Settings
+                                    </Link>
+                                </DropdownMenuItem>
                                 <DropdownMenuItem asChild>
                                     <Link
                                         className="block w-full cursor-pointer"
@@ -167,6 +178,7 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                                         as="button"
                                         data-test="logout-button"
                                     >
+                                        <LogOut className="mr-2" />
                                         Uitloggen
                                     </Link>
                                 </DropdownMenuItem>
