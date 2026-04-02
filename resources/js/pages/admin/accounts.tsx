@@ -1,6 +1,6 @@
 import { Head, router, Link, usePage } from '@inertiajs/react';
 import { ImportIcon, UserRoundPlus, UserRoundPen } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import AlertError from '@/components/alert-error';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +36,7 @@ import RolSelector, {
     SelectorMode,
 } from '@/pages/admin/components/rol-selector';
 import { accountCreate, accountEdit, accountImport, accounts } from '@/routes';
-import type { BreadcrumbItem, User } from '@/types';
+import type { BreadcrumbItem, PaginatedUsers, User } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -46,12 +46,12 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 type AccountsPageProps = {
-    users: User[];
+    users: PaginatedUsers;
+    selectedRole: RoleFilter;
 };
 
 export default function Account() {
-    const { users } = usePage<AccountsPageProps>().props;
-    const [selectedRole, setSelectedRole] = useState<RoleFilter>('all');
+    const { users, selectedRole } = usePage<AccountsPageProps>().props;
     const [importResponse, setImportResponse] = useState<{
         success: boolean;
         message: string;
@@ -89,13 +89,17 @@ export default function Account() {
         });
     }
 
-    const filteredUsers = useMemo(() => {
-        if (selectedRole === 'all') {
-            return users;
-        }
+    function handleRoleChange(role: RoleFilter): void {
+        router.get(accounts.url(), role === 'all' ? {} : { role }, {
+            preserveState: true,
+        });
+    }
 
-        return users.filter((user) => user.role === selectedRole);
-    }, [selectedRole, users]);
+    function navigateToPage(url: string | null): void {
+        if (url) {
+            router.get(url, {}, { preserveState: true });
+        }
+    }
 
     return (
         <AppLayout
@@ -159,7 +163,7 @@ export default function Account() {
                                     value={selectedRole}
                                     placeholder="Filter op rol"
                                     mode={SelectorMode.Filter}
-                                    onValueChange={setSelectedRole}
+                                    onValueChange={handleRoleChange}
                                 />
                             </TableHead>
                             <TableHead>Status</TableHead>
@@ -169,7 +173,7 @@ export default function Account() {
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredUsers.map((user: User) => (
+                        {users.data.map((user: User) => (
                             <TableRow key={user.id}>
                                 <TableCell>{user.name}</TableCell>
                                 <TableCell>{user.email}</TableCell>
@@ -208,6 +212,36 @@ export default function Account() {
                         ))}
                     </TableBody>
                 </Table>
+                {users.last_page > 1 && (
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            {users.total} account(s) — pagina{' '}
+                            {users.current_page} van {users.last_page}
+                        </p>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!users.prev_page_url}
+                                onClick={() =>
+                                    navigateToPage(users.prev_page_url)
+                                }
+                            >
+                                Vorige
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!users.next_page_url}
+                                onClick={() =>
+                                    navigateToPage(users.next_page_url)
+                                }
+                            >
+                                Volgende
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Import Dialog */}
