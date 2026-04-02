@@ -33,17 +33,16 @@ import type { BreadcrumbItem, User } from '@/types';
 
 type AccountEditProps = {
     user: User;
-    backUrl?: string | null;
 };
 
-export default function AccountEdit({ user, backUrl }: AccountEditProps) {
+export default function AccountEdit({ user }: AccountEditProps) {
     const [isPasswordOpen, setIsPasswordOpen] = useState(false);
     const [activeProcessing, setActiveProcessing] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Accounts',
-            href: backUrl ?? accounts(),
+            href: accounts(),
         },
         {
             title: 'Wijzig account',
@@ -197,7 +196,7 @@ export default function AccountEdit({ user, backUrl }: AccountEditProps) {
                         </div>
                     </form>
                     <Button variant="outline" className="mt-4 w-full" asChild>
-                        <Link href={backUrl ?? accounts()}>
+                        <Link href={accounts()}>
                             <ArrowLeftIcon />
                             Terug naar accounts
                         </Link>
