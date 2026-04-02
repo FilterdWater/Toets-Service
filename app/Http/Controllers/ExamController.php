@@ -82,7 +82,6 @@ class ExamController extends Controller
 
         $submissions = Submission::where('exam_id', $exam->id)
             ->whereNotNull('submitted_at')
-            ->where('outdated', false)
             ->with(['user', 'userAnswers.selectedAnswer'])
             ->latest('submitted_at')
             ->get();
@@ -112,14 +111,16 @@ class ExamController extends Controller
                     : 0,
                 'submitted_at' => $submission->submitted_at,
                 'duration_in_seconds' => $durationInSeconds,
+                'outdated' => $submission->outdated,
             ];
         });
 
-        $totalSubmissions = $results->count();
+        $currentResults = $results->where('outdated', false);
+        $totalSubmissions = $currentResults->count();
         $averageScore = $totalSubmissions > 0
-            ? round($results->avg('score'), 1)
+            ? round($currentResults->avg('score'), 1)
             : 0;
-        $passedCount = $results->where('score', '>=', 5.5)->count();
+        $passedCount = $currentResults->where('score', '>=', 5.5)->count();
 
         return Inertia::render('exam-result/exam-result', [
             'exam' => new ExamResource($exam),
@@ -139,5 +140,39 @@ class ExamController extends Controller
         $exam->delete();
 
         return redirect('/docent/toetsen')->with('success', 'toets succesvol verwijderd');
+    }
+
+    /**
+     * Marks the submission as outdated so the student may start a new attempt. Irreversible.
+     * Only allowed for insufficient (onvoldoende) scores.
+     */
+    public function allowSubmissionRetake(Exam $exam, Submission $submission): RedirectResponse
+    {
+        abort_unless($submission->exam_id === $exam->id, 404);
+
+        if ($submission->submitted_at === null) {
+            abort(422);
+        }
+
+        if ($submission->outdated) {
+            abort(422);
+        }
+
+        $submission->load('userAnswers.selectedAnswer');
+        $totalQuestions = $submission->userAnswers->count();
+        $correctAnswers = $submission->userAnswers
+            ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
+            ->count();
+        $score = $totalQuestions > 0
+            ? round(($correctAnswers / $totalQuestions) * 10, 1)
+            : 0;
+
+        if ($score >= 5.5) {
+            abort(422);
+        }
+
+        $submission->update(['outdated' => true]);
+
+        return back();
     }
 }
