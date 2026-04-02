@@ -42,26 +42,7 @@ test('exams index can navigate to page 2', function (): void {
     );
 });
 
-test('exam create passes back url when referer is a different page', function (): void {
-    $teacher = User::factory()->create([
-        'role' => Role::Docent,
-    ]);
-
-    $fromUrl = route('exams', ['page' => 2]);
-
-    $this->actingAs($teacher);
-
-    $response = $this->withHeader('Referer', $fromUrl)
-        ->get(route('createExam'));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn ($page) => $page
-        ->component('exam/exam')
-        ->where('backUrl', url($fromUrl))
-    );
-});
-
-test('exam create back url is null when there is no referer (direct load)', function (): void {
+test('exam create page renders', function (): void {
     $teacher = User::factory()->create([
         'role' => Role::Docent,
     ]);
@@ -73,31 +54,10 @@ test('exam create back url is null when there is no referer (direct load)', func
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('exam/exam')
-        ->where('backUrl', null)
     );
 });
 
-test('exam edit passes back url when referer is a different page', function (): void {
-    $teacher = User::factory()->create([
-        'role' => Role::Docent,
-    ]);
-
-    $exam = Exam::factory()->create();
-    $fromUrl = route('exams', ['page' => 2]);
-
-    $this->actingAs($teacher);
-
-    $response = $this->withHeader('Referer', $fromUrl)
-        ->get(route('getExam', $exam->id));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn ($page) => $page
-        ->component('exam/exam')
-        ->where('backUrl', url($fromUrl))
-    );
-});
-
-test('exam edit back url is null when there is no referer (direct load / refresh)', function (): void {
+test('exam edit page renders', function (): void {
     $teacher = User::factory()->create([
         'role' => Role::Docent,
     ]);
@@ -111,51 +71,11 @@ test('exam edit back url is null when there is no referer (direct load / refresh
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('exam/exam')
-        ->where('backUrl', null)
+        ->has('exam')
     );
 });
 
-test('exam edit back url is null when referer is the same page (refresh)', function (): void {
-    $teacher = User::factory()->create([
-        'role' => Role::Docent,
-    ]);
-
-    $exam = Exam::factory()->create();
-    $editUrl = route('getExam', $exam->id);
-
-    $this->actingAs($teacher);
-
-    $response = $this->withHeader('Referer', $editUrl)
-        ->get($editUrl);
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn ($page) => $page
-        ->component('exam/exam')
-        ->where('backUrl', null)
-    );
-});
-
-test('exam results passes back url when referer is a different page', function (): void {
-    $teacher = User::factory()->create([
-        'role' => Role::Docent,
-    ]);
-
-    $exam = Exam::factory()->create();
-    $fromUrl = route('exams', ['page' => 2]);
-
-    $this->actingAs($teacher);
-
-    $response = $this->withHeader('Referer', $fromUrl)
-        ->get(route('examResults', $exam));
-
-    $response->assertSuccessful();
-    $response->assertInertia(fn ($page) => $page
-        ->component('exam-result/exam-result')
-        ->where('backUrl', url($fromUrl))
-    );
-});
-
-test('exam results back url is null when there is no referer (direct load / refresh)', function (): void {
+test('exam results page renders', function (): void {
     $teacher = User::factory()->create([
         'role' => Role::Docent,
     ]);
@@ -169,6 +89,6 @@ test('exam results back url is null when there is no referer (direct load / refr
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
         ->component('exam-result/exam-result')
-        ->where('backUrl', null)
+        ->has('exam')
     );
 });

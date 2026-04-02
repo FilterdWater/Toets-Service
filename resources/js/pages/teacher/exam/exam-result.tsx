@@ -22,7 +22,12 @@ import {
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString, formatDuration } from '@/lib/utils';
 import ResultStatCard from '@/pages/student/components/result-stat-card';
-import { exams, examResults, submissionAllowRetake } from '@/routes';
+import {
+    examResults,
+    examSubmissionDetail,
+    exams,
+    submissionAllowRetake,
+} from '@/routes';
 import type { BreadcrumbItem, Exam } from '@/types';
 
 type StudentResult = {
@@ -49,7 +54,6 @@ type ExamResultProps = {
         passed_count: number;
         failed_count: number;
     };
-    backUrl?: string | null;
 };
 
 const chartConfig = {
@@ -67,10 +71,9 @@ export default function ExamResult({
     exam,
     results,
     summary,
-    backUrl,
 }: ExamResultProps) {
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Toetsen', href: backUrl ?? exams() },
+        { title: 'Toetsen', href: exams() },
         {
             title: exam.name,
             href: examResults.url({ exam: exam.id }),
@@ -162,7 +165,21 @@ export default function ExamResult({
                                     </TableHeader>
                                     <TableBody>
                                         {results.map((r) => (
-                                            <TableRow key={r.id}>
+                                            <TableRow
+                                                key={r.id}
+                                                className="cursor-pointer hover:bg-muted/60"
+                                                onClick={() => {
+                                                    router.get(
+                                                        examSubmissionDetail.url(
+                                                            {
+                                                                exam: exam.id,
+                                                                submission:
+                                                                    r.id,
+                                                            },
+                                                        ),
+                                                    );
+                                                }}
+                                            >
                                                 <TableCell>
                                                     <div>
                                                         <p className="font-medium">
@@ -219,7 +236,8 @@ export default function ExamResult({
                                                             type="button"
                                                             variant="outline"
                                                             size="sm"
-                                                            onClick={() => {
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
                                                                 router.post(
                                                                     submissionAllowRetake.url(
                                                                         {

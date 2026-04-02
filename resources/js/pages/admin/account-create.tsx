@@ -14,15 +14,11 @@ import { accounts, accountCreate } from '@/routes';
 import { accountStore } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
-type AccountCreateProps = {
-    backUrl?: string | null;
-};
-
-export default function AccountCreate({ backUrl }: AccountCreateProps) {
+export default function AccountCreate() {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Accounts',
-            href: backUrl ?? accounts(),
+            href: accounts(),
         },
         {
             title: 'Creëer account',
@@ -126,7 +122,7 @@ export default function AccountCreate({ backUrl }: AccountCreateProps) {
                                 Creëer account
                             </Button>
                             <Button variant="outline" asChild>
-                                <Link href={backUrl ?? accounts()}>
+                                <Link href={accounts()}>
                                     Annuleren
                                 </Link>
                             </Button>

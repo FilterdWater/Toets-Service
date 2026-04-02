@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ExamResource;
 use App\Models\Exam;
+use App\Models\Question;
 use App\Models\Submission;
+use App\Models\UserAnswer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,22 +28,19 @@ class ExamController extends Controller
     }
 
     // the edit function is at the same time also the show method for the admin and teacher
-    public function showEdit(Request $request, $examId): Response
+    public function showEdit($examId): Response
     {
         $exam = Exam::where('id', $examId)->firstOrFail();
 
         return Inertia::render('exam/exam', [
             'exam' => new ExamResource($exam),
-            'backUrl' => $this->resolveBackUrl($request),
         ]);
     }
 
     // this is used to show the page for creating a new exam
-    public function showCreate(Request $request): Response
+    public function showCreate(): Response
     {
-        return Inertia::render('exam/exam', [
-            'backUrl' => $this->resolveBackUrl($request),
-        ]);
+        return Inertia::render('exam/exam');
     }
 
     // this is used to store the exam in the database
@@ -76,7 +76,7 @@ class ExamController extends Controller
         return back()->with('success', 'Exam succesvol gewijzigd.');
     }
 
-    public function showResults(Request $request, Exam $exam): Response
+    public function showResults(Exam $exam): Response
     {
         $exam->load('sections');
 
@@ -131,8 +131,107 @@ class ExamController extends Controller
                 'passed_count' => $passedCount,
                 'failed_count' => $totalSubmissions - $passedCount,
             ],
-            'backUrl' => $this->resolveBackUrl($request),
         ]);
+    }
+
+    public function showSubmissionDetail(Exam $exam, Submission $submission): Response
+    {
+        abort_unless($submission->exam_id === $exam->id, 404);
+
+        if ($submission->submitted_at === null) {
+            abort(404);
+        }
+
+        $exam->load([
+            'sections' => fn ($q) => $q->orderBy('sequence_nr'),
+            'sections.questions' => fn ($q) => $q->orderBy('sequence_nr'),
+            'sections.questions.answers',
+        ]);
+
+        $submission->load('user');
+
+        $userAnswersByQuestion = $submission->userAnswers()
+            ->get()
+            ->groupBy('question_id');
+
+        $questionsPayload = [];
+        foreach ($exam->sections as $section) {
+            foreach ($section->questions as $question) {
+                $rows = $userAnswersByQuestion->get($question->id, collect());
+                $questionsPayload[] = $this->formatQuestionReview($section->name, $question, $rows);
+            }
+        }
+
+        $durationInSeconds = null;
+        if ($submission->started_at && $submission->submitted_at) {
+            $durationInSeconds = $submission->started_at->diffInSeconds($submission->submitted_at);
+        }
+
+        return Inertia::render('exam-result/exam-submission-detail', [
+            'exam' => [
+                'id' => $exam->id,
+                'name' => $exam->name,
+                'description' => $exam->description,
+            ],
+            'submission' => [
+                'id' => $submission->id,
+                'submitted_at' => $submission->submitted_at,
+                'duration_in_seconds' => $durationInSeconds,
+                'outdated' => $submission->outdated,
+                'user' => [
+                    'id' => $submission->user->id,
+                    'name' => $submission->user->name,
+                    'email' => $submission->user->email,
+                ],
+            ],
+            'questions' => $questionsPayload,
+        ]);
+    }
+
+    /**
+     * @param  Collection<int, UserAnswer>  $rows
+     * @return array<string, mixed>
+     */
+    private function formatQuestionReview(string $sectionName, Question $question, $rows): array
+    {
+        $correctIds = $question->answers->where('is_correct', true)->pluck('id')->sort()->values()->all();
+        $selectedIds = $this->selectedAnswerIdsFromUserAnswerRows($rows);
+
+        $isCorrect = null;
+        if ($question->type === 'text') {
+            $isCorrect = null;
+        } else {
+            $isCorrect = $correctIds === $selectedIds;
+        }
+
+        return [
+            'id' => $question->id,
+            'section_name' => $sectionName,
+            'title' => $question->title,
+            'text' => $question->text,
+            'type' => $question->type,
+            'is_correct' => $isCorrect,
+            'options' => $question->answers->map(fn ($a) => [
+                'id' => $a->id,
+                'answer_option' => $a->answer_option,
+                'is_correct' => (bool) $a->is_correct,
+            ])->values()->all(),
+            'student_selected_ids' => $question->type === 'text' ? [] : $selectedIds,
+            'student_text' => $question->type === 'text' ? ($rows->first()?->text_answer) : null,
+        ];
+    }
+
+    /**
+     * @param  Collection<int, UserAnswer>  $rows
+     * @return list<int>
+     */
+    private function selectedAnswerIdsFromUserAnswerRows($rows): array
+    {
+        return $rows->map(function ($userAnswer) {
+            $raw = $userAnswer->getRawOriginal('selected_answer');
+
+            return is_numeric($raw) ? (int) $raw : null;
+        })->filter()->unique()->sort()->values()->all();
     }
 
     public function destroy(Exam $exam): RedirectResponse
