@@ -25,7 +25,7 @@ class GroupController extends Controller
             fn () => Exam::all()
         );
 
-        return Inertia::render('groups/groups', [
+        return Inertia::render('teacher/groups/groups', [
             'groups' => $groups,
             'students' => $students,
             'exams' => $exams,

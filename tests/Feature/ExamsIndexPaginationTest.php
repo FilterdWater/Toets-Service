@@ -17,7 +17,7 @@ test('exams index returns paginated exams', function (): void {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('exam/exams')
+        ->component('teacher/exam/exams')
         ->has('exams.data', 10)
         ->where('exams.total', 15)
         ->where('exams.last_page', 2)
@@ -53,7 +53,7 @@ test('exam create page renders', function (): void {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('exam/exam')
+        ->component('teacher/exam/exam')
     );
 });
 
@@ -70,7 +70,7 @@ test('exam edit page renders', function (): void {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('exam/exam')
+        ->component('teacher/exam/exam')
         ->has('exam')
     );
 });
@@ -88,7 +88,7 @@ test('exam results page renders', function (): void {
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('exam-result/exam-result')
+        ->component('teacher/exam/exam-result')
         ->has('exam')
     );
 });
