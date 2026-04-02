@@ -206,7 +206,14 @@ class TakeExamController extends Controller
         }
 
         return Inertia::render('student/exam-result', [
-            'exam' => new ExamResource($exam),
+            'exam' => array_merge(
+                $exam->toArray(),
+                [
+                    'created_at' => $exam->created_at?->format('d-m-Y H:i'),
+                    'updated_at' => $exam->updated_at?->format('d-m-Y H:i'),
+                    'sections' => $exam->sections,
+                ]
+            ),
             'result' => [
                 'total_questions' => $totalQuestions,
                 'correct_answers' => $correctAnswers,

@@ -5,18 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Exam extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'id',
         'name',
         'description',
         'active_from',
         'active_until',
         'globally_available',
         'max_mistakes',
+        'created_at',
+        'updated_at',
+        'sequence_nr',
+        'new_page',
     ];
 
     protected $casts = [
@@ -35,12 +41,12 @@ class Exam extends Model
         return $this->belongsToMany(Group::class, 'groups_has_exams');
     }
 
-    public function submissions()
+    public function submissions(): HasMany
     {
         return $this->hasMany(Submission::class);
     }
 
-    public function sections()
+    public function sections(): HasMany
     {
         return $this->hasMany(Section::class)->orderBy('sequence_nr');
     }

@@ -5,8 +5,8 @@ export type Section = {
     name: string;
     new_page: boolean;
     sequence_nr: number;
-    exam_id: number;
-    created_at: string;
-    updated_at: string;
+    exam_id?: number;
+    created_at?: string;
+    updated_at?: string;
     questions?: Question[];
 };

@@ -195,6 +195,11 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'sections.*.name' => 'sectienaam',
+        'sections.*.sequence_nr' => 'sectie volgnummer',
+        'sections.*.questions.*.title' => 'vraag titel',
+        'sections.*.questions.*.sequence_nr' => 'vraag volgnummer',
+    ],
 
 ];

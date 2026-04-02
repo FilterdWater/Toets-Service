@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Submission extends Model
 {
@@ -34,7 +35,7 @@ class Submission extends Model
         return $this->belongsTo(Exam::class);
     }
 
-    public function userAnswers()
+    public function userAnswers(): HasMany
     {
         return $this->hasMany(UserAnswer::class);
     }
