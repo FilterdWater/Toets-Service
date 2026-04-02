@@ -13,10 +13,15 @@ import {
 } from '@/components/ui/card';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import {
+    TooltipProvider,
+    TooltipTrigger,
+    Tooltip,
+    TooltipContent,
+} from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { getExam, storeExam, updateExam, deleteExam } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
@@ -448,16 +453,29 @@ export function SectionCard({
                         )}
                     </Field>
                     <div className="flex items-center space-x-2">
-                        <Label htmlFor="airplane-mode">
-                            Begint op nieuwe pagina
-                        </Label>
-                        <Switch
-                            id="section_available"
-                            checked={section.new_page}
-                            onCheckedChange={(checked) =>
-                                onChange({ ...section, new_page: checked })
-                            }
-                        />
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center">
+                                        <Switch
+                                            id="section_available"
+                                            checked={section.new_page}
+                                            onCheckedChange={(checked) =>
+                                                onChange({
+                                                    ...section,
+                                                    new_page: checked,
+                                                })
+                                            }
+                                        />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>
+                                        Deze sectie start op een nieuwe pagina
+                                    </p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </div>
                 <Button variant="destructive" onClick={() => onChange(null)}>
@@ -489,40 +507,42 @@ export function QuestionCard({ question, onChange }: QuestionCardProps) {
     return (
         <Card>
             <CardContent>
-                <div>{question.sequence_nr}</div>
-                <Field>
-                    <FieldLabel htmlFor="question_title">
-                        Vraag titel
-                    </FieldLabel>
-                    <Input
-                        id="question_title"
-                        type="text"
-                        placeholder="Titel"
-                        value={question.title}
-                        onChange={(e) =>
-                            onChange({
-                                ...question,
-                                title: e.target.value,
-                            })
-                        }
-                    />
-                </Field>
-                <Field>
-                    <FieldLabel htmlFor="question_description">
-                        Vraag beschrijving/uitleg
-                    </FieldLabel>
-                    <Textarea
-                        id="question_description"
-                        placeholder="Vraag beschrijving/uitleg"
-                        value={question.text}
-                        onChange={(e) =>
-                            onChange({
-                                ...question,
-                                text: e.target.value,
-                            })
-                        }
-                    />
-                </Field>
+                <div className="flex flex-col gap-4">
+                    <div>{question.sequence_nr}</div>
+                    <Field>
+                        <FieldLabel htmlFor="question_title">
+                            Vraag titel
+                        </FieldLabel>
+                        <Input
+                            id="question_title"
+                            type="text"
+                            placeholder="Titel"
+                            value={question.title}
+                            onChange={(e) =>
+                                onChange({
+                                    ...question,
+                                    title: e.target.value,
+                                })
+                            }
+                        />
+                    </Field>
+                    <Field>
+                        <FieldLabel htmlFor="question_description">
+                            Vraag beschrijving/uitleg
+                        </FieldLabel>
+                        <Textarea
+                            id="question_description"
+                            placeholder="Vraag beschrijving/uitleg"
+                            value={question.text}
+                            onChange={(e) =>
+                                onChange({
+                                    ...question,
+                                    text: e.target.value,
+                                })
+                            }
+                        />
+                    </Field>
+                </div>
             </CardContent>
         </Card>
     );

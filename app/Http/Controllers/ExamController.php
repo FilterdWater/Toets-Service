@@ -75,12 +75,12 @@ class ExamController extends Controller
             'sections.*.name' => ['required', 'string'],
             'sections.*.sequence_nr' => ['required', 'integer', 'distinct'],
             'sections.*.new_page' => ['required', 'boolean'],
-            'sections.*.questions' => ['array'],
-            'sections.*.questions.*.id' => ['nullable', 'integer'],
-            'sections.*.questions.*.title' => ['required', 'string'],
-            'sections.*.questions.*.text' => ['nullable', 'string'],
-            'sections.*.questions.*.type' => ['required', 'string'],
-            'sections.*.questions.*.sequence_nr' => ['required', 'integer', 'distinct'],
+            //            'sections.*.questions' => ['array'],
+            //            'sections.*.questions.*.id' => ['nullable', 'integer'],
+            //            'sections.*.questions.*.title' => ['required', 'string'],
+            //            'sections.*.questions.*.text' => ['nullable', 'string'],
+            //            'sections.*.questions.*.type' => ['required', 'string'],
+            //            'sections.*.questions.*.sequence_nr' => ['required', 'integer', 'distinct'],
         ]);
 
         DB::transaction(function () use ($validated, $exam) {
@@ -101,20 +101,21 @@ class ExamController extends Controller
                 );
 
                 // this here deletes all questions that are not present in the data sent from the frontend
-                $questionIds = collect($sectionData['questions'] ?? [])->pluck('id')->filter()->toArray();
-                $section->questions()->whereNotIn('id', $questionIds)->delete();
-
-                foreach ($sectionData['questions'] ?? [] as $questionData) {
-                    $section->questions()->updateOrCreate(
-                        ['id' => $questionData['id'] ?? null],
-                        [
-                            'title' => $questionData['title'],
-                            'text' => $questionData['text'],
-                            'type' => $questionData['type'],
-                            'sequence_nr' => $questionData['sequence_nr'],
-                        ]
-                    );
-                }
+                // COMMENTED OUT SO THE REQ FUNC OF THE BRANCH WORKS THIS IS FOR US-13/14
+                //                $questionIds = collect($sectionData['questions'] ?? [])->pluck('id')->filter()->toArray();
+                //                $section->questions()->whereNotIn('id', $questionIds)->delete();
+                //
+                //                foreach ($sectionData['questions'] ?? [] as $questionData) {
+                //                    $section->questions()->updateOrCreate(
+                //                        ['id' => $questionData['id'] ?? null],
+                //                        [
+                //                            'title' => $questionData['title'],
+                //                            'text' => $questionData['text'],
+                //                            'type' => $questionData['type'],
+                //                            'sequence_nr' => $questionData['sequence_nr'],
+                //                        ]
+                //                    );
+                //                }
             }
         });
 
