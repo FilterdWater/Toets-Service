@@ -169,10 +169,22 @@ export default function ExamResult({ exam, result }: ExamResultProps) {
                                   10
                               ).toFixed(1)
                             : '0.0'}
+
+                        <span className="relative -top-1 pl-2 text-xs text-muted-foreground">
+                            {result.correct_answers >=
+                            result.total_questions * 0.55 ? (
+                                <Badge variant="student">Voldoende</Badge>
+                            ) : (
+                                <Badge variant="admin">Onvoldoende</Badge>
+                            )}
+                        </span>
                     </ResultStatCard>
 
                     <ResultStatCard title="Resultaat">
-                        {result.correct_answers} / {result.total_questions}
+                        {result.correct_answers} / {result.total_questions}{' '}
+                        <span className="text-xs text-muted-foreground">
+                            zijn goed beantwoord
+                        </span>
                     </ResultStatCard>
 
                     <ResultStatCard title="Tijdsduur">

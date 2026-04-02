@@ -15,7 +15,7 @@ export default function ResultStatCard({
             <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
                 <CardTitle className="text-lg">{title}</CardTitle>
             </CardHeader>
-            <CardContent className="flex items-center justify-start gap-1 pt-0">
+            <CardContent className="flex items-center justify-start gap-1 pt-0 pl-6">
                 <span className="text-6xl font-semibold">{children}</span>
             </CardContent>
         </Card>
