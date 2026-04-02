@@ -53,7 +53,7 @@ class ExamController extends Controller
 
         Exam::create($validatedData);
 
-        return redirect('/docent/toetsen')->with('success', 'toets succesvol opgeslagen');
+        return redirect('/docent/toetsen')->with('success', 'Toets succesvol opgeslagen');
     }
 
     public function update(Request $request, Exam $exam): RedirectResponse

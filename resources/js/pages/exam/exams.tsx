@@ -1,4 +1,4 @@
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
 import {
     flexRender,
@@ -114,18 +114,12 @@ export default function Exams() {
             },
             {
                 id: 'results',
-                header: '',
+                header: 'Resultaten',
                 cell: ({ row }) => (
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() =>
-                            router.visit(
-                                examResults.url({ exam: row.original.id }),
-                            )
-                        }
-                    >
-                        Resultaten
+                    <Button size="sm" variant="link">
+                        <Link href={examResults.url({ exam: row.original.id })}>
+                            Resultaten
+                        </Link>
                     </Button>
                 ),
             },
