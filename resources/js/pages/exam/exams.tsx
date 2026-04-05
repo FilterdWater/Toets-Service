@@ -8,6 +8,8 @@ import {
 } from '@tanstack/react-table';
 import {
     ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
     BookPlus,
     Trash2Icon,
     MoreHorizontal,
@@ -75,12 +77,19 @@ export default function Exams() {
                 header: ({ column }) => (
                     <Button
                         variant="ghost"
+                        className={column.getIsSorted() ? 'bg-accent' : ''}
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() === 'asc')
                         }
                     >
                         Naam
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === 'asc' ? (
+                            <ArrowUp className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ArrowDown className="ml-2 h-4 w-4" />
+                        ) : (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 ),
             },
@@ -93,12 +102,19 @@ export default function Exams() {
                 header: ({ column }) => (
                     <Button
                         variant="ghost"
+                        className={column.getIsSorted() ? 'bg-accent' : ''}
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() === 'asc')
                         }
                     >
                         Actief vanaf
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === 'asc' ? (
+                            <ArrowUp className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ArrowDown className="ml-2 h-4 w-4" />
+                        ) : (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 ),
                 cell: ({ row }) =>
@@ -109,12 +125,19 @@ export default function Exams() {
                 header: ({ column }) => (
                     <Button
                         variant="ghost"
+                        className={column.getIsSorted() ? 'bg-accent' : ''}
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() === 'asc')
                         }
                     >
                         Actief tot
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === 'asc' ? (
+                            <ArrowUp className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ArrowDown className="ml-2 h-4 w-4" />
+                        ) : (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 ),
                 cell: ({ row }) =>
@@ -137,12 +160,19 @@ export default function Exams() {
                 header: ({ column }) => (
                     <Button
                         variant="ghost"
+                        className={column.getIsSorted() ? 'bg-accent' : ''}
                         onClick={() =>
                             column.toggleSorting(column.getIsSorted() === 'asc')
                         }
                     >
                         Max fouten
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                        {column.getIsSorted() === 'asc' ? (
+                            <ArrowUp className="ml-2 h-4 w-4" />
+                        ) : column.getIsSorted() === 'desc' ? (
+                            <ArrowDown className="ml-2 h-4 w-4" />
+                        ) : (
+                            <ArrowUpDown className="ml-2 h-4 w-4" />
+                        )}
                     </Button>
                 ),
             },
