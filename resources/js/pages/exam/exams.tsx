@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import type { Column } from '@tanstack/react-table';
 import {
     flexRender,
     getCoreRowModel,
@@ -61,6 +62,26 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: exams(),
     },
 ];
+
+function SortableHeader({ label }: { label: string }) {
+    return ({ column }: { column: Column<Exam> }) => (
+        <Button
+            variant="ghost"
+            className={column.getIsSorted() ? 'bg-accent' : ''}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+            {label}
+            {column.getIsSorted() === 'asc' ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === 'desc' ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+            ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            )}
+        </Button>
+    );
+}
+
 export default function Exams() {
     const { exams } = usePage<{ exams: PaginatedExams }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -74,24 +95,7 @@ export default function Exams() {
         () => [
             {
                 accessorKey: 'name',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        className={column.getIsSorted() ? 'bg-accent' : ''}
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Naam
-                        {column.getIsSorted() === 'asc' ? (
-                            <ArrowUp className="ml-2 h-4 w-4" />
-                        ) : column.getIsSorted() === 'desc' ? (
-                            <ArrowDown className="ml-2 h-4 w-4" />
-                        ) : (
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                        )}
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Naam' }),
             },
             {
                 accessorKey: 'description',
@@ -99,47 +103,13 @@ export default function Exams() {
             },
             {
                 accessorKey: 'active_from',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        className={column.getIsSorted() ? 'bg-accent' : ''}
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Actief vanaf
-                        {column.getIsSorted() === 'asc' ? (
-                            <ArrowUp className="ml-2 h-4 w-4" />
-                        ) : column.getIsSorted() === 'desc' ? (
-                            <ArrowDown className="ml-2 h-4 w-4" />
-                        ) : (
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                        )}
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Actief vanaf' }),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_from),
             },
             {
                 accessorKey: 'active_until',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        className={column.getIsSorted() ? 'bg-accent' : ''}
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Actief tot
-                        {column.getIsSorted() === 'asc' ? (
-                            <ArrowUp className="ml-2 h-4 w-4" />
-                        ) : column.getIsSorted() === 'desc' ? (
-                            <ArrowDown className="ml-2 h-4 w-4" />
-                        ) : (
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                        )}
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Actief tot' }),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_until),
             },
@@ -157,24 +127,7 @@ export default function Exams() {
             },
             {
                 accessorKey: 'max_mistakes',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        className={column.getIsSorted() ? 'bg-accent' : ''}
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Max fouten
-                        {column.getIsSorted() === 'asc' ? (
-                            <ArrowUp className="ml-2 h-4 w-4" />
-                        ) : column.getIsSorted() === 'desc' ? (
-                            <ArrowDown className="ml-2 h-4 w-4" />
-                        ) : (
-                            <ArrowUpDown className="ml-2 h-4 w-4" />
-                        )}
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Max fouten' }),
             },
             {
                 id: 'results',
@@ -196,7 +149,7 @@ export default function Exams() {
         [],
     );
 
-    // eslint-disable-next-line react-hooks/incompatible-library
+     
     const table = useReactTable({
         data: exams.data,
         columns,
