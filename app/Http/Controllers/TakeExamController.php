@@ -24,8 +24,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
-                    ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
+                $query->whereHas('groups.users', fn($q) => $q->whereKey($userId))
+                    ->orWhereHas('users', fn($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now);
@@ -49,7 +49,7 @@ class TakeExamController extends Controller
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now)
-            ->whereHas('submissions', fn ($q) => $q->where('user_id', Auth::id()))
+            ->whereHas('submissions', fn($q) => $q->where('user_id', Auth::id()))
             ->get()
             ->map(function (Exam $exam) {
                 $submission = $exam->submissions()
@@ -121,7 +121,7 @@ class TakeExamController extends Controller
             $questionIds = $exam->sections()
                 ->with('questions')
                 ->get()
-                ->flatMap(fn ($s) => $s->questions->pluck('id'))
+                ->flatMap(fn($s) => $s->questions->pluck('id'))
                 ->toArray();
 
             // Check which questions are unanswered
@@ -174,7 +174,31 @@ class TakeExamController extends Controller
             return back()->with('error', 'Er is iets misgegaan');
         }
 
-        return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
+        $totalQuestions = 0;
+        $correctAnswers = 0;
+
+        if ($submission) {
+            $totalQuestions = $submission->userAnswers->count();
+            $correctAnswers = $submission->userAnswers
+                ->filter(fn($ua) => $ua->selectedAnswer?->is_correct)
+                ->count();
+        }
+
+        $durationInSeconds = null;
+        if ($submission?->started_at && $submission?->submitted_at) {
+            $durationInSeconds = $submission->started_at->diffInSeconds($submission->submitted_at);
+        }
+
+        return Inertia::render('student/exam-result', [
+            'exam' => new ExamResource($exam),
+            'result' => [
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'submitted_at' => $submission?->submitted_at,
+                'duration_in_seconds' => $durationInSeconds,
+                'has_submission' => $submission !== null,
+            ],
+        ]);
     }
 
     public function showResult(Request $request, $examId)
@@ -199,7 +223,7 @@ class TakeExamController extends Controller
         if ($submission) {
             $totalQuestions = $submission->userAnswers->count();
             $correctAnswers = $submission->userAnswers
-                ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
+                ->filter(fn($ua) => $ua->selectedAnswer?->is_correct)
                 ->count();
         }
 
