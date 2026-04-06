@@ -65,6 +65,73 @@ test('allow retake is rejected for sufficient score', function (): void {
     expect($submission->fresh()->outdated)->toBeFalse();
 });
 
+test('allow retake is permitted when multiple choice is only partially correct under per-question scoring', function (): void {
+    $this->actingAs($this->teacher);
+
+    $exam = Exam::factory()->active()->create();
+    $section = Section::factory()->create(['exam_id' => $exam->id]);
+    $question = Question::factory()->multipleChoice()->create(['section_id' => $section->id]);
+    $correctA = Answer::factory()->correct()->create(['question_id' => $question->id]);
+    Answer::factory()->correct()->create(['question_id' => $question->id]);
+
+    $student = User::factory()->create(['role' => Role::Student]);
+    $submission = Submission::factory()
+        ->forUser($student)
+        ->forExam($exam)
+        ->completed()
+        ->create([
+            'outdated' => false,
+        ]);
+
+    UserAnswer::factory()
+        ->forSubmission($submission)
+        ->forQuestion($question)
+        ->withSelectedAnswer($correctA)
+        ->create();
+
+    $response = $this->from(route('examResults', $exam))
+        ->post(route('submissionAllowRetake', [$exam, $submission]));
+
+    $response->assertRedirect();
+    expect($submission->fresh()->outdated)->toBeTrue();
+});
+
+test('allow retake is rejected when multiple choice is fully correct', function (): void {
+    $this->actingAs($this->teacher);
+
+    $exam = Exam::factory()->active()->create();
+    $section = Section::factory()->create(['exam_id' => $exam->id]);
+    $question = Question::factory()->multipleChoice()->create(['section_id' => $section->id]);
+    $correctA = Answer::factory()->correct()->create(['question_id' => $question->id]);
+    $correctB = Answer::factory()->correct()->create(['question_id' => $question->id]);
+
+    $student = User::factory()->create(['role' => Role::Student]);
+    $submission = Submission::factory()
+        ->forUser($student)
+        ->forExam($exam)
+        ->completed()
+        ->create([
+            'outdated' => false,
+        ]);
+
+    UserAnswer::factory()
+        ->forSubmission($submission)
+        ->forQuestion($question)
+        ->withSelectedAnswer($correctA)
+        ->create();
+    UserAnswer::factory()
+        ->forSubmission($submission)
+        ->forQuestion($question)
+        ->withSelectedAnswer($correctB)
+        ->create();
+
+    $response = $this->from(route('examResults', $exam))
+        ->post(route('submissionAllowRetake', [$exam, $submission]));
+
+    $response->assertStatus(422);
+    expect($submission->fresh()->outdated)->toBeFalse();
+});
+
 test('allow retake cannot be undone', function (): void {
     $this->actingAs($this->teacher);
 
