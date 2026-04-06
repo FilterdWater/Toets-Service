@@ -122,9 +122,7 @@ export default function AccountCreate() {
                                 Creëer account
                             </Button>
                             <Button variant="outline" asChild>
-                                <Link href={accounts()}>
-                                    Annuleren
-                                </Link>
+                                <Link href={accounts()}>Annuleren</Link>
                             </Button>
                         </div>
                     </form>

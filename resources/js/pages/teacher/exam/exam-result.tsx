@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { Pie, PieChart } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     ChartContainer,
@@ -10,7 +11,6 @@ import {
     ChartTooltipContent,
 } from '@/components/ui/chart';
 import type { ChartConfig } from '@/components/ui/chart';
-import { Button } from '@/components/ui/button';
 import {
     Table,
     TableBody,
