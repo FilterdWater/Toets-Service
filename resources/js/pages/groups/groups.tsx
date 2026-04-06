@@ -175,7 +175,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
             />
             <Head title="Docent" />
             <div className="grid-cols flex h-full flex-1 flex-col gap-4 overflow-auto rounded-xl p-4 md:flex-row">
-                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
+                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                     {groups.map((g) => {
                         return (
                             <Card
@@ -264,7 +264,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                         {selectedGroup.exams?.map((e) => (
                                             <div
                                                 key={e.id}
-                                                className="flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1"
+                                                className="flex items-center gap-2 rounded-full bg-accent px-3 py-1"
                                             >
                                                 <span className="text-sm">
                                                     {e.name}
@@ -274,7 +274,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                                         detachExam(e.id)
                                                     }
                                                 >
-                                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
                                                 </button>
                                             </div>
                                         ))}
@@ -300,7 +300,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                         </Button>
                                     </div>
 
-                                    <div className="mt-2 space-y-2">
+                                    <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                                         {selectedGroup.users.map((u) => (
                                             <div
                                                 key={u.id}

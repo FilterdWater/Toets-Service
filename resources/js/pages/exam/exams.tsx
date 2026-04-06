@@ -1,5 +1,6 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import type { Column } from '@tanstack/react-table';
 import {
     flexRender,
     getCoreRowModel,
@@ -8,6 +9,8 @@ import {
 } from '@tanstack/react-table';
 import {
     ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
     BookPlus,
     Trash2Icon,
     MoreHorizontal,
@@ -59,6 +62,26 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: exams(),
     },
 ];
+
+function SortableHeader({ label }: { label: string }) {
+    return ({ column }: { column: Column<Exam> }) => (
+        <Button
+            variant="ghost"
+            className={column.getIsSorted() ? 'bg-accent' : ''}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+            {label}
+            {column.getIsSorted() === 'asc' ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === 'desc' ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+            ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            )}
+        </Button>
+    );
+}
+
 export default function Exams() {
     const { exams } = usePage<{ exams: PaginatedExams }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
@@ -72,17 +95,7 @@ export default function Exams() {
         () => [
             {
                 accessorKey: 'name',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Naam
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Naam' }),
             },
             {
                 accessorKey: 'description',
@@ -90,33 +103,13 @@ export default function Exams() {
             },
             {
                 accessorKey: 'active_from',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Actief vanaf
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Actief vanaf' }),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_from),
             },
             {
                 accessorKey: 'active_until',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Actief tot
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Actief tot' }),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_until),
             },
@@ -134,17 +127,7 @@ export default function Exams() {
             },
             {
                 accessorKey: 'max_mistakes',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Max fouten
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Max fouten' }),
             },
             {
                 id: 'results',
@@ -166,7 +149,7 @@ export default function Exams() {
         [],
     );
 
-    // eslint-disable-next-line react-hooks/incompatible-library
+     
     const table = useReactTable({
         data: exams.data,
         columns,
@@ -303,7 +286,7 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                     }}
                 >
                     <Trash2Icon className="mr-2 h-4 w-4" />
-                    Delete Exam
+                    Verwijder examen
                 </DropdownMenuItem>
             </DropdownMenuContent>
 
@@ -316,9 +299,9 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                         <AlertDialogMedia className="bg-destructive/10 text-destructive">
                             <Trash2Icon />
                         </AlertDialogMedia>
-                        <AlertDialogTitle>Delete exam?</AlertDialogTitle>
+                        <AlertDialogTitle>Examen verwijderen?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure? This will delete {exam.name}.
+                            Weet je het zeker? Dit zal {exam.name} verwijderen.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -335,7 +318,7 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                                 method="delete"
                                 as="button"
                             >
-                                Delete
+                                Verwijderen
                             </Link>
                         </AlertDialogAction>
                     </AlertDialogFooter>
