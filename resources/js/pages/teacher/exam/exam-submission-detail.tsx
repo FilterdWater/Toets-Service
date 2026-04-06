@@ -99,9 +99,8 @@ export default function ExamSubmissionDetail({
                             <CardHeader className="pb-2">
                                 <div className="flex flex-wrap items-start justify-between gap-2">
                                     <div>
-                                        <p className="text-xs font-medium uppercase text-muted-foreground">
-                                            {q.section_name} · Vraag{' '}
-                                            {index + 1}
+                                        <p className="text-xs font-medium text-muted-foreground uppercase">
+                                            {q.section_name} · Vraag {index + 1}
                                         </p>
                                         <CardTitle className="text-base">
                                             {q.title}
@@ -110,17 +109,18 @@ export default function ExamSubmissionDetail({
                                             {q.text}
                                         </p>
                                     </div>
-                                    {q.type !== 'text' && q.is_correct !== null && (
-                                        <Badge
-                                            variant={
-                                                q.is_correct
-                                                    ? 'student'
-                                                    : 'destructive'
-                                            }
-                                        >
-                                            {q.is_correct ? 'Goed' : 'Fout'}
-                                        </Badge>
-                                    )}
+                                    {q.type !== 'text' &&
+                                        q.is_correct !== null && (
+                                            <Badge
+                                                variant={
+                                                    q.is_correct
+                                                        ? 'student'
+                                                        : 'destructive'
+                                                }
+                                            >
+                                                {q.is_correct ? 'Goed' : 'Fout'}
+                                            </Badge>
+                                        )}
                                     {q.type === 'text' && (
                                         <Badge variant="secondary">
                                             Open antwoord
