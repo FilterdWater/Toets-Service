@@ -286,7 +286,7 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                     }}
                 >
                     <Trash2Icon className="mr-2 h-4 w-4" />
-                    Delete Exam
+                    Verwijder examen
                 </DropdownMenuItem>
             </DropdownMenuContent>
 
@@ -299,9 +299,9 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                         <AlertDialogMedia className="bg-destructive/10 text-destructive">
                             <Trash2Icon />
                         </AlertDialogMedia>
-                        <AlertDialogTitle>Delete exam?</AlertDialogTitle>
+                        <AlertDialogTitle>Examen verwijderen?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure? This will delete {exam.name}.
+                            Weet je het zeker? Dit zal {exam.name} verwijderen.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -318,7 +318,7 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                                 method="delete"
                                 as="button"
                             >
-                                Delete
+                                Verwijderen
                             </Link>
                         </AlertDialogAction>
                     </AlertDialogFooter>
