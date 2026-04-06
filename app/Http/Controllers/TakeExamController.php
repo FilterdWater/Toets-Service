@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Models\Submission;
+use App\Services\SubmissionScoreCalculator;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -213,29 +214,25 @@ class TakeExamController extends Controller
 
     public function showResult(Request $request, $examId)
     {
-        $exam = Exam::with('sections')->findOrFail($examId);
+        $exam = Exam::with([
+            'sections.questions.answers',
+        ])->findOrFail($examId);
 
         $submission = Submission::where('exam_id', $exam->id)
             ->where('user_id', $request->user()->id)
             ->whereNotNull('submitted_at')
             ->where('outdated', false)
             ->latest('submitted_at')
-            ->with('userAnswers.selectedAnswer')
+            ->with('userAnswers')
             ->first();
 
         if ($submission == null || $submission->submitted_at == null) {
             return back()->with('error', 'Dit examen heeft geen resultaat of is niet van jou.');
         }
 
-        $totalQuestions = 0;
-        $correctAnswers = 0;
-
-        if ($submission) {
-            $totalQuestions = $submission->userAnswers->count();
-            $correctAnswers = $submission->userAnswers
-                ->filter(fn($ua) => $ua->selectedAnswer?->is_correct)
-                ->count();
-        }
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $totalQuestions = $graded['total_questions'];
+        $correctAnswers = $graded['correct_answers'];
 
         $durationInSeconds = null;
         if ($submission?->started_at && $submission?->submitted_at) {

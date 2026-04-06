@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\Question;
 use App\Models\Submission;
 use App\Models\UserAnswer;
+use App\Services\SubmissionScoreCalculator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -78,19 +79,18 @@ class ExamController extends Controller
 
     public function showResults(Exam $exam): Response
     {
-        $exam->load('sections');
+        $exam->load([
+            'sections.questions.answers',
+        ]);
 
         $submissions = Submission::where('exam_id', $exam->id)
             ->whereNotNull('submitted_at')
-            ->with(['user', 'userAnswers.selectedAnswer'])
+            ->with(['user', 'userAnswers'])
             ->latest('submitted_at')
             ->get();
 
-        $results = $submissions->map(function (Submission $submission) {
-            $totalQuestions = $submission->userAnswers->count();
-            $correctAnswers = $submission->userAnswers
-                ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
-                ->count();
+        $results = $submissions->map(function (Submission $submission) use ($exam) {
+            $graded = SubmissionScoreCalculator::calculate($submission, $exam);
 
             $durationInSeconds = null;
             if ($submission->started_at && $submission->submitted_at) {
@@ -104,11 +104,9 @@ class ExamController extends Controller
                     'name' => $submission->user->name,
                     'email' => $submission->user->email,
                 ],
-                'total_questions' => $totalQuestions,
-                'correct_answers' => $correctAnswers,
-                'score' => $totalQuestions > 0
-                    ? round(($correctAnswers / $totalQuestions) * 10, 1)
-                    : 0,
+                'total_questions' => $graded['total_questions'],
+                'correct_answers' => $graded['correct_answers'],
+                'score' => $graded['score'],
                 'submitted_at' => $submission->submitted_at,
                 'duration_in_seconds' => $durationInSeconds,
                 'outdated' => $submission->outdated,
@@ -194,14 +192,13 @@ class ExamController extends Controller
      */
     private function formatQuestionReview(string $sectionName, Question $question, $rows): array
     {
-        $correctIds = $question->answers->where('is_correct', true)->pluck('id')->sort()->values()->all();
-        $selectedIds = $this->selectedAnswerIdsFromUserAnswerRows($rows);
+        $selectedIds = SubmissionScoreCalculator::selectedAnswerIdsFromUserAnswerRows($rows);
 
         $isCorrect = null;
         if ($question->type === 'text') {
             $isCorrect = null;
         } else {
-            $isCorrect = $correctIds === $selectedIds;
+            $isCorrect = SubmissionScoreCalculator::isQuestionAnswerCorrect($question, $rows);
         }
 
         return [
@@ -219,19 +216,6 @@ class ExamController extends Controller
             'student_selected_ids' => $question->type === 'text' ? [] : $selectedIds,
             'student_text' => $question->type === 'text' ? ($rows->first()?->text_answer) : null,
         ];
-    }
-
-    /**
-     * @param  Collection<int, UserAnswer>  $rows
-     * @return list<int>
-     */
-    private function selectedAnswerIdsFromUserAnswerRows($rows): array
-    {
-        return $rows->map(function ($userAnswer) {
-            $raw = $userAnswer->getRawOriginal('selected_answer');
-
-            return is_numeric($raw) ? (int) $raw : null;
-        })->filter()->unique()->sort()->values()->all();
     }
 
     public function destroy(Exam $exam): RedirectResponse
@@ -257,14 +241,9 @@ class ExamController extends Controller
             abort(422);
         }
 
-        $submission->load('userAnswers.selectedAnswer');
-        $totalQuestions = $submission->userAnswers->count();
-        $correctAnswers = $submission->userAnswers
-            ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
-            ->count();
-        $score = $totalQuestions > 0
-            ? round(($correctAnswers / $totalQuestions) * 10, 1)
-            : 0;
+        $submission->load('userAnswers');
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $score = $graded['score'];
 
         if ($score >= 5.5) {
             abort(422);
