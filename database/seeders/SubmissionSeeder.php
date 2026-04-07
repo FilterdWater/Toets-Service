@@ -21,12 +21,18 @@ class SubmissionSeeder extends Seeder
 
     private function createSubmissionsForStudents(): void
     {
-        $students = User::where('role', Role::Student)->get();
-        $exams = Exam::all();
+        $students = User::where('role', Role::Student)
+            ->with('groups:id')
+            ->get();
 
         foreach ($students as $student) {
+            $eligibleExams = $this->eligibleExamsForStudent($student);
+            if ($eligibleExams->isEmpty()) {
+                continue;
+            }
+
             $submissionCount = rand(2, 5);
-            $randomExams = $exams->random(min($submissionCount, $exams->count()));
+            $randomExams = $eligibleExams->random(min($submissionCount, $eligibleExams->count()));
 
             foreach ($randomExams as $exam) {
                 $startedAt = now()->subDays(rand(1, 60));
@@ -43,12 +49,18 @@ class SubmissionSeeder extends Seeder
 
     private function createCompletedSubmissions(): void
     {
-        $students = User::where('role', Role::Student)->get();
-        $exams = Exam::all();
+        $students = User::where('role', Role::Student)
+            ->with('groups:id')
+            ->get();
 
         for ($i = 0; $i < 20; $i++) {
             $student = $students->random();
-            $exam = $exams->random();
+            $eligibleExams = $this->eligibleExamsForStudent($student);
+            if ($eligibleExams->isEmpty()) {
+                continue;
+            }
+
+            $exam = $eligibleExams->random();
             $startedAt = now()->subDays(rand(1, 60));
 
             Submission::factory()
@@ -125,6 +137,27 @@ class SubmissionSeeder extends Seeder
 
         return User::where('role', Role::Student)
             ->whereIn('id', $studentIds)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Exam>
+     */
+    private function eligibleExamsForStudent(User $student): Collection
+    {
+        $studentGroupIds = $student->groups->pluck('id');
+
+        return Exam::query()
+            ->with(['groups:id', 'users:id,role'])
+            ->where(function ($query) use ($student, $studentGroupIds) {
+                $query->where('globally_available', true)
+                    ->orWhereHas('groups', function ($q) use ($studentGroupIds) {
+                        $q->whereIn('groups.id', $studentGroupIds);
+                    })
+                    ->orWhereHas('users', function ($q) use ($student) {
+                        $q->where('users.id', $student->id);
+                    });
+            })
             ->get();
     }
 }
