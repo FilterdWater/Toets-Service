@@ -30,19 +30,19 @@ class UserSeeder extends Seeder
         User::factory()->beheerder()->create([
             'name' => 'Beheerder Rob',
             'email' => 'beheerder@roca12.nl',
-            'password' => Hash::make('B3he3rd3r@r0ca!2'),
+            'password' => Hash::make('password'),
         ]);
 
         User::factory()->docent()->create([
             'name' => 'Docent Jan',
             'email' => 'docent@roca12.nl',
-            'password' => Hash::make('D0c3nt@r0ca!2'),
+            'password' => Hash::make('password'),
         ]);
 
         User::factory()->create([
             'name' => 'Student Frenkie',
             'email' => 'student@st.roc.a12.nl',
-            'password' => Hash::make('Stud3nt@r0ca!'),
+            'password' => Hash::make('password'),
             'role' => Role::Student,
         ]);
     }
