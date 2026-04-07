@@ -160,16 +160,20 @@ class TakeExamController extends Controller
             foreach ($request['answers'] as $questionId => $answer) {
                 if (is_array($answer)) {
                     foreach ($answer as $ansId) {
+                        if (! is_numeric($ansId)) {
+                            continue;
+                        }
+
                         $submission->userAnswers()->create([
                             'question_id' => $questionId,
-                            'selected_answer' => $ansId, // single choice
+                            'selected_answer' => (int) $ansId,
                             'text_answer' => null,
                         ]);
                     }
-                } elseif (is_int($answer)) {
+                } elseif (is_numeric($answer)) {
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
-                        'selected_answer' => $answer, // single choice
+                        'selected_answer' => (int) $answer,
                         'text_answer' => null,
                     ]);
                 } elseif (is_string($answer)) {
