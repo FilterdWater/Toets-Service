@@ -130,18 +130,7 @@ export default function Exams() {
                 header: SortableHeader({ label: 'Max fouten' }),
             },
             {
-                id: 'results',
-                header: 'Resultaten',
-                cell: ({ row }) => (
-                    <Button size="sm" variant="link">
-                        <Link href={examResults.url({ exam: row.original.id })}>
-                            Resultaten
-                        </Link>
-                    </Button>
-                ),
-            },
-            {
-                accessorKey: 'max_mistakes',
+                id: 'actions',
                 header: 'acties',
                 cell: ({ row }) => <ExamTableRowActions exam={row.original} />,
             },
@@ -200,7 +189,17 @@ export default function Exams() {
                         <TableBody>
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
-                                    <TableRow key={row.id}>
+                                    <TableRow
+                                        key={row.id}
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                            navigateToPage(
+                                                examResults.url({
+                                                    exam: row.original.id,
+                                                }),
+                                            )
+                                        }
+                                    >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id}>
                                                 {flexRender(
@@ -265,7 +264,11 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
@@ -275,12 +278,18 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                     <Pencil />
-                    <Link href={showEdit(exam.id)}>Bewerken</Link>
+                    <Link
+                        href={showEdit(exam.id)}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Bewerken
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     variant="destructive"
                     onSelect={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         setIsDeleteDialogOpen(true);
                     }}
                 >

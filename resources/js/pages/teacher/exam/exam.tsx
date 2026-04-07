@@ -38,12 +38,11 @@ import type { Section } from '@/types/section';
 
 type examProps = {
     exam?: Exam | null;
-    backUrl?: string | null;
 };
 
 // als het exam leeg is dan wordt het automatisch een creation page
 //TODO de create pagina scheiden van de edit pagina dit moet gebeuren als er aan us-12-15 wordt gewerkt
-export default function Exam({ exam, backUrl }: examProps) {
+export default function Exam({ exam }: examProps) {
     const mode = exam ? 'edit' : 'create';
     const { errors } = usePage().props;
     //creates temp ID's for the sections and questions'
@@ -141,7 +140,7 @@ export default function Exam({ exam, backUrl }: examProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Toetsen',
-            href: backUrl ?? exams(),
+            href: exams(),
         },
         {
             title: exam ? exam.name : 'Nieuwe toets',

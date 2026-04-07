@@ -24,7 +24,7 @@ class ApplicationStatisticsController extends Controller
                 'submittedAt' => $submission->submitted_at,
             ]);
 
-        return Inertia::render('admin/application-statistics/application-statistics', [
+        return Inertia::render('admin/application-statistics', [
             'totalUsers' => User::count(),
             'totalStudents' => User::where('role', 'student')->count(),
             'totalTeachers' => User::where('role', 'teacher')->count(),

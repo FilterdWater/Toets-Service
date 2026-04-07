@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
             /*
             * Groups
             */
-            Route::inertia('/', 'teacher')->name('teacher');
+            Route::inertia('/', 'teacher/teacher')->name('teacher');
             Route::get('groepen', [GroupController::class, 'index'])->name('groups');
             Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
             Route::put('groepen/{id}', [GroupController::class, 'update'])->name('updateGroup');
@@ -58,10 +58,18 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
             Route::prefix('toetsen')->group(function () {
                 Route::get('/', [ExamController::class, 'index'])->name('exams');
                 Route::get('/{exam}/resultaten', [ExamController::class, 'showResults'])->name('examResults');
+                Route::get(
+                    '/{exam}/inzendingen/{submission}',
+                    [ExamController::class, 'showSubmissionDetail']
+                )->name('examSubmissionDetail');
                 Route::get('/{id}/wijzigen', [ExamController::class, 'showEdit'])->name('getExam');
                 Route::get('/aanmaken', [ExamController::class, 'showCreate'])->name('createExam');
                 Route::post('/opslaan', [ExamController::class, 'store'])->name('storeExam');
                 Route::put('/{exam}', [ExamController::class, 'update'])->name('updateExam');
+                Route::post(
+                    '/{exam}/inzendingen/{submission}/herkansen',
+                    [ExamController::class, 'allowSubmissionRetake']
+                )->name('submissionAllowRetake');
                 Route::delete('/{exam}', [ExamController::class, 'destroy'])->name('deleteExam');
             });
         });
