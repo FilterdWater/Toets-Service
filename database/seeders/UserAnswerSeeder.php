@@ -13,7 +13,7 @@ class UserAnswerSeeder extends Seeder
     /**
      * Percentage: The chance of attempting to answer correctly for multiple-choice (single/multi) questions. The remainder will deliberately answer incorrectly to ensure some failing samples.
      */
-    private const int CORRECT_ATTEMPT_CHANCE_PERCENT = 55;
+    private const CORRECT_ATTEMPT_CHANCE_PERCENT = 55;
 
     public function run(): void
     {

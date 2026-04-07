@@ -185,15 +185,11 @@ class TakeExamController extends Controller
             return back()->with('error', 'Er is iets misgegaan');
         }
 
-        $totalQuestions = 0;
-        $correctAnswers = 0;
-
-        if ($submission) {
-            $totalQuestions = $submission->userAnswers->count();
-            $correctAnswers = $submission->userAnswers
-                ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
-                ->count();
-        }
+        $exam->loadMissing('sections.questions.answers');
+        $submission->load('userAnswers');
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $totalQuestions = $graded['total_questions'];
+        $correctAnswers = $graded['correct_answers'];
 
         $durationInSeconds = null;
         if ($submission?->started_at && $submission?->submitted_at) {
@@ -230,15 +226,9 @@ class TakeExamController extends Controller
             return back()->with('error', 'Dit examen heeft geen resultaat of is niet van jou.');
         }
 
-        $totalQuestions = 0;
-        $correctAnswers = 0;
-
-        if ($submission) {
-            $totalQuestions = $submission->userAnswers->count();
-            $correctAnswers = $submission->userAnswers
-                ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
-                ->count();
-        }
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $totalQuestions = $graded['total_questions'];
+        $correctAnswers = $graded['correct_answers'];
 
         $durationInSeconds = null;
         if ($submission?->started_at && $submission?->submitted_at) {
