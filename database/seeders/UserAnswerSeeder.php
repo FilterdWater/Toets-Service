@@ -2,12 +2,19 @@
 
 namespace Database\Seeders;
 
+use App\Models\Answer;
 use App\Models\Submission;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
 class UserAnswerSeeder extends Seeder
 {
+    /**
+     * Percentage: The chance of attempting to answer correctly for multiple-choice (single/multi) questions. The remainder will deliberately answer incorrectly to ensure some failing samples.
+     */
+    private const int CORRECT_ATTEMPT_CHANCE_PERCENT = 55;
+
     public function run(): void
     {
         Submission::whereNotNull('submitted_at')
@@ -25,7 +32,9 @@ class UserAnswerSeeder extends Seeder
         $inserts = [];
 
         foreach ($questions as $question) {
-            $inserts[] = $this->createInsertData($submission, $question, $now);
+            foreach ($this->createInsertRows($submission, $question, $now) as $row) {
+                $inserts[] = $row;
+            }
         }
 
         if (! empty($inserts)) {
@@ -33,47 +42,149 @@ class UserAnswerSeeder extends Seeder
         }
     }
 
-    private function createInsertData(Submission $submission, $question, $now): array
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function createInsertRows(Submission $submission, $question, $now): array
     {
         if ($question->type === 'text') {
-            return [
+            return [[
                 'submission_id' => $submission->id,
                 'question_id' => $question->id,
                 'selected_answer' => null,
                 'text_answer' => $this->randomTextAnswer(),
                 'created_at' => $now,
                 'updated_at' => $now,
-            ];
+            ]];
         }
 
         $answers = $question->answers;
 
         if ($answers->isEmpty()) {
-            return [
+            return [[
                 'submission_id' => $submission->id,
                 'question_id' => $question->id,
                 'selected_answer' => null,
                 'text_answer' => null,
                 'created_at' => $now,
                 'updated_at' => $now,
-            ];
+            ]];
         }
 
         if ($question->type === 'single_choice') {
-            $selectedAnswer = $answers->random();
-        } else {
-            $correctAnswers = $answers->filter(fn ($a) => $a->is_correct);
-            $incorrectAnswers = $answers->filter(fn ($a) => ! $a->is_correct);
-
-            if ($correctAnswers->isNotEmpty() && rand(0, 1)) {
-                $selectedAnswer = $correctAnswers->random();
-            } else {
-                $selectedAnswer = $incorrectAnswers->isNotEmpty()
-                    ? $incorrectAnswers->random()
-                    : $answers->random();
-            }
+            return [$this->makeChoiceRow(
+                $submission,
+                $question,
+                $this->pickSingleChoiceAnswer($answers),
+                $now
+            )];
         }
 
+        return $this->createMultipleChoiceRows($submission, $question, $answers, $now);
+    }
+
+    /**
+     * @param  EloquentCollection<int, Answer>  $answers
+     */
+    private function pickSingleChoiceAnswer(EloquentCollection $answers): Answer
+    {
+        $correctAnswers = $answers->filter(fn ($a) => $a->is_correct);
+        $incorrectAnswers = $answers->filter(fn ($a) => ! $a->is_correct);
+
+        if ($correctAnswers->isNotEmpty() && random_int(1, 100) <= self::CORRECT_ATTEMPT_CHANCE_PERCENT) {
+            return $correctAnswers->random();
+        }
+
+        if ($incorrectAnswers->isNotEmpty()) {
+            return $incorrectAnswers->random();
+        }
+
+        return $answers->random();
+    }
+
+    /**
+     * @param  EloquentCollection<int, Answer>  $answers
+     * @return list<array<string, mixed>>
+     */
+    private function createMultipleChoiceRows(
+        Submission $submission,
+        $question,
+        EloquentCollection $answers,
+        $now
+    ): array {
+        /** @var EloquentCollection<int, Answer> $correctAnswers */
+        $correctAnswers = $answers->filter(fn ($a) => $a->is_correct)->values();
+        /** @var EloquentCollection<int, Answer> $incorrectAnswers */
+        $incorrectAnswers = $answers->filter(fn ($a) => ! $a->is_correct)->values();
+
+        if ($correctAnswers->isEmpty()) {
+            return [$this->makeChoiceRow($submission, $question, $answers->random(), $now)];
+        }
+
+        $wantFullCorrect = random_int(1, 100) <= self::CORRECT_ATTEMPT_CHANCE_PERCENT;
+
+        if ($wantFullCorrect) {
+            return $correctAnswers->map(fn ($answer) => $this->makeChoiceRow(
+                $submission,
+                $question,
+                $answer,
+                $now
+            ))->all();
+        }
+
+        return $this->makeWrongMultipleChoiceRows(
+            $submission,
+            $question,
+            $correctAnswers,
+            $incorrectAnswers,
+            $answers,
+            $now
+        );
+    }
+
+    /**
+     * @param  EloquentCollection<int, Answer>  $correctAnswers
+     * @param  EloquentCollection<int, Answer>  $incorrectAnswers
+     * @param  EloquentCollection<int, Answer>  $allAnswers
+     * @return list<array<string, mixed>>
+     */
+    private function makeWrongMultipleChoiceRows(
+        Submission $submission,
+        $question,
+        EloquentCollection $correctAnswers,
+        EloquentCollection $incorrectAnswers,
+        EloquentCollection $allAnswers,
+        $now
+    ): array {
+        if ($incorrectAnswers->isNotEmpty() && random_int(0, 1) === 1) {
+            return [$this->makeChoiceRow($submission, $question, $incorrectAnswers->random(), $now)];
+        }
+
+        if ($correctAnswers->count() > 1) {
+            $takeCount = random_int(1, $correctAnswers->count() - 1);
+            $partial = $correctAnswers->take($takeCount);
+
+            return $partial->map(fn ($answer) => $this->makeChoiceRow(
+                $submission,
+                $question,
+                $answer,
+                $now
+            ))->all();
+        }
+
+        if ($incorrectAnswers->isNotEmpty()) {
+            return [$this->makeChoiceRow($submission, $question, $incorrectAnswers->random(), $now)];
+        }
+
+        return [$this->makeChoiceRow($submission, $question, $allAnswers->random(), $now)];
+    }
+
+    private function makeChoiceRow(
+        Submission $submission,
+        $question,
+        Answer $selectedAnswer,
+        $now
+    ): array {
         return [
             'submission_id' => $submission->id,
             'question_id' => $question->id,
