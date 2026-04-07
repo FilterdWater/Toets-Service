@@ -25,8 +25,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn($q) => $q->whereKey($userId))
-                    ->orWhereHas('users', fn($q) => $q->whereKey($userId));
+                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
+                    ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now);
@@ -52,7 +52,7 @@ class TakeExamController extends Controller
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now)
-            ->whereHas('submissions', fn($q) => $q->where('user_id', Auth::id()))
+            ->whereHas('submissions', fn ($q) => $q->where('user_id', Auth::id()))
             ->get()
             ->map(function (Exam $exam) {
                 $submission = $exam->submissions()
@@ -132,7 +132,7 @@ class TakeExamController extends Controller
             $questionIds = $exam->sections()
                 ->with('questions')
                 ->get()
-                ->flatMap(fn($s) => $s->questions->pluck('id'))
+                ->flatMap(fn ($s) => $s->questions->pluck('id'))
                 ->toArray();
 
             // Check which questions are unanswered
@@ -185,15 +185,11 @@ class TakeExamController extends Controller
             return back()->with('error', 'Er is iets misgegaan');
         }
 
-        $totalQuestions = 0;
-        $correctAnswers = 0;
-
-        if ($submission) {
-            $totalQuestions = $submission->userAnswers->count();
-            $correctAnswers = $submission->userAnswers
-                ->filter(fn($ua) => $ua->selectedAnswer?->is_correct)
-                ->count();
-        }
+        $exam->loadMissing('sections.questions.answers');
+        $submission->load('userAnswers');
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $totalQuestions = $graded['total_questions'];
+        $correctAnswers = $graded['correct_answers'];
 
         $durationInSeconds = null;
         if ($submission?->started_at && $submission?->submitted_at) {
