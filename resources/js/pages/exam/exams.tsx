@@ -149,7 +149,6 @@ export default function Exams() {
         [],
     );
 
-     
     const table = useReactTable({
         data: exams.data,
         columns,
