@@ -25,7 +25,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
+                $query->where('globally_available', true)
+                    ->orWhereHas('groups.users', fn ($q) => $q->whereKey($userId))
                     ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
