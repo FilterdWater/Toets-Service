@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Models\Exam;
+use App\Models\Submission;
 use App\Models\User;
 
 test('exams index returns paginated exams', function (): void {
@@ -90,5 +91,38 @@ test('exam results page renders', function (): void {
     $response->assertInertia(fn ($page) => $page
         ->component('teacher/exam/exam-result')
         ->has('exam')
+        ->has('results')
+        ->has('summary')
+    );
+});
+
+test('exam results page includes completed submissions for csv source data', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+    $student = User::factory()->create([
+        'role' => Role::Student,
+    ]);
+    $exam = Exam::factory()->create();
+
+    Submission::factory()
+        ->forExam($exam)
+        ->forUser($student)
+        ->completed()
+        ->current()
+        ->create();
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('examResults', $exam));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('teacher/exam/exam-result')
+        ->has('results', 1)
+        ->where('results.0.user.email', $student->email)
+        ->has('results.0.score')
+        ->has('results.0.correct_answers')
+        ->has('results.0.total_questions')
     );
 });

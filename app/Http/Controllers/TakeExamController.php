@@ -43,6 +43,7 @@ class TakeExamController extends Controller
                             ->whereNull('submitted_at');
                     });
             })
+            ->orderBy('active_until')
             ->get();
 
         $finishedExams = (clone $baseQuery)
@@ -66,7 +67,9 @@ class TakeExamController extends Controller
                 $exam->setAttribute('submitted_at', $submission?->submitted_at);
 
                 return $exam;
-            });
+            })
+            ->sortByDesc('submitted_at')
+            ->values();
 
         return Inertia::render('student/student', [
             'availableExams' => $availableExams,
