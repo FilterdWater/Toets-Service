@@ -258,16 +258,15 @@ export default function ExamResult({
                                     selected={dateRange}
                                     onSelect={setDateRange}
                                     enableReset
-                                    className="w-[240px]"
+                                    className="w-60"
                                 />
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    size="sm"
                                     disabled={filteredResults.length === 0}
                                     onClick={handleDownloadCsv}
                                 >
-                                    Download resultaat als CSV
+                                    Download resultaten als CSV
                                 </Button>
                             </div>
                         </CardHeader>
@@ -293,7 +292,7 @@ export default function ExamResult({
                                                     Ingeleverd
                                                 </TableHead>
                                                 <TableHead>Status</TableHead>
-                                                <TableHead className="w-[140px]">
+                                                <TableHead className="w-35">
                                                     Herkansen
                                                 </TableHead>
                                             </TableRow>
