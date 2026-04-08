@@ -18,6 +18,10 @@ class Section extends Model
         'exam_id',
     ];
 
+    protected $casts = [
+        'new_page' => 'boolean',
+    ];
+
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class);
