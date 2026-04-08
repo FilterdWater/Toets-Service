@@ -16,6 +16,7 @@ class Submission extends Model
         'started_at',
         'submitted_at',
         'outdated',
+        'retake_mode',
     ];
 
     protected $casts = [

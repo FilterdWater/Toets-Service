@@ -8,6 +8,7 @@ use App\Models\Submission;
 use App\Services\SubmissionScoreCalculator;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -77,7 +78,7 @@ class TakeExamController extends Controller
         ]);
     }
 
-    public function showExam(string $id)
+    public function showExam(Request $request, string $id)
     {
         $exam = Exam::with([
             'sections.questions.answers',
@@ -85,6 +86,35 @@ class TakeExamController extends Controller
                 $query->where('user_id', Auth::id())->where('outdated', false);
             },
         ])->where('id', $id)->firstOrFail();
+
+        $repeatIncorrect = $this->shouldRepeatIncorrectOnly($exam, $request->user()->id);
+
+        if ($repeatIncorrect) {
+            $latestSubmitted = $exam->submissions()
+                ->where('user_id', Auth::id())
+                ->whereNotNull('submitted_at')
+                ->latest('submitted_at')
+                ->with('userAnswers')
+                ->first();
+
+            if ($latestSubmitted === null) {
+                return back()->with('error', 'Er is geen eerdere inzending om te herhalen.');
+            }
+
+            $incorrectQuestionIds = $this->incorrectQuestionIds($exam, $latestSubmitted);
+            $correctQuestionIds = $this->correctQuestionIds($exam, $latestSubmitted);
+
+            if ($incorrectQuestionIds === []) {
+                return back()->with('error', 'Er zijn geen fout beantwoorde vragen om te herhalen.');
+            }
+
+            foreach ($exam->sections as $section) {
+                foreach ($section->questions as $question) {
+                    $question->setAttribute('repeat_required', in_array($question->id, $incorrectQuestionIds, true));
+                    $question->setAttribute('previously_correct', in_array($question->id, $correctQuestionIds, true));
+                }
+            }
+        }
 
         return Inertia::render('student/make-exam', [
             'exam' => $exam,
@@ -108,28 +138,36 @@ class TakeExamController extends Controller
     {
         try {
             $exam = Exam::findOrFail($id);
+            $repeatIncorrect = $this->shouldRepeatIncorrectOnly($exam, $request->user()->id);
 
             $now = Carbon::now();
             if ($now < $exam->active_from || $now > $exam->active_until) {
                 return back()->with('error', 'Examen is niet actief');
             }
 
-            // get current user's active (non-outdated) submission
+            // get current user's in-progress (non-outdated) submission
             $submission = $exam->submissions()
                 ->where('user_id', Auth::id())
                 ->where('outdated', false)
+                ->whereNull('submitted_at')
+                ->latest('started_at')
                 ->first();
 
             if ($submission === null) {
+                $alreadySubmitted = $exam->submissions()
+                    ->where('user_id', Auth::id())
+                    ->where('outdated', false)
+                    ->whereNotNull('submitted_at')
+                    ->exists();
+
+                if ($alreadySubmitted) {
+                    return back()->with('error', 'Examen is al ingeleverd');
+                }
+
                 $submission = $exam->submissions()->create([
                     'user_id' => Auth::id(),
                     'started_at' => now(),
                 ]);
-            }
-
-            // prevent resubmission
-            if ($submission->submitted_at) {
-                return back()->with('error', 'Examen is al ingeleverd');
             }
 
             // Get all question IDs from the exam
@@ -138,6 +176,27 @@ class TakeExamController extends Controller
                 ->get()
                 ->flatMap(fn ($s) => $s->questions->pluck('id'))
                 ->toArray();
+
+            $previousSubmission = null;
+            if ($repeatIncorrect) {
+                $previousSubmission = $exam->submissions()
+                    ->where('user_id', Auth::id())
+                    ->whereNotNull('submitted_at')
+                    ->latest('submitted_at')
+                    ->with('userAnswers')
+                    ->first();
+
+                if ($previousSubmission === null) {
+                    return back()->with('error', 'Er is geen eerdere inzending om te herhalen.');
+                }
+
+                $incorrectQuestionIds = $this->incorrectQuestionIds($exam, $previousSubmission);
+                $questionIds = array_values(array_intersect($questionIds, $incorrectQuestionIds));
+
+                if ($questionIds === []) {
+                    return back()->with('error', 'Er zijn geen fout beantwoorde vragen om te herhalen.');
+                }
+            }
 
             // Check which questions are unanswered
             $answeredQuestionIds = array_keys(array_filter($request['answers'], function ($answer) {
@@ -161,7 +220,13 @@ class TakeExamController extends Controller
             $submission->update(['submitted_at' => now()]);
 
             // save answers
-            foreach ($request['answers'] as $questionId => $answer) {
+            foreach ($questionIds as $questionId) {
+                $answer = $request['answers'][$questionId] ?? null;
+
+                if ($answer === null) {
+                    continue;
+                }
+
                 if (is_array($answer)) {
                     foreach ($answer as $ansId) {
                         if (! is_numeric($ansId)) {
@@ -189,6 +254,21 @@ class TakeExamController extends Controller
                     ]);
                 }
             }
+
+            if ($repeatIncorrect && $previousSubmission !== null) {
+                $carriedCorrectQuestionIds = $this->correctQuestionIds($exam, $previousSubmission);
+                $previousAnswersByQuestion = $previousSubmission->userAnswers->groupBy('question_id');
+
+                foreach ($carriedCorrectQuestionIds as $questionId) {
+                    foreach ($previousAnswersByQuestion->get($questionId, new Collection) as $previousAnswer) {
+                        $submission->userAnswers()->create([
+                            'question_id' => $questionId,
+                            'selected_answer' => $previousAnswer->selected_answer,
+                            'text_answer' => $previousAnswer->text_answer,
+                        ]);
+                    }
+                }
+            }
         } catch (Exception $e) {
             return back()->with('error', 'Er is iets misgegaan');
         }
@@ -209,6 +289,7 @@ class TakeExamController extends Controller
             'result' => [
                 'total_questions' => $totalQuestions,
                 'correct_answers' => $correctAnswers,
+                'incorrect_questions' => count($this->incorrectQuestionIds($exam, $submission)),
                 'submitted_at' => $submission?->submitted_at,
                 'duration_in_seconds' => $durationInSeconds,
                 'has_submission' => $submission !== null,
@@ -248,10 +329,87 @@ class TakeExamController extends Controller
             'result' => [
                 'total_questions' => $totalQuestions,
                 'correct_answers' => $correctAnswers,
+                'incorrect_questions' => count($this->incorrectQuestionIds($exam, $submission)),
                 'submitted_at' => $submission?->submitted_at,
                 'duration_in_seconds' => $durationInSeconds,
                 'has_submission' => $submission !== null,
             ],
         ]);
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function incorrectQuestionIds(Exam $exam, Submission $submission): array
+    {
+        $exam->loadMissing('sections.questions.answers');
+        $submission->loadMissing('userAnswers');
+
+        $userAnswersByQuestion = $submission->userAnswers->groupBy('question_id');
+        $incorrectQuestionIds = [];
+
+        foreach ($exam->sections as $section) {
+            foreach ($section->questions as $question) {
+                $rows = $userAnswersByQuestion->get($question->id, new Collection);
+                $isCorrect = SubmissionScoreCalculator::isQuestionAnswerCorrect($question, $rows);
+
+                if ($isCorrect === false) {
+                    $incorrectQuestionIds[] = $question->id;
+                }
+            }
+        }
+
+        return $incorrectQuestionIds;
+    }
+
+    /**
+     * @return list<int>
+     */
+    protected function correctQuestionIds(Exam $exam, Submission $submission): array
+    {
+        $exam->loadMissing('sections.questions.answers');
+        $submission->loadMissing('userAnswers');
+
+        $userAnswersByQuestion = $submission->userAnswers->groupBy('question_id');
+        $correctQuestionIds = [];
+
+        foreach ($exam->sections as $section) {
+            foreach ($section->questions as $question) {
+                $rows = $userAnswersByQuestion->get($question->id, new Collection);
+                $isCorrect = SubmissionScoreCalculator::isQuestionAnswerCorrect($question, $rows);
+
+                if ($isCorrect === true) {
+                    $correctQuestionIds[] = $question->id;
+                }
+            }
+        }
+
+        return $correctQuestionIds;
+    }
+
+    protected function shouldRepeatIncorrectOnly(Exam $exam, int $userId): bool
+    {
+        $latestSubmitted = $exam->submissions()
+            ->where('user_id', $userId)
+            ->whereNotNull('submitted_at')
+            ->latest('submitted_at')
+            ->with('userAnswers')
+            ->first();
+
+        if ($latestSubmitted === null || ! $latestSubmitted->outdated) {
+            return false;
+        }
+
+        if ($latestSubmitted->retake_mode !== 'incorrect_only') {
+            return false;
+        }
+
+        $graded = SubmissionScoreCalculator::calculate($latestSubmitted, $exam);
+
+        if ($graded['score'] >= 5.5) {
+            return false;
+        }
+
+        return $this->incorrectQuestionIds($exam, $latestSubmitted) !== [];
     }
 }

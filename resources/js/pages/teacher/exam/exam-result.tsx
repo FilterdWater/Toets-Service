@@ -51,6 +51,7 @@ type StudentResult = {
     submitted_at: string | null;
     duration_in_seconds: number | null;
     outdated: boolean;
+    retake_mode: 'incorrect_only' | 'full' | null;
 };
 
 type ExamResultProps = {
@@ -358,40 +359,77 @@ export default function ExamResult({
                                                     </TableCell>
                                                     <TableCell>
                                                         {r.outdated ? (
-                                                            <span className="text-sm text-muted-foreground">
+                                                            <div className="text-sm text-muted-foreground">
                                                                 Toegestaan
-                                                            </span>
+                                                                {r.retake_mode ===
+                                                                'incorrect_only'
+                                                                    ? ' (alleen fout)'
+                                                                    : r.retake_mode ===
+                                                                        'full'
+                                                                      ? ' (volledig)'
+                                                                      : ''}
+                                                            </div>
                                                         ) : r.score >= 5.5 ? (
                                                             <span className="text-sm text-muted-foreground">
                                                                 —
                                                             </span>
                                                         ) : (
-                                                            <Button
-                                                                type="button"
-                                                                variant="outline"
-                                                                size="sm"
-                                                                onClick={(
-                                                                    e,
-                                                                ) => {
-                                                                    e.stopPropagation();
-                                                                    router.post(
-                                                                        submissionAllowRetake.url(
+                                                            <div className="flex flex-col gap-2">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        router.post(
+                                                                            submissionAllowRetake.url(
+                                                                                {
+                                                                                    exam: exam.id,
+                                                                                    submission:
+                                                                                        r.id,
+                                                                                },
+                                                                            ),
                                                                             {
-                                                                                exam: exam.id,
-                                                                                submission:
-                                                                                    r.id,
+                                                                                mode: 'incorrect_only',
                                                                             },
-                                                                        ),
-                                                                        {},
-                                                                        {
-                                                                            preserveScroll: true,
-                                                                        },
-                                                                    );
-                                                                }}
-                                                            >
-                                                                Herkansen
-                                                                toestaan
-                                                            </Button>
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                            },
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    Alleen fout
+                                                                </Button>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        router.post(
+                                                                            submissionAllowRetake.url(
+                                                                                {
+                                                                                    exam: exam.id,
+                                                                                    submission:
+                                                                                        r.id,
+                                                                                },
+                                                                            ),
+                                                                            {
+                                                                                mode: 'full',
+                                                                            },
+                                                                            {
+                                                                                preserveScroll: true,
+                                                                            },
+                                                                        );
+                                                                    }}
+                                                                >
+                                                                    Hele toets
+                                                                </Button>
+                                                            </div>
                                                         )}
                                                     </TableCell>
                                                 </TableRow>

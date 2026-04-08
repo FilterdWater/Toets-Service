@@ -17,6 +17,7 @@ type MakeExamProps = {
 
 export default function MakeExam({ exam }: MakeExamProps) {
     const missingQuestions = (usePage().props as any).missingQuestions || [];
+    const storageKey = `exam-${exam.id}-answers`;
 
     const pages: { sections: Exam['sections'] }[] = [];
     let currentPageSections: Exam['sections'] = [];
@@ -41,16 +42,13 @@ export default function MakeExam({ exam }: MakeExamProps) {
         exam?.submissions && exam.submissions.length > 0 ? 1 : 0,
     );
     const [answers, setAnswers] = useState<Record<number, any>>(() => {
-        const saved = localStorage.getItem(`exam-${exam.id}-answers`);
+        const saved = localStorage.getItem(storageKey);
         return saved ? JSON.parse(saved) : {};
     });
 
     useEffect(() => {
-        localStorage.setItem(
-            `exam-${exam.id}-answers`,
-            JSON.stringify(answers),
-        );
-    }, [exam.id, answers]);
+        localStorage.setItem(storageKey, JSON.stringify(answers));
+    }, [answers, storageKey]);
 
     const handleNextPage = () => setPage(Math.min(page + 1, pages.length + 1));
     const handlePrevPage = () => setPage(Math.max(page - 1, 0));
@@ -88,7 +86,7 @@ export default function MakeExam({ exam }: MakeExamProps) {
             { answers },
             {
                 onSuccess: () => {
-                    localStorage.removeItem(`exam-${exam.id}-answers`);
+                    localStorage.removeItem(storageKey);
                 },
             },
         );
