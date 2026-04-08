@@ -1,14 +1,16 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import type { Column } from '@tanstack/react-table';
 import {
     flexRender,
     getCoreRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
 import {
     ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
     BookPlus,
     Trash2Icon,
     MoreHorizontal,
@@ -50,7 +52,7 @@ import {
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
-import { createExam, exams } from '@/routes';
+import { createExam, exams, examResults } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 import type { Exam, PaginatedExams } from '@/types';
 
@@ -60,24 +62,40 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: exams(),
     },
 ];
+
+function SortableHeader({ label }: { label: string }) {
+    return ({ column }: { column: Column<Exam> }) => (
+        <Button
+            variant="ghost"
+            className={column.getIsSorted() ? 'bg-accent' : ''}
+            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+            {label}
+            {column.getIsSorted() === 'asc' ? (
+                <ArrowUp className="ml-2 h-4 w-4" />
+            ) : column.getIsSorted() === 'desc' ? (
+                <ArrowDown className="ml-2 h-4 w-4" />
+            ) : (
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            )}
+        </Button>
+    );
+}
+
 export default function Exams() {
     const { exams } = usePage<{ exams: PaginatedExams }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
+
+    function navigateToPage(url: string | null): void {
+        if (url) {
+            router.get(url, {}, { preserveState: true });
+        }
+    }
     const columns = useMemo<ColumnDef<Exam>[]>(
         () => [
             {
                 accessorKey: 'name',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Naam
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Naam' }),
             },
             {
                 accessorKey: 'description',
@@ -85,33 +103,13 @@ export default function Exams() {
             },
             {
                 accessorKey: 'active_from',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Actief vanaf
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Actief vanaf' }),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_from),
             },
             {
                 accessorKey: 'active_until',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Actief tot
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Actief tot' }),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_until),
             },
@@ -129,20 +127,10 @@ export default function Exams() {
             },
             {
                 accessorKey: 'max_mistakes',
-                header: ({ column }) => (
-                    <Button
-                        variant="ghost"
-                        onClick={() =>
-                            column.toggleSorting(column.getIsSorted() === 'asc')
-                        }
-                    >
-                        Max fouten
-                        <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                ),
+                header: SortableHeader({ label: 'Max fouten' }),
             },
             {
-                accessorKey: 'max_mistakes',
+                id: 'actions',
                 header: 'acties',
                 cell: ({ row }) => <ExamTableRowActions exam={row.original} />,
             },
@@ -150,7 +138,6 @@ export default function Exams() {
         [],
     );
 
-    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data: exams.data,
         columns,
@@ -159,7 +146,6 @@ export default function Exams() {
         },
         onSortingChange: setSorting,
         getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
         getSortedRowModel: getSortedRowModel(),
     });
     return (
@@ -203,7 +189,17 @@ export default function Exams() {
                         <TableBody>
                             {table.getRowModel().rows?.length ? (
                                 table.getRowModel().rows.map((row) => (
-                                    <TableRow key={row.id}>
+                                    <TableRow
+                                        key={row.id}
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                            navigateToPage(
+                                                examResults.url({
+                                                    exam: row.original.id,
+                                                }),
+                                            )
+                                        }
+                                    >
                                         {row.getVisibleCells().map((cell) => (
                                             <TableCell key={cell.id}>
                                                 {flexRender(
@@ -227,25 +223,36 @@ export default function Exams() {
                         </TableBody>
                     </Table>
                 </div>
-                {/* Pagination */}
-                <div className="flex flex-row justify-start gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Vorige pagina
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Volgende pagina
-                    </Button>
-                </div>
+                {exams.last_page > 1 && (
+                    <div className="flex items-center justify-between">
+                        <p className="text-sm text-muted-foreground">
+                            {exams.total} toets(en) — pagina{' '}
+                            {exams.current_page} van {exams.last_page}
+                        </p>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!exams.prev_page_url}
+                                onClick={() =>
+                                    navigateToPage(exams.prev_page_url)
+                                }
+                            >
+                                Vorige
+                            </Button>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={!exams.next_page_url}
+                                onClick={() =>
+                                    navigateToPage(exams.next_page_url)
+                                }
+                            >
+                                Volgende
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </div>
         </AppLayout>
     );
@@ -257,7 +264,11 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
@@ -267,17 +278,23 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                     <Pencil />
-                    <Link href={showEdit(exam.id)}>Bewerken</Link>
+                    <Link
+                        href={showEdit(exam.id)}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Bewerken
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                     variant="destructive"
                     onSelect={(e) => {
                         e.preventDefault();
+                        e.stopPropagation();
                         setIsDeleteDialogOpen(true);
                     }}
                 >
                     <Trash2Icon className="mr-2 h-4 w-4" />
-                    Delete Exam
+                    Verwijder examen
                 </DropdownMenuItem>
             </DropdownMenuContent>
 
@@ -290,9 +307,9 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                         <AlertDialogMedia className="bg-destructive/10 text-destructive">
                             <Trash2Icon />
                         </AlertDialogMedia>
-                        <AlertDialogTitle>Delete exam?</AlertDialogTitle>
+                        <AlertDialogTitle>Examen verwijderen?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure? This will delete {exam.name}.
+                            Weet je het zeker? Dit zal {exam.name} verwijderen.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -308,7 +325,7 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                                 method="delete"
                                 as="button"
                             >
-                                Delete
+                                Verwijderen
                             </Link>
                         </AlertDialogAction>
                     </AlertDialogFooter>

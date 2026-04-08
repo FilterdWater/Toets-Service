@@ -38,6 +38,7 @@ type AccountEditProps = {
 export default function AccountEdit({ user }: AccountEditProps) {
     const [isPasswordOpen, setIsPasswordOpen] = useState(false);
     const [activeProcessing, setActiveProcessing] = useState(false);
+
     const breadcrumbs: BreadcrumbItem[] = [
         {
             title: 'Accounts',

@@ -14,18 +14,18 @@ import { accounts, accountCreate } from '@/routes';
 import { accountStore } from '@/routes';
 import type { BreadcrumbItem } from '@/types';
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Accounts',
-        href: accounts(),
-    },
-    {
-        title: 'Creëer account',
-        href: accountCreate(),
-    },
-];
-
 export default function AccountCreate() {
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: 'Accounts',
+            href: accounts(),
+        },
+        {
+            title: 'Creëer account',
+            href: accountCreate(),
+        },
+    ];
+
     const { data, setData, post, processing, errors } = useForm({
         name: '',
         email: '',

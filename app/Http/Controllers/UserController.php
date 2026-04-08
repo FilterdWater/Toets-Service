@@ -10,17 +10,25 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request): Response
     {
+        $query = User::query()->orderBy('updated_at', 'desc');
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->input('role'));
+        }
+
         return Inertia::render('admin/accounts', [
-            'users' => User::all(),
+            'users' => $query->paginate(10)->withQueryString(),
+            'selectedRole' => $request->input('role', 'all'),
         ]);
     }
 
-    public function showCreate()
+    public function showCreate(): Response
     {
         return Inertia::render('admin/account-create');
     }
@@ -250,7 +258,7 @@ class UserController extends Controller
         );
     }
 
-    public function showEdit(string $id)
+    public function showEdit(string $id): Response
     {
         return Inertia::render('admin/account-edit', [
             'user' => User::findOrFail($id),

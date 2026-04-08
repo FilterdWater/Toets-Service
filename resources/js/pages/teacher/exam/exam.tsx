@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { getExam, storeExam, updateExam, deleteExam } from '@/routes';
+import { createExam, getExam, storeExam, updateExam, deleteExam } from '@/routes';
 import type { Answer, BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
 import type { Question } from '@/types/question';
@@ -398,6 +398,10 @@ export default function Exam({ exam }: ExamProps) {
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Exam', href: exam ? getExam(exam.id).url : '' },
+        {
+            title: exam ? exam.name : 'Nieuwe toets',
+            href: exam ? getExam(exam.id) : createExam(),
+        },
     ];
 
     return (

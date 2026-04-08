@@ -3,13 +3,7 @@ import { ChevronDown, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DeleteDialog } from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Dialog,
     DialogTitle,
@@ -25,13 +19,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui/sheet';
 import AppLayout from '@/layouts/app-layout';
 import {
     attachExam,
@@ -79,6 +71,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
     const [loadingStudents, setLoadingStudents] = useState<boolean>(true);
     const [loadingExams, setLoadingExams] = useState<boolean>(true);
+    const [sheetOpen, setSheetOpen] = useState<boolean>(false);
 
     const groupForm = useForm({
         name: '',
@@ -181,18 +174,22 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                 }}
             />
             <Head title="Docent" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-auto rounded-xl p-4 md:flex-row">
-                <div className="w-full md:w-1/2">
+            <div className="grid-cols flex h-full flex-1 flex-col gap-4 overflow-auto rounded-xl p-4 md:flex-row">
+                <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
                     {groups.map((g) => {
                         return (
                             <Card
                                 className="relative mb-3"
                                 key={g.id}
-                                onClick={() =>
-                                    setSelectedGroup(
-                                        selectedGroup?.id === g.id ? null : g,
-                                    )
-                                }
+                                onClick={() => {
+                                    if (selectedGroup?.id === g.id) {
+                                        setSelectedGroup(null);
+                                        setSheetOpen(false);
+                                    } else {
+                                        setSelectedGroup(g);
+                                        setSheetOpen(true);
+                                    }
+                                }}
                             >
                                 {selectedGroup?.id === g.id ? (
                                     <ChevronRight className="absolute top-3 right-3" />
@@ -211,16 +208,16 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                         );
                     })}
                 </div>
-                <div className="w-full md:w-1/2">
-                    <Card className="md:fixed md:w-[40%]">
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle className="text-lg">
+                <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+                    <SheetContent className="w-[90vw] max-w-250! overflow-auto px-5 pb-6">
+                        <SheetHeader className="mt-8 -ml-4 flex flex-row items-center justify-between">
+                            <SheetTitle className="text-2xl">
                                 {selectedGroup?.name ?? 'Geen groep gekozen'}
-                            </CardTitle>
-                            <div>
+                            </SheetTitle>
+
+                            <div className="flex items-center gap-2">
                                 <Button
                                     size="sm"
-                                    className="mr-2"
                                     disabled={selectedGroup === null}
                                     onClick={() => {
                                         groupForm.setData(
@@ -233,6 +230,7 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                 >
                                     Bewerken
                                 </Button>
+
                                 <Button
                                     variant="destructive"
                                     size="sm"
@@ -242,87 +240,101 @@ export default function Groups({ groups, students, exams }: GroupProps) {
                                     Verwijderen
                                 </Button>
                             </div>
-                        </CardHeader>
-                        {selectedGroup !== null && (
-                            <CardContent>
-                                <div className="flex items-center justify-between">
-                                    <CardTitle>Toetsen</CardTitle>
-                                    <Button
-                                        size="sm"
-                                        onClick={() => setDialogExamsOpen(true)}
-                                    >
-                                        +
-                                    </Button>
-                                </div>
-                                <div className="mt-2 flex flex-wrap gap-2">
-                                    {selectedGroup?.exams?.map((e) => (
-                                        <div
-                                            key={e.id}
-                                            className="flex items-center justify-between gap-2 rounded-full bg-blue-50 px-3 py-1 text-blue-900 shadow-sm transition-colors hover:bg-blue-100"
+                        </SheetHeader>
+
+                        {selectedGroup && (
+                            <div className="mt-4 space-y-6">
+                                {/* Toetsen */}
+                                <div>
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-semibold">
+                                            Toetsen
+                                        </h3>
+                                        <Button
+                                            size="sm"
+                                            onClick={() =>
+                                                setDialogExamsOpen(true)
+                                            }
                                         >
-                                            <span className="text-sm font-medium">
-                                                {e.name}
-                                            </span>
-                                            <button
-                                                onClick={() => detachExam(e.id)}
-                                                className="rounded-full p-1 transition-colors hover:bg-red-100"
-                                                title="Verwijderen"
+                                            <Plus />
+                                        </Button>
+                                    </div>
+
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        {selectedGroup.exams?.map((e) => (
+                                            <div
+                                                key={e.id}
+                                                className="flex items-center gap-2 rounded-full bg-accent px-3 py-1"
                                             >
-                                                <Trash2 className="h-4 w-4 text-red-600" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                    {selectedGroup?.exams?.length === 0 &&
-                                        'Geen data gevonden'}
-                                </div>
-                                <div className="mt-6 flex items-center justify-between">
-                                    <CardTitle>Studenten</CardTitle>
-                                    <Button
-                                        size="sm"
-                                        onClick={() =>
-                                            setDialogStudentOpen(true)
-                                        }
-                                    >
-                                        +
-                                    </Button>
-                                </div>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead>Naam</TableHead>
-                                            <TableHead>Email</TableHead>
-                                            <TableHead>Verwijderen</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {selectedGroup?.users?.map((u) => (
-                                            <TableRow key={u.id}>
-                                                <TableCell>{u.name}</TableCell>
-                                                <TableCell>{u.email}</TableCell>
-                                                <TableCell>
-                                                    <Button
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            detachStudent(u.id)
-                                                        }
-                                                    >
-                                                        Verwijderen
-                                                    </Button>
-                                                </TableCell>
-                                            </TableRow>
+                                                <span className="text-sm">
+                                                    {e.name}
+                                                </span>
+                                                <button
+                                                    onClick={() =>
+                                                        detachExam(e.id)
+                                                    }
+                                                >
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </button>
+                                            </div>
                                         ))}
-                                        {selectedGroup?.users.length === 0 && (
-                                            <TableCell>
-                                                Geen data gevonden
-                                            </TableCell>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </CardContent>
+
+                                        {selectedGroup.exams?.length === 0 &&
+                                            'Geen data'}
+                                    </div>
+                                </div>
+
+                                {/* Studenten */}
+                                <div>
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="font-semibold">
+                                            Studenten
+                                        </h3>
+                                        <Button
+                                            size="sm"
+                                            onClick={() =>
+                                                setDialogStudentOpen(true)
+                                            }
+                                        >
+                                            <Plus />
+                                        </Button>
+                                    </div>
+
+                                    <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                        {selectedGroup.users.map((u) => (
+                                            <div
+                                                key={u.id}
+                                                className="flex items-center justify-between rounded border p-2"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        {u.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {u.email}
+                                                    </p>
+                                                </div>
+
+                                                <Button
+                                                    size="sm"
+                                                    variant="destructive"
+                                                    onClick={() =>
+                                                        detachStudent(u.id)
+                                                    }
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+
+                                        {selectedGroup.users.length === 0 &&
+                                            'Geen data'}
+                                    </div>
+                                </div>
+                            </div>
                         )}
-                    </Card>
-                </div>
+                    </SheetContent>
+                </Sheet>
             </div>
             <Dialog
                 open={dialogExamsOpen}

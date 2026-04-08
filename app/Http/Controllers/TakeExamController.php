@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Models\Submission;
+use App\Services\SubmissionScoreCalculator;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class TakeExamController extends Controller
 {
@@ -24,7 +25,8 @@ class TakeExamController extends Controller
         $baseQuery = Exam::query()
             ->with(['groups', 'users'])
             ->where(function ($query) use ($userId) {
-                $query->whereHas('groups.users', fn ($q) => $q->whereKey($userId))
+                $query->where('globally_available', true)
+                    ->orWhereHas('groups.users', fn ($q) => $q->whereKey($userId))
                     ->orWhereHas('users', fn ($q) => $q->whereKey($userId));
             })
             ->where('active_from', '<=', $now)
@@ -33,19 +35,22 @@ class TakeExamController extends Controller
         $availableExams = (clone $baseQuery)
             ->where(function ($query) use ($userId) {
                 $query->whereDoesntHave('submissions', function ($q) use ($userId) {
-                    $q->where('user_id', $userId);
+                    $q->where('user_id', $userId)->where('outdated', false);
                 })
                     ->orWhereHas('submissions', function ($q) use ($userId) {
                         $q->where('user_id', $userId)
+                            ->where('outdated', false)
                             ->whereNull('submitted_at');
                     });
             })
+            ->orderBy('active_until')
             ->get();
 
         $finishedExams = (clone $baseQuery)
             ->whereHas('submissions', function ($q) use ($userId) {
                 $q->where('user_id', $userId)
-                    ->whereNotNull('submitted_at');
+                    ->whereNotNull('submitted_at')
+                    ->where('outdated', false);
             })
             ->where('active_from', '<=', $now)
             ->where('active_until', '>=', $now)
@@ -55,13 +60,16 @@ class TakeExamController extends Controller
                 $submission = $exam->submissions()
                     ->where('user_id', Auth::id())
                     ->whereNotNull('submitted_at')
+                    ->where('outdated', false)
                     ->latest('submitted_at')
                     ->first();
 
                 $exam->setAttribute('submitted_at', $submission?->submitted_at);
 
                 return $exam;
-            });
+            })
+            ->sortByDesc('submitted_at')
+            ->values();
 
         return Inertia::render('student/student', [
             'availableExams' => $availableExams,
@@ -74,7 +82,7 @@ class TakeExamController extends Controller
         $exam = Exam::with([
             'sections.questions.answers',
             'submissions' => function ($query) {
-                $query->where('user_id', Auth::id());
+                $query->where('user_id', Auth::id())->where('outdated', false);
             },
         ])->where('id', $id)->firstOrFail();
 
@@ -106,11 +114,18 @@ class TakeExamController extends Controller
                 return back()->with('error', 'Examen is niet actief');
             }
 
-            // get current user's submission
-            $submission = $exam->submissions()->firstOrCreate(
-                ['user_id' => Auth::id()],
-                ['started_at' => now()]
-            );
+            // get current user's active (non-outdated) submission
+            $submission = $exam->submissions()
+                ->where('user_id', Auth::id())
+                ->where('outdated', false)
+                ->first();
+
+            if ($submission === null) {
+                $submission = $exam->submissions()->create([
+                    'user_id' => Auth::id(),
+                    'started_at' => now(),
+                ]);
+            }
 
             // prevent resubmission
             if ($submission->submitted_at) {
@@ -149,16 +164,20 @@ class TakeExamController extends Controller
             foreach ($request['answers'] as $questionId => $answer) {
                 if (is_array($answer)) {
                     foreach ($answer as $ansId) {
+                        if (! is_numeric($ansId)) {
+                            continue;
+                        }
+
                         $submission->userAnswers()->create([
                             'question_id' => $questionId,
-                            'selected_answer' => $ansId, // single choice
+                            'selected_answer' => (int) $ansId,
                             'text_answer' => null,
                         ]);
                     }
-                } elseif (is_int($answer)) {
+                } elseif (is_numeric($answer)) {
                     $submission->userAnswers()->create([
                         'question_id' => $questionId,
-                        'selected_answer' => $answer, // single choice
+                        'selected_answer' => (int) $answer,
                         'text_answer' => null,
                     ]);
                 } elseif (is_string($answer)) {
@@ -174,30 +193,11 @@ class TakeExamController extends Controller
             return back()->with('error', 'Er is iets misgegaan');
         }
 
-        return redirect()->route('student')->with('success', 'Examen succesvol ingestuurd!');
-    }
-
-    public function showResult(Request $request, $examId): Response
-    {
-        $exam = Exam::with('sections')->findOrFail($examId);
-
-        $submission = Submission::where('exam_id', $exam->id)
-            ->where('user_id', $request->user()->id)
-            ->whereNotNull('submitted_at')
-            ->where('outdated', false)
-            ->latest('submitted_at')
-            ->with('userAnswers.selectedAnswer')
-            ->first();
-
-        $totalQuestions = 0;
-        $correctAnswers = 0;
-
-        if ($submission) {
-            $totalQuestions = $submission->userAnswers->count();
-            $correctAnswers = $submission->userAnswers
-                ->filter(fn ($ua) => $ua->selectedAnswer?->is_correct)
-                ->count();
-        }
+        $exam->loadMissing('sections.questions.answers');
+        $submission->load('userAnswers');
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $totalQuestions = $graded['total_questions'];
+        $correctAnswers = $graded['correct_answers'];
 
         $durationInSeconds = null;
         if ($submission?->started_at && $submission?->submitted_at) {
@@ -205,14 +205,46 @@ class TakeExamController extends Controller
         }
 
         return Inertia::render('student/exam-result', [
-            'exam' => array_merge(
-                $exam->toArray(),
-                [
-                    'created_at' => $exam->created_at?->format('d-m-Y H:i'),
-                    'updated_at' => $exam->updated_at?->format('d-m-Y H:i'),
-                    'sections' => $exam->sections,
-                ]
-            ),
+            'exam' => new ExamResource($exam),
+            'result' => [
+                'total_questions' => $totalQuestions,
+                'correct_answers' => $correctAnswers,
+                'submitted_at' => $submission?->submitted_at,
+                'duration_in_seconds' => $durationInSeconds,
+                'has_submission' => $submission !== null,
+            ],
+        ]);
+    }
+
+    public function showResult(Request $request, $examId)
+    {
+        $exam = Exam::with([
+            'sections.questions.answers',
+        ])->findOrFail($examId);
+
+        $submission = Submission::where('exam_id', $exam->id)
+            ->where('user_id', $request->user()->id)
+            ->whereNotNull('submitted_at')
+            ->where('outdated', false)
+            ->latest('submitted_at')
+            ->with('userAnswers')
+            ->first();
+
+        if ($submission == null || $submission->submitted_at == null) {
+            return back()->with('error', 'Dit examen heeft geen resultaat of is niet van jou.');
+        }
+
+        $graded = SubmissionScoreCalculator::calculate($submission, $exam);
+        $totalQuestions = $graded['total_questions'];
+        $correctAnswers = $graded['correct_answers'];
+
+        $durationInSeconds = null;
+        if ($submission?->started_at && $submission?->submitted_at) {
+            $durationInSeconds = $submission->started_at->diffInSeconds($submission->submitted_at);
+        }
+
+        return Inertia::render('student/exam-result', [
+            'exam' => new ExamResource($exam),
             'result' => [
                 'total_questions' => $totalQuestions,
                 'correct_answers' => $correctAnswers,
