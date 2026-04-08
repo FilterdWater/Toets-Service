@@ -126,3 +126,42 @@ test('exam results page includes completed submissions for csv source data', fun
         ->has('results.0.total_questions')
     );
 });
+
+test('exam results page keeps only latest submission per student', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+    $student = User::factory()->create([
+        'role' => Role::Student,
+    ]);
+    $exam = Exam::factory()->create();
+
+    Submission::factory()
+        ->forExam($exam)
+        ->forUser($student)
+        ->completed()
+        ->create([
+            'started_at' => now()->subMinutes(20),
+            'submitted_at' => now()->subMinutes(19),
+        ]);
+
+    Submission::factory()
+        ->forExam($exam)
+        ->forUser($student)
+        ->completed()
+        ->create([
+            'started_at' => now()->subMinutes(5),
+            'submitted_at' => now()->subMinutes(4),
+        ]);
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('examResults', $exam));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('teacher/exam/exam-result')
+        ->has('results', 1)
+        ->where('results.0.user.id', $student->id)
+    );
+});

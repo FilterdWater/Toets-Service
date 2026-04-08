@@ -29,10 +29,13 @@ test('teacher can allow retake by marking submission outdated', function (): voi
         ]);
 
     $response = $this->from(route('examResults', $exam))
-        ->post(route('submissionAllowRetake', [$exam, $submission]));
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertRedirect();
     expect($submission->fresh()->outdated)->toBeTrue();
+    expect($submission->fresh()->retake_mode)->toBe('full');
 });
 
 test('allow retake is rejected for sufficient score', function (): void {
@@ -59,7 +62,9 @@ test('allow retake is rejected for sufficient score', function (): void {
         ->create();
 
     $response = $this->from(route('examResults', $exam))
-        ->post(route('submissionAllowRetake', [$exam, $submission]));
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertStatus(422);
     expect($submission->fresh()->outdated)->toBeFalse();
@@ -90,7 +95,9 @@ test('allow retake is permitted when multiple choice is only partially correct u
         ->create();
 
     $response = $this->from(route('examResults', $exam))
-        ->post(route('submissionAllowRetake', [$exam, $submission]));
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertRedirect();
     expect($submission->fresh()->outdated)->toBeTrue();
@@ -126,7 +133,9 @@ test('allow retake is rejected when multiple choice is fully correct', function 
         ->create();
 
     $response = $this->from(route('examResults', $exam))
-        ->post(route('submissionAllowRetake', [$exam, $submission]));
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertStatus(422);
     expect($submission->fresh()->outdated)->toBeFalse();
@@ -146,7 +155,9 @@ test('allow retake cannot be undone', function (): void {
         ]);
 
     $response = $this->from(route('examResults', $exam))
-        ->post(route('submissionAllowRetake', [$exam, $submission]));
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertStatus(422);
     expect($submission->fresh()->outdated)->toBeTrue();
@@ -165,7 +176,9 @@ test('submission allow retake returns 404 when submission belongs to another exa
         ->create(['outdated' => false]);
 
     $response = $this->from(route('examResults', $examB))
-        ->post(route('submissionAllowRetake', [$examB, $submission]));
+        ->post(route('submissionAllowRetake', [$examB, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertNotFound();
 });
@@ -182,7 +195,9 @@ test('submission allow retake aborts when submission is not completed', function
         ->create(['outdated' => false]);
 
     $response = $this->from(route('examResults', $exam))
-        ->post(route('submissionAllowRetake', [$exam, $submission]));
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'full',
+        ]);
 
     $response->assertStatus(422);
 });
@@ -211,4 +226,27 @@ test('student sees exam in available list when only submission is outdated', fun
             return $exams->contains(fn (array $e) => $e['id'] === $exam->id);
         })
     );
+});
+
+test('teacher can allow retake with incorrect only mode', function (): void {
+    $this->actingAs($this->teacher);
+
+    $exam = Exam::factory()->active()->create();
+    $student = User::factory()->create(['role' => Role::Student]);
+    $submission = Submission::factory()
+        ->forUser($student)
+        ->forExam($exam)
+        ->completed()
+        ->create([
+            'outdated' => false,
+        ]);
+
+    $response = $this->from(route('examResults', $exam))
+        ->post(route('submissionAllowRetake', [$exam, $submission]), [
+            'mode' => 'incorrect_only',
+        ]);
+
+    $response->assertRedirect();
+    expect($submission->fresh()->outdated)->toBeTrue();
+    expect($submission->fresh()->retake_mode)->toBe('incorrect_only');
 });

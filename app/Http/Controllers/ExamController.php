@@ -110,10 +110,15 @@ class ExamController extends Controller
                 'submitted_at' => $submission->submitted_at,
                 'duration_in_seconds' => $durationInSeconds,
                 'outdated' => $submission->outdated,
+                'retake_mode' => $submission->retake_mode,
             ];
         });
 
-        $currentResults = $results->where('outdated', false);
+        $latestResults = $results
+            ->unique(fn (array $result) => $result['user']['id'])
+            ->values();
+
+        $currentResults = $latestResults->where('outdated', false);
         $totalSubmissions = $currentResults->count();
         $averageScore = $totalSubmissions > 0
             ? round($currentResults->avg('score'), 1)
@@ -122,7 +127,7 @@ class ExamController extends Controller
 
         return Inertia::render('teacher/exam/exam-result', [
             'exam' => new ExamResource($exam),
-            'results' => $results->values(),
+            'results' => $latestResults,
             'summary' => [
                 'total_submissions' => $totalSubmissions,
                 'average_score' => $averageScore,
@@ -233,6 +238,10 @@ class ExamController extends Controller
     {
         abort_unless($submission->exam_id === $exam->id, 404);
 
+        $validated = request()->validate([
+            'mode' => ['required', 'in:incorrect_only,full'],
+        ]);
+
         if ($submission->submitted_at === null) {
             abort(422);
         }
@@ -249,7 +258,10 @@ class ExamController extends Controller
             abort(422);
         }
 
-        $submission->update(['outdated' => true]);
+        $submission->update([
+            'outdated' => true,
+            'retake_mode' => $validated['mode'],
+        ]);
 
         return back();
     }
