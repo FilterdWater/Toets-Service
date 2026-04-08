@@ -1,5 +1,8 @@
 import { Head, router } from '@inertiajs/react';
+import { useMemo, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { Pie, PieChart } from 'recharts';
+import { DatePickerWithRange } from '@/components/DatePickerWithRange';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +23,11 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
+import {
+    downloadCsvFile,
+    rowsToCsvContent,
+    sanitizeCsvFilenameSegment,
+} from '@/lib/csv';
 import { dateToReadableString, formatDuration } from '@/lib/utils';
 import ResultStatCard from '@/pages/student/components/result-stat-card';
 import {
@@ -67,11 +75,98 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
+function resultStatusLabel(r: StudentResult): string {
+    if (r.outdated) {
+        return 'Herkansen';
+    }
+    if (r.score >= 5.5) {
+        return 'Voldoende';
+    }
+    return 'Onvoldoende';
+}
+
+function retakeColumnLabel(r: StudentResult): string {
+    if (r.outdated) {
+        return 'Toegestaan';
+    }
+    if (r.score >= 5.5) {
+        return '-';
+    }
+    return 'Nee';
+}
+
+function buildTeacherExamResultsCsv(
+    examName: string,
+    results: StudentResult[],
+): string {
+    const header: string[] = [
+        'Naam',
+        'E-mail',
+        'Score',
+        'Goed',
+        'Totaal',
+        'Tijdsduur',
+        'Ingeleverd',
+        'Status',
+        'Herkans',
+    ];
+
+    const dataRows: string[][] = results.map((r) => [
+        r.user.name,
+        r.user.email,
+        String(r.score),
+        String(r.correct_answers),
+        String(r.total_questions),
+        formatDuration(r.duration_in_seconds),
+        dateToReadableString(r.submitted_at),
+        resultStatusLabel(r),
+        retakeColumnLabel(r),
+    ]);
+
+    return rowsToCsvContent([['Toets', examName], [], header, ...dataRows]);
+}
+
+function isWithinDateRange(
+    submittedAt: string | null,
+    dateRange: DateRange | undefined,
+): boolean {
+    if (!dateRange?.from && !dateRange?.to) {
+        return true;
+    }
+    if (!submittedAt) {
+        return false;
+    }
+
+    const submittedDate = new Date(submittedAt);
+    if (Number.isNaN(submittedDate.getTime())) {
+        return false;
+    }
+
+    if (dateRange.from && submittedDate < dateRange.from) {
+        return false;
+    }
+
+    if (dateRange.to) {
+        const inclusiveEndDate = new Date(dateRange.to);
+        inclusiveEndDate.setHours(23, 59, 59, 999);
+
+        if (submittedDate > inclusiveEndDate) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 export default function ExamResult({
     exam,
     results,
     summary,
 }: ExamResultProps) {
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(
+        undefined,
+    );
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Toetsen', href: exams() },
         {
@@ -79,6 +174,22 @@ export default function ExamResult({
             href: examResults.url({ exam: exam.id }),
         },
     ];
+
+    const filteredResults = useMemo(
+        () =>
+            results.filter((result) =>
+                isWithinDateRange(result.submitted_at, dateRange),
+            ),
+        [results, dateRange],
+    );
+
+    const handleDownloadCsv = (): void => {
+        const stamp = new Date().toISOString().slice(0, 10);
+        const safe = sanitizeCsvFilenameSegment(exam.name);
+        const filename = `resultaten-${safe}-${stamp}.csv`;
+        const csv = buildTeacherExamResultsCsv(exam.name, filteredResults);
+        downloadCsvFile(filename, csv);
+    };
 
     const passFailData = [
         {
@@ -137,15 +248,34 @@ export default function ExamResult({
 
                 <div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
                     <Card className="min-w-0 xl:col-span-3">
-                        <CardHeader className="pb-2">
+                        <CardHeader className="flex-row justify-between pb-2">
                             <CardTitle className="text-lg">
                                 Resultaten per student
                             </CardTitle>
+                            <div className="flex items-center gap-2">
+                                <DatePickerWithRange
+                                    selected={dateRange}
+                                    onSelect={setDateRange}
+                                    enableReset
+                                    className="w-[240px]"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="sm"
+                                    disabled={filteredResults.length === 0}
+                                    onClick={handleDownloadCsv}
+                                >
+                                    Download resultaat als CSV
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent className="pt-0">
-                            {results.length === 0 ? (
+                            {filteredResults.length === 0 ? (
                                 <p className="text-muted-foreground">
-                                    Nog geen inzendingen.
+                                    {results.length === 0
+                                        ? 'Nog geen inzendingen.'
+                                        : 'Geen resultaten in de gekozen periode.'}
                                 </p>
                             ) : (
                                 <div className="overflow-x-auto rounded-md border">
@@ -168,7 +298,7 @@ export default function ExamResult({
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {results.map((r) => (
+                                            {filteredResults.map((r) => (
                                                 <TableRow
                                                     key={r.id}
                                                     className="cursor-pointer hover:bg-muted/60"

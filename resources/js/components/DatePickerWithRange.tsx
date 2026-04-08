@@ -17,17 +17,23 @@ interface DatePickerWithRangeProps {
     selected?: DateRange;
     onSelect?: (date: DateRange | undefined) => void;
     label?: string;
+    enableReset?: boolean;
 }
 
 export function DatePickerWithRange({
     className,
     selected,
     onSelect,
-    label = 'Datum kiezer',
+    label,
+    enableReset = false,
 }: DatePickerWithRangeProps) {
+    const hasSelectedRange = Boolean(selected?.from || selected?.to);
+
     return (
         <Field className={cn('w-60', className)}>
-            <FieldLabel htmlFor="date-picker-range">{label}</FieldLabel>
+            {label && (
+                <FieldLabel htmlFor="date-picker-range">{label}</FieldLabel>
+            )}
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
@@ -58,6 +64,19 @@ export function DatePickerWithRange({
                         onSelect={onSelect}
                         numberOfMonths={2}
                     />
+                    {enableReset && hasSelectedRange && (
+                        <div className="border-t p-2">
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="w-full"
+                                onClick={() => onSelect?.(undefined)}
+                            >
+                                Reset datum
+                            </Button>
+                        </div>
+                    )}
                 </PopoverContent>
             </Popover>
         </Field>
