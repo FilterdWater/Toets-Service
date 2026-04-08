@@ -1,4 +1,4 @@
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage, Link } from '@inertiajs/react';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -99,12 +99,14 @@ export default function MakeExam({ exam }: MakeExamProps) {
                 {page === 0 && (
                     <>
                         <Button
+                            asChild
                             className="self-start"
                             variant="outline"
-                            onClick={() => router.visit(student.url())}
                         >
-                            <ArrowLeft />
-                            Terug naar toetsenlijst
+                            <Link href={student.url()}>
+                                <ArrowLeft />
+                                Terug naar toetsen
+                            </Link>
                         </Button>
                         <Label className="text-2xl">{exam.name}</Label>
                         <div

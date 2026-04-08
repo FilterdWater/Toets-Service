@@ -33,7 +33,13 @@ import {
 } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
-import { createExam, getExam, storeExam, updateExam, deleteExam } from '@/routes';
+import {
+    createExam,
+    getExam,
+    storeExam,
+    updateExam,
+    deleteExam,
+} from '@/routes';
 import type { Answer, BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
 import type { Question } from '@/types/question';

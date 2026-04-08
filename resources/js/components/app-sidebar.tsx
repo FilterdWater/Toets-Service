@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { User, Users, LibraryBig, PieChart } from 'lucide-react';
+import { User, Users, LibraryBig } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -19,8 +19,6 @@ import {
     groups,
     exams,
     student,
-    admin,
-    teacher,
 } from '@/routes';
 import type { NavItem } from '@/types';
 
@@ -32,12 +30,6 @@ export function AppSidebar() {
             title: 'Accounts',
             href: accounts(),
             icon: User,
-            isVisible: auth.user.role === Role.Admin,
-        },
-        {
-            title: 'Applicatie Statistieken',
-            href: applicationStatistics(),
-            icon: PieChart,
             isVisible: auth.user.role === Role.Admin,
         },
         {
@@ -62,9 +54,9 @@ export function AppSidebar() {
         role === Role.Student
             ? student()
             : role === Role.Teacher
-              ? teacher()
+              ? groups()
               : role === Role.Admin
-                ? admin() // TODO: Use the application statistics page instead
+                ? applicationStatistics() // TODO: Use the application statistics page instead
                 : '#';
 
     return (

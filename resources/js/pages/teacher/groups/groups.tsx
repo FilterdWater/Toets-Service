@@ -32,7 +32,6 @@ import {
     detachUser,
     groups,
     storeGroup,
-    teacher,
     updateGroup,
     detachExam as detachExamRoute,
 } from '@/routes';
@@ -51,10 +50,6 @@ type GroupProps = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Docent',
-        href: teacher.url(),
-    },
     {
         title: 'Groepen',
         href: groups.url(),

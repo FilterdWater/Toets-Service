@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { LogOut, Menu, Settings } from 'lucide-react';
-import AppLogo from '@/components/app-logo';
+import { appName } from '@/app';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,7 +28,6 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
-import { student } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { BreadcrumbItem, NavItem } from '@/types';
 
@@ -97,13 +96,14 @@ export function AppHeader({ breadcrumbs = [] }: Props) {
                     {/* Desktop Navigation */}
 
                     {/* Logo */}
-                    {/* TODO: We should turn this link off when the user is doing an exam */}
-                    <Link
-                        className="flex items-center space-x-2"
-                        href={student.url()}
-                    >
-                        <AppLogo />
-                    </Link>
+                    <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
+                        <AppLogoIcon className="size-5 text-white dark:text-black" />
+                    </div>
+                    <div className="ml-2 grid flex-1 text-left text-sm">
+                        <span className="mb-0.5 truncate leading-tight font-semibold">
+                            {appName}
+                        </span>
+                    </div>
 
                     {/* Navigation */}
                     <div className="ml-6 hidden h-full items-center space-x-6 lg:flex">

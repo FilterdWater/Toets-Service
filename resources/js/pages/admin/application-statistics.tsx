@@ -98,19 +98,6 @@ export default function ApplicationStatistics({
                             </CardHeader>
                         </Card>
                     </Link>
-                    <Link href={exams()} className="cursor-pointer">
-                        <Card>
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <CardDescription>Toetsen</CardDescription>
-                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                                </div>
-                                <CardTitle className="text-3xl">
-                                    {totalExams}
-                                </CardTitle>
-                            </CardHeader>
-                        </Card>
-                    </Link>
                     <Link href={groups.url()} className="cursor-pointer">
                         <Card>
                             <CardHeader>
@@ -120,6 +107,19 @@ export default function ApplicationStatistics({
                                 </div>
                                 <CardTitle className="text-3xl">
                                     {totalGroups}
+                                </CardTitle>
+                            </CardHeader>
+                        </Card>
+                    </Link>
+                    <Link href={exams()} className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <CardDescription>Toetsen</CardDescription>
+                                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                                <CardTitle className="text-3xl">
+                                    {totalExams}
                                 </CardTitle>
                             </CardHeader>
                         </Card>
@@ -135,7 +135,7 @@ export default function ApplicationStatistics({
                             </CardDescription>
                         </CardHeader>
                         {/* Possible TODO: Put a link to the specific submission (no page for this yet) */}
-                        <CardContent className="max-h-62.5 overflow-auto">
+                        <CardContent className="max-h-68 overflow-auto">
                             <div className="space-y-4">
                                 {recentSubmissions.map((submission) => (
                                     <div
@@ -171,7 +171,7 @@ export default function ApplicationStatistics({
                         <CardContent>
                             <ChartContainer
                                 config={chartConfig}
-                                className="mx-auto aspect-square max-h-62.5"
+                                className="mx-auto aspect-square max-h-68"
                             >
                                 <PieChart>
                                     <ChartTooltip
