@@ -18,7 +18,7 @@ class CustomLoginResponse implements LoginResponseContract
 
         return redirect()->route(match ($role) {
             'admin' => 'admin',
-            'teacher' => 'teacher',
+            'teacher' => 'groups',
             'student' => 'student',
             default => 'login',
         });

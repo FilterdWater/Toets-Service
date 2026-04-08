@@ -21,7 +21,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
 
         return match ($role) {
             'student' => redirect()->route('student'),
-            'teacher' => redirect()->route('teacher'),
+            'teacher' => redirect()->route('groups'),
             'admin' => redirect()->route('admin'),
             default => redirect()->route('login'),
         };
@@ -39,10 +39,10 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
 
     Route::middleware(['role:teacher,admin'])->group(function () {
         Route::prefix('docent')->group(function () {
+            Route::get('/groepen', [GroupController::class, 'index'])->name('teacher');
             /*
             * Groups
             */
-            Route::inertia('/', 'teacher/teacher')->name('teacher');
             Route::get('groepen', [GroupController::class, 'index'])->name('groups');
             Route::post('groepen', [GroupController::class, 'store'])->name('storeGroup');
             Route::put('groepen/{id}', [GroupController::class, 'update'])->name('updateGroup');
@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     });
 
     Route::middleware(['role:admin'])->group(function () {
-        Route::inertia('beheerder', 'admin/admin')->name('admin');
+        Route::get('/beheerder', [ApplicationStatisticsController::class, 'index'])->name('admin');
         Route::get('accounts', [UserController::class, 'index'])->name('accounts');
         Route::get('accounts/aanmaken', [UserController::class, 'showCreate'])->name('accountCreate');
         Route::post('accounts/opslaan', [UserController::class, 'store'])->name('accountStore');
@@ -84,13 +84,6 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
         Route::get('accounts/{id}/bewerken', [UserController::class, 'showEdit'])->name('accountEdit');
         Route::put('accounts/{id}/bijwerken', [UserController::class, 'update'])->name('accountUpdate');
         Route::put('accounts/{id}/wachtwoord-resetten', [UserController::class, 'resetPassword'])->name('accountResetPassword');
-
-        /*
-        * Application statistics
-        */
-        Route::prefix('applicatie-statistieken')->group(function () {
-            Route::get('/', [ApplicationStatisticsController::class, 'index'])->name('applicationStatistics');
-        });
         Route::put('accounts/{id}/actief-aanpassen', [UserController::class, 'updateIsActive'])->name('accountUpdateIsActive');
     });
 });

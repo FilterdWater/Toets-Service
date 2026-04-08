@@ -13,15 +13,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Role } from '@/enums/role';
-import {
-    accounts,
-    applicationStatistics,
-    groups,
-    exams,
-    student,
-    admin,
-    teacher,
-} from '@/routes';
+import { accounts, admin, groups, exams, student } from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -32,12 +24,6 @@ export function AppSidebar() {
             title: 'Accounts',
             href: accounts(),
             icon: User,
-            isVisible: auth.user.role === Role.Admin,
-        },
-        {
-            title: 'Applicatie Statistieken',
-            href: applicationStatistics(),
-            icon: PieChart,
             isVisible: auth.user.role === Role.Admin,
         },
         {
@@ -62,7 +48,7 @@ export function AppSidebar() {
         role === Role.Student
             ? student()
             : role === Role.Teacher
-              ? teacher()
+              ? groups()
               : role === Role.Admin
                 ? admin() // TODO: Use the application statistics page instead
                 : '#';
