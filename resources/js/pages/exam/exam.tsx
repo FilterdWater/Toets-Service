@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 import { DatePickerWithRange } from '@/components/DatePickerWithRange';
+import { DeleteDialog } from '@/components/delete-dialog';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -388,14 +389,12 @@ export default function Exam({ exam }: ExamProps) {
     };
 
     const handleDelete = () => {
-        if (
-            mode === 'edit' &&
-            state.id &&
-            confirm('Weet je zeker dat je deze toets wilt verwijderen?')
-        ) {
+        if (mode === 'edit' && state.id) {
             router.delete(deleteExam.url(state.id), { preserveScroll: true });
         }
     };
+
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Exam', href: exam ? getExam(exam.id).url : '' },
@@ -573,10 +572,17 @@ export default function Exam({ exam }: ExamProps) {
                                 <Button
                                     className="w-full"
                                     variant="destructive"
-                                    onClick={handleDelete}
+                                    onClick={() => setIsDeleteDialogOpen(true)}
                                 >
                                     <Trash2 /> Verwijderen
                                 </Button>
+                                <DeleteDialog
+                                    title="Groep verwijderen"
+                                    description={`Weet je zeker dat je de toets "${state.name}" wilt verwijderen ?`}
+                                    open={isDeleteDialogOpen}
+                                    onOpenChange={setIsDeleteDialogOpen}
+                                    onConfirm={() => handleDelete}
+                                />
                             </CardFooter>
                         )}
                     </Card>

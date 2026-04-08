@@ -300,7 +300,6 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                         <AlertDialogAction
                             variant="destructive"
                             onClick={() => {
-                                // Add your delete logic here
                                 setIsDeleteDialogOpen(false);
                             }}
                         >
