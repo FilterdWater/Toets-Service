@@ -135,7 +135,7 @@ export default function ExamResult({
                     </ResultStatCard>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
                     <Card className="min-w-0 xl:col-span-3">
                         <CardHeader className="pb-2">
                             <CardTitle className="text-lg">
@@ -299,9 +299,9 @@ export default function ExamResult({
                                             data={passFailData}
                                             dataKey="value"
                                             nameKey="name"
-                                            innerRadius={40}
-                                            outerRadius={70}
-                                            paddingAngle={2}
+                                            innerRadius={0}
+                                            outerRadius={60}
+                                            paddingAngle={0}
                                             labelLine={false}
                                             label={({
                                                 cx,
