@@ -39,6 +39,7 @@ import {
     storeExam,
     updateExam,
     deleteExam,
+    exams,
 } from '@/routes';
 import type { Answer, BreadcrumbItem } from '@/types';
 import type { Exam } from '@/types/exam';
@@ -403,7 +404,7 @@ export default function Exam({ exam }: ExamProps) {
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Exam', href: exam ? getExam(exam.id).url : '' },
+        { title: 'Toetsen', href: exams() },
         {
             title: exam ? exam.name : 'Nieuwe toets',
             href: exam ? getExam(exam.id) : createExam(),
