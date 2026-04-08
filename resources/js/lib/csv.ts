@@ -32,7 +32,10 @@ export function downloadCsvFile(filename: string, content: string): void {
 }
 
 export function sanitizeCsvFilenameSegment(name: string): string {
-    const trimmed = name.replace(/[/\\?%*:|"<>]/g, '-').replace(/\s+/g, ' ').trim();
+    const trimmed = name
+        .replace(/[/\\?%*:|"<>]/g, '-')
+        .replace(/\s+/g, ' ')
+        .trim();
 
     return trimmed.length > 0 ? trimmed : 'toets';
 }
