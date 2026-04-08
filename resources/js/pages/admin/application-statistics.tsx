@@ -16,13 +16,13 @@ import {
 } from '@/components/ui/chart';
 import AppLayout from '@/layouts/app-layout';
 import { dateToReadableString } from '@/lib/utils';
-import { accounts, admin, exams, groups } from '@/routes';
+import { accounts, applicationStatistics, exams, groups } from '@/routes';
 import type { BreadcrumbItem, RecentSubmission } from '@/types';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Applicatie Statistieken',
-        href: admin(),
+        href: applicationStatistics(),
     },
 ];
 

@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
         return match ($role) {
             'student' => redirect()->route('student'),
             'teacher' => redirect()->route('groups'),
-            'admin' => redirect()->route('admin'),
+            'admin' => redirect()->route('applicationStatistics'),
             default => redirect()->route('login'),
         };
     })->name('dashboard');
@@ -76,7 +76,7 @@ Route::middleware(['auth', 'verified', 'is_active'])->group(function () {
     });
 
     Route::middleware(['role:admin'])->group(function () {
-        Route::get('/beheerder', [ApplicationStatisticsController::class, 'index'])->name('admin');
+        Route::get('/beheerder', [ApplicationStatisticsController::class, 'index'])->name('applicationStatistics');
         Route::get('accounts', [UserController::class, 'index'])->name('accounts');
         Route::get('accounts/aanmaken', [UserController::class, 'showCreate'])->name('accountCreate');
         Route::post('accounts/opslaan', [UserController::class, 'store'])->name('accountStore');

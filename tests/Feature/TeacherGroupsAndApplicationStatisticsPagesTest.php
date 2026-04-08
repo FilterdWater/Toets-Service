@@ -10,11 +10,11 @@ test('teacher dashboard renders correct inertia component', function (): void {
 
     $this->actingAs($teacher);
 
-    $response = $this->get(route('teacher'));
+    $response = $this->get(route('groups'));
 
     $response->assertSuccessful();
     $response->assertInertia(fn ($page) => $page
-        ->component('teacher/teacher')
+        ->component('teacher/groups/groups')
     );
 });
 

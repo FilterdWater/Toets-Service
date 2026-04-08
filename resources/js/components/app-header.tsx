@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { LogOut, Menu, Settings } from 'lucide-react';
-import AppLogo from '@/components/app-logo';
+import { appName } from '@/app';
 import AppLogoIcon from '@/components/app-logo-icon';
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,11 +28,8 @@ import { useCurrentUrl } from '@/hooks/use-current-url';
 import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { logout } from '@/routes';
-import { student } from '@/routes';
 import { edit } from '@/routes/profile';
 import type { BreadcrumbItem, NavItem } from '@/types';
-import { SidebarMenuButton } from './ui/sidebar';
-import { appName } from '@/app';
 
 type Props = {
     breadcrumbs?: BreadcrumbItem[];

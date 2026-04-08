@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { User, Users, LibraryBig, PieChart } from 'lucide-react';
+import { User, Users, LibraryBig } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -13,7 +13,13 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { Role } from '@/enums/role';
-import { accounts, admin, groups, exams, student } from '@/routes';
+import {
+    accounts,
+    applicationStatistics,
+    groups,
+    exams,
+    student,
+} from '@/routes';
 import type { NavItem } from '@/types';
 
 export function AppSidebar() {
@@ -50,7 +56,7 @@ export function AppSidebar() {
             : role === Role.Teacher
               ? groups()
               : role === Role.Admin
-                ? admin() // TODO: Use the application statistics page instead
+                ? applicationStatistics() // TODO: Use the application statistics page instead
                 : '#';
 
     return (
