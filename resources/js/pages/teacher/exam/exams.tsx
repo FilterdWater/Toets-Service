@@ -293,7 +293,7 @@ function ExamTableRowActions({ exam }: { exam: Exam }) {
                         setIsDeleteDialogOpen(true);
                     }}
                 >
-                    <Trash2Icon className="mr-2 h-4 w-4" />
+                    <Trash2Icon className="h-4 w-4" />
                     Verwijder examen
                 </DropdownMenuItem>
             </DropdownMenuContent>

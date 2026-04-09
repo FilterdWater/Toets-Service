@@ -72,6 +72,7 @@ export default function AccountCreate() {
                                     onChange={(event) =>
                                         setData('name', event.target.value)
                                     }
+                                    placeholder="John Doe"
                                 />
                                 <InputError message={errors.name} />
                             </div>
@@ -84,6 +85,7 @@ export default function AccountCreate() {
                                 onChange={(event) =>
                                     setData('email', event.target.value)
                                 }
+                                placeholder="JohnDoe@roca12.nl"
                             />
                             <InputError message={errors.email} />
                         </div>
@@ -96,6 +98,7 @@ export default function AccountCreate() {
                                 onChange={(event) =>
                                     setData('password', event.target.value)
                                 }
+                                placeholder="MySuperSecurePassword"
                             />
                             <InputError message={errors.password} />
                         </div>
@@ -111,6 +114,7 @@ export default function AccountCreate() {
                                         event.target.value,
                                     )
                                 }
+                                placeholder="MySuperSecurePassword"
                             />
                             <InputError
                                 message={errors.password_confirmation}
