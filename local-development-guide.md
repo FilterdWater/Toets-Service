@@ -86,17 +86,17 @@ After running the seeders you should have some test users you can log in as usin
 **Admin**
 
 - Email: `beheerder@roca12.nl`
-- Password: `B3he3rd3r@r0ca!2`
+- Password: `password`
 
 **Teacher**
 
 - Email: `docent@roca12.nl`
-- Password: `D0c3nt@r0ca!2`
+- Password: `password`
 
 **Student**
 
 - Email: `student@st.roc.a12.nl`
-- Password: `Stud3nt@r0ca!`
+- Password: `password`
 
 #### Laravel Sail
 
