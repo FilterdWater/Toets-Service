@@ -767,6 +767,7 @@ export function QuestionCard({
                                 <Field>
                                     <Input
                                         value={question.title}
+                                        placeholder="Mooie vraag titel"
                                         onChange={(e) =>
                                             onChange({
                                                 ...question,
@@ -791,6 +792,7 @@ export function QuestionCard({
                         </FieldLabel>
                         <Textarea
                             value={question.text}
+                            placeholder="Mooie vraag beschrijving/uitleg"
                             rows={3}
                             onChange={(e) =>
                                 onChange({ ...question, text: e.target.value })
