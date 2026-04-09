@@ -119,9 +119,7 @@ export default function Account() {
                     <div className="block md:hidden">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline">
-                                    Importeer of Creëer
-                                </Button>
+                                <Button>Importeer of Creëer</Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 <DropdownMenuGroup className="flex flex-col gap-2 p-2">
