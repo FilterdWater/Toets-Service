@@ -165,3 +165,104 @@ test('exam results page keeps only latest submission per student', function (): 
         ->where('results.0.user.id', $student->id)
     );
 });
+
+test('exams index returns sort and direction in props', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+
+    Exam::factory()->count(3)->create();
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('exams'));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('sortBy', 'created_at')
+        ->where('direction', 'desc')
+    );
+});
+
+test('exams index can sort by name ascending', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+
+    Exam::factory()->create(['name' => 'Charlie Exam']);
+    Exam::factory()->create(['name' => 'Alpha Exam']);
+    Exam::factory()->create(['name' => 'Beta Exam']);
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('exams', ['sort' => 'name', 'direction' => 'asc']));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('sortBy', 'name')
+        ->where('direction', 'asc')
+        ->has('exams.data', 3)
+        ->where('exams.data.0.name', 'Alpha Exam')
+        ->where('exams.data.1.name', 'Beta Exam')
+        ->where('exams.data.2.name', 'Charlie Exam')
+    );
+});
+
+test('exams index can sort by name descending', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+
+    Exam::factory()->create(['name' => 'Charlie Exam']);
+    Exam::factory()->create(['name' => 'Alpha Exam']);
+    Exam::factory()->create(['name' => 'Beta Exam']);
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('exams', ['sort' => 'name', 'direction' => 'desc']));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('sortBy', 'name')
+        ->where('direction', 'desc')
+        ->where('exams.data.0.name', 'Charlie Exam')
+        ->where('exams.data.1.name', 'Beta Exam')
+        ->where('exams.data.2.name', 'Alpha Exam')
+    );
+});
+
+test('exams index defaults to created_at desc for invalid sort column', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+
+    Exam::factory()->count(3)->create();
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('exams', ['sort' => 'invalid_column', 'direction' => 'asc']));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('sortBy', 'created_at')
+        ->where('direction', 'asc')
+    );
+});
+
+test('exams index defaults to desc for invalid direction', function (): void {
+    $teacher = User::factory()->create([
+        'role' => Role::Docent,
+    ]);
+
+    Exam::factory()->count(3)->create();
+
+    $this->actingAs($teacher);
+
+    $response = $this->get(route('exams', ['sort' => 'name', 'direction' => 'invalid']));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->where('sortBy', 'name')
+        ->where('direction', 'desc')
+    );
+});

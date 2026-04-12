@@ -18,15 +18,28 @@ use Inertia\Response;
 
 class ExamController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $sortBy = $request->query('sort', 'created_at');
+        $direction = $request->query('direction', 'desc');
+
+        $allowedColumns = ['name', 'active_from', 'active_until', 'max_mistakes', 'created_at'];
+        if (! in_array($sortBy, $allowedColumns)) {
+            $sortBy = 'created_at';
+        }
+        if (! in_array($direction, ['asc', 'desc'])) {
+            $direction = 'desc';
+        }
+
         $exams = Exam::with('groups')
-            ->orderBy('created_at', 'desc')
+            ->orderBy($sortBy, $direction)
             ->paginate(10)
             ->withQueryString();
 
         return Inertia::render('teacher/exam/exams', [
             'exams' => $exams,
+            'sortBy' => $sortBy,
+            'direction' => $direction,
         ]);
     }
 
