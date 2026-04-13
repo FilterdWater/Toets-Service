@@ -1,6 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { ColumnDef, SortingState } from '@tanstack/react-table';
-import type { Column } from '@tanstack/react-table';
 import {
     flexRender,
     getCoreRowModel,
@@ -63,27 +62,51 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-function SortableHeader({ label }: { label: string }) {
-    return ({ column }: { column: Column<Exam> }) => (
-        <Button
-            variant="ghost"
-            className={column.getIsSorted() ? 'bg-accent' : ''}
-            onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-        >
-            {label}
-            {column.getIsSorted() === 'asc' ? (
-                <ArrowUp className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'desc' ? (
-                <ArrowDown className="ml-2 h-4 w-4" />
-            ) : (
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            )}
+function SortableHeader({
+    label,
+    column,
+    currentSort,
+    currentDirection,
+}: {
+    label: string;
+    column: string;
+    currentSort: string;
+    currentDirection: string;
+}) {
+    const isActive = currentSort === column;
+    const newDirection =
+        isActive && currentDirection === 'asc' ? 'desc' : 'asc';
+
+    return (
+        <Button variant="ghost" className={isActive ? 'bg-accent' : ''} asChild>
+            <Link
+                href={exams.url({
+                    query: { sort: column, direction: newDirection },
+                })}
+            >
+                {label}
+                {isActive && currentDirection === 'asc' ? (
+                    <ArrowUp className="ml-2 h-4 w-4" />
+                ) : isActive && currentDirection === 'desc' ? (
+                    <ArrowDown className="ml-2 h-4 w-4" />
+                ) : (
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                )}
+            </Link>
         </Button>
     );
 }
 
 export default function Exams() {
-    const { exams } = usePage<{ exams: PaginatedExams }>().props;
+    const {
+        exams,
+        sortBy = 'created_at',
+        direction = 'desc',
+    } = usePage<{
+        exams: PaginatedExams;
+        sortBy?: string;
+        direction?: string;
+    }>().props;
     const [sorting, setSorting] = useState<SortingState>([]);
 
     function navigateToPage(url: string | null): void {
@@ -95,7 +118,14 @@ export default function Exams() {
         () => [
             {
                 accessorKey: 'name',
-                header: SortableHeader({ label: 'Naam' }),
+                header: () => (
+                    <SortableHeader
+                        label="Naam"
+                        column="name"
+                        currentSort={sortBy}
+                        currentDirection={direction}
+                    />
+                ),
             },
             {
                 accessorKey: 'description',
@@ -103,13 +133,27 @@ export default function Exams() {
             },
             {
                 accessorKey: 'active_from',
-                header: SortableHeader({ label: 'Actief vanaf' }),
+                header: () => (
+                    <SortableHeader
+                        label="Actief vanaf"
+                        column="active_from"
+                        currentSort={sortBy}
+                        currentDirection={direction}
+                    />
+                ),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_from),
             },
             {
                 accessorKey: 'active_until',
-                header: SortableHeader({ label: 'Actief tot' }),
+                header: () => (
+                    <SortableHeader
+                        label="Actief tot"
+                        column="active_until"
+                        currentSort={sortBy}
+                        currentDirection={direction}
+                    />
+                ),
                 cell: ({ row }) =>
                     dateToReadableString(row.original.active_until),
             },
@@ -127,7 +171,14 @@ export default function Exams() {
             },
             {
                 accessorKey: 'max_mistakes',
-                header: SortableHeader({ label: 'Max fouten' }),
+                header: () => (
+                    <SortableHeader
+                        label="Max fouten"
+                        column="max_mistakes"
+                        currentSort={sortBy}
+                        currentDirection={direction}
+                    />
+                ),
             },
             {
                 id: 'actions',
@@ -135,7 +186,7 @@ export default function Exams() {
                 cell: ({ row }) => <ExamTableRowActions exam={row.original} />,
             },
         ],
-        [],
+        [sortBy, direction],
     );
 
     const table = useReactTable({
