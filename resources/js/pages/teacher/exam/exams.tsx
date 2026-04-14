@@ -1,9 +1,8 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import type { ColumnDef, SortingState } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import {
     flexRender,
     getCoreRowModel,
-    getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table';
 import {
@@ -107,7 +106,6 @@ export default function Exams() {
         sortBy?: string;
         direction?: string;
     }>().props;
-    const [sorting, setSorting] = useState<SortingState>([]);
 
     function navigateToPage(url: string | null): void {
         if (url) {
@@ -192,12 +190,8 @@ export default function Exams() {
     const table = useReactTable({
         data: exams.data,
         columns,
-        state: {
-            sorting,
-        },
-        onSortingChange: setSorting,
+        state: {},
         getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
     });
     return (
         <AppLayout
