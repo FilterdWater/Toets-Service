@@ -9,3 +9,10 @@ Project Documentation
 
 - [Local development guide](./local-development-guide.md)
 - [Coolify deployment guide](./coolify-deployment-guide.md)
+
+## Screenshots
+
+![Exams overview](./readme-assets/teacher-exams-page.png)
+![Exam edit](./readme-assets/teacher-edit-exam.png)
+![Student taking exam](./readme-assets/exam-make-student.png)
+![Student exam result](./readme-assets/exam-result-student.png)
